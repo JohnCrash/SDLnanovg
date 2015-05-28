@@ -84,7 +84,7 @@ cp -r $SDLPATH/android-project/* $BUILDPATH
 mkdir -p $BUILDPATH/jni/SDL
 if [ -z "$COPYSOURCE" ]; then
 #junction 不支持/cygwindriver/c/Source这样的目录
-	SDLPATH_WIN="c:/Source/SDL_hg"
+	SDLPATH_WIN="c:/Source/SDLnanovg"
 	BUILDPATH_WIN="$SDLPATH_WIN/build/$APP"
 	$JUNCTION $BUILDPATH_WIN/jni/SDL/src $SDLPATH_WIN/src
 	$JUNCTION $BUILDPATH_WIN/jni/SDL/include $SDLPATH_WIN/include
