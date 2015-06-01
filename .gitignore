@@ -3,3 +3,6 @@ build/org.libsdl.testgles/bin/
 build/android/jni/SDL/
 build/org.libsdl.testgles/libs/
 *.opensdf
+*.sdf
+VisualC/SDL/Win32/Debug/
+build/win32/Win32/Debug/
