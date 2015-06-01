@@ -1,1 +1,5 @@
-build/
+build/org.libsdl.testgles/obj/
+build/org.libsdl.testgles/bin/
+build/android/jni/SDL/
+build/org.libsdl.testgles/libs/
+*.opensdf
