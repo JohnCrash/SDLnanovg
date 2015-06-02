@@ -6,3 +6,5 @@ build/org.libsdl.testgles/libs/
 *.sdf
 VisualC/SDL/Win32/Debug/
 build/win32/Win32/Debug/
+build/win32/Debug/
+VisualC/SDLmain/Win32/Debug/
