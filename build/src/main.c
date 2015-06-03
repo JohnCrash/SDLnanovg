@@ -14,13 +14,13 @@ freely.
 #include <string.h>
 #include <math.h>
 
-#include "SDL_test_common.h"
-
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #include "SDL_opengles.h"
 #else
 #include "SDL_opengl.h"
 #endif
+
+#include "SDL_test_common.h"
 
 
 static SDLTest_CommonState *state;

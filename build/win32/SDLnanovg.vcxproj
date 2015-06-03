@@ -19,15 +19,19 @@
     <ClInclude Include="..\..\src\nanovg\nanovg_gl_utils.h" />
     <ClInclude Include="..\..\src\nanovg\stb_image.h" />
     <ClInclude Include="..\..\src\nanovg\stb_truetype.h" />
+    <ClInclude Include="..\src\test_nanovg_sdl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\nanovg\nanovg.c" />
-    <ClCompile Include="..\..\src\test\SDL_test_common.c" />
     <ClCompile Include="..\src\main.c" />
+    <ClCompile Include="..\src\test_nanovg_sdl.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\VisualC\SDLmain\SDLmain_VS2013.vcxproj">
       <Project>{da956fd3-e142-46f2-9dd5-c78bebb56b7a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\VisualC\SDLtest\SDLtest_VS2013.vcxproj">
+      <Project>{da956fd3-e143-46f2-9fe5-c77bebc56b1a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\VisualC\SDL\SDL_VS2013.vcxproj">
       <Project>{81ce8daf-ebb2-4761-8e45-b71abcca8c68}</Project>
@@ -71,7 +75,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../include;../../src/nanovg;../../src/nanovg/example;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>

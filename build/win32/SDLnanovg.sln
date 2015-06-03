@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2", "..\..\VisualC\SDL\S
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2main", "..\..\VisualC\SDLmain\SDLmain_VS2013.vcxproj", "{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2test", "..\..\VisualC\SDLtest\SDLtest_VS2013.vcxproj", "{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -39,6 +41,14 @@ Global
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|Win32.Build.0 = Release|Win32
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|x64.ActiveCfg = Release|x64
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|x64.Build.0 = Release|x64
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|Win32.Build.0 = Debug|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|x64.ActiveCfg = Debug|x64
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|x64.Build.0 = Debug|x64
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|Win32.ActiveCfg = Release|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|Win32.Build.0 = Release|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|x64.ActiveCfg = Release|x64
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
