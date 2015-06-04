@@ -17,7 +17,8 @@ freely.
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #include "SDL_opengles.h"
 #else
-#include "SDL_opengl.h"
+//#include "SDL_opengl.h"
+#include "GL/glew.h"
 #endif
 
 #include "SDL_test_common.h"
@@ -171,6 +172,7 @@ int main(int argc,char *argv[])
 	if (accel) {
 		state->gl_accelerated = 1;
 	}
+
 	if (!SDLTest_CommonInit(state)) {
 		quit(2);
 	}
