@@ -27,7 +27,9 @@
 
 #include "nanovg.h"
 #define NANOVG_GL2_IMPLEMENTATION
+//#define NANOVG_GLES2_IMPLEMENTATION
 #include "nanovg_gl.h"
+#include "nanovg_gl_utils.h"
 #include "demo.h"
 #include "perf.h"
 
@@ -50,6 +52,7 @@ int initNanovg()
 	vg = nvgCreateGL2(NVG_STENCIL_STROKES | NVG_DEBUG);
 #else
 	vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+	//vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
 #endif
 	if (vg == NULL) {
 		printf("Could not init nanovg.\n");
@@ -85,4 +88,5 @@ void renderNanovg()
 void releaseNanovg()
 {
 	nvgDeleteGL2(vg);
+	//nvgDeleteGLES2(vg);
 }

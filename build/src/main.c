@@ -13,7 +13,7 @@ freely.
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
+#define NANOVG_GL2_IMPLEMENTATION
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #include "SDL_opengles.h"
 #else
@@ -22,7 +22,7 @@ freely.
 #endif
 
 #include "SDL_test_common.h"
-
+#include "test_nanovg_sdl.h"
 
 static SDLTest_CommonState *state;
 static SDL_GLContext *context = NULL;
@@ -164,7 +164,13 @@ int main(int argc,char *argv[])
 	state->gl_depth_size = depth;
 	state->gl_major_version = 1;
 	state->gl_minor_version = 1;
+#ifdef NANOVG_GL2_IMPLEMENTATION
+	state->gl_profile_mask = SDL_GL_CONTEXT_PROFILE_CORE;
+#elif  NANOVG_GLES2_IMPLEMENTATION
 	state->gl_profile_mask = SDL_GL_CONTEXT_PROFILE_ES;
+#else
+#error "Please define NANOVG_GL2_IMPLEMENTATION or NANOVG_GLES2_IMPLEMENTATION"
+#endif
 	if (fsaa) {
 		state->gl_multisamplebuffers = 1;
 		state->gl_multisamplesamples = fsaa;
@@ -207,6 +213,17 @@ int main(int argc,char *argv[])
 	SDL_Log("Version    : %s\n", glGetString(GL_VERSION));
 	SDL_Log("Extensions : %s\n", glGetString(GL_EXTENSIONS));
 	SDL_Log("\n");
+
+	if (glewInit() != GLEW_OK)
+	{
+		printf("glewInit failed!");
+		return 1;
+	}
+	if (initNanovg() < 0)
+	{
+		printf("initNanovg failed!");
+		return 1;
+	}
 
 	status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
 	if (!status) {
