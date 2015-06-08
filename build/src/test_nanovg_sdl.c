@@ -17,7 +17,7 @@
 //
 
 #include <stdio.h>
-
+#include "SDL.h"
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #include "SDL_opengles.h"
 #else
@@ -63,12 +63,13 @@ int initNanovg()
 		return -1;
 
 	pxRatio = (float)fbWidth / (float)winWidth;
+	prevt = 0;
 	return 0;
 }
 
 void renderNanovg()
 {
-//	t = glfwGetTime();
+	t = SDL_GetTicks()/1000.0;
 	dt = t - prevt;
 	prevt = t;
 

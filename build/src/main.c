@@ -48,6 +48,7 @@ quit(int rc)
 	exit(rc);
 }
 
+#if 0
 static void
 Render()
 {
@@ -98,7 +99,13 @@ Render()
 	glMatrixMode(GL_MODELVIEW);
 	glRotatef(5.0, 1.0, 1.0, 1.0);
 }
-
+#else
+static void
+Render()
+{
+	renderNanovg();
+}
+#endif
 int main(int argc,char *argv[])
 {
 	int fsaa, accel;
@@ -364,6 +371,7 @@ int main(int argc,char *argv[])
 		SDL_Log("%2.2f frames per second\n",
 			((double)frames * 1000) / (now - then));
 	}
+	releaseNanovg();
 #if !defined(__ANDROID__)
 	quit(0);
 #endif        
