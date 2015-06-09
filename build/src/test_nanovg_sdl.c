@@ -63,17 +63,25 @@ int initNanovg()
 		return -1;
 
 	pxRatio = (float)fbWidth / (float)winWidth;
-	prevt = 0;
+	prevt = SDL_GetTicks() / 1000.0;
 	return 0;
 }
 
-void renderNanovg()
+void renderNanovg( int w,int h )
 {
 	t = SDL_GetTicks()/1000.0;
 	dt = t - prevt;
 	prevt = t;
+	updateGraph(&fps, dt);
 
-	glViewport(0, 0, fbWidth, fbHeight);
+	fbWidth = w;
+	fbHeight = h;
+	pxRatio = (float)fbWidth / (float)winWidth;
+	winWidth = w;
+	winHeight = h;
+	mx = 10;
+	my = 10;
+
 	glViewport(0, 0, fbWidth, fbHeight);
 	if (premult)
 		glClearColor(0, 0, 0, 0);

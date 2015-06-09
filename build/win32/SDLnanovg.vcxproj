@@ -20,6 +20,7 @@
     <ClInclude Include="..\..\src\nanovg\stb_image.h" />
     <ClInclude Include="..\..\src\nanovg\stb_truetype.h" />
     <ClInclude Include="..\src\test_nanovg_sdl.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\nanovg\example\demo.c" />

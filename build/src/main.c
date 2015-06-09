@@ -50,7 +50,7 @@ quit(int rc)
 
 #if 0
 static void
-Render()
+Render( int w,int h )
 {
 	static GLubyte color[8][4] = { { 255, 0, 0, 0 },
 	{ 255, 0, 0, 255 },
@@ -101,9 +101,9 @@ Render()
 }
 #else
 static void
-Render()
+Render( int w,int h )
 {
-	renderNanovg();
+	renderNanovg(w,h);
 }
 #endif
 int main(int argc,char *argv[])
@@ -164,13 +164,15 @@ int main(int argc,char *argv[])
 	}
 
 	/* Set OpenGL parameters */
-	state->window_flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_BORDERLESS;
+	state->window_flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;// | SDL_WINDOW_BORDERLESS;
 	state->gl_red_size = 5;
 	state->gl_green_size = 5;
 	state->gl_blue_size = 5;
 	state->gl_depth_size = depth;
 	state->gl_major_version = 1;
 	state->gl_minor_version = 1;
+	state->window_w = 1024;
+	state->window_h = 576;
 #ifdef NANOVG_GL2_IMPLEMENTATION
 	state->gl_profile_mask = SDL_GL_CONTEXT_PROFILE_CORE;
 #elif  NANOVG_GLES2_IMPLEMENTATION
@@ -297,7 +299,6 @@ int main(int argc,char *argv[])
 	/* Set rendering settings for each context */
 	for (i = 0; i < state->num_windows; ++i) {
 		float aspectAdjust;
-
 		status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
 		if (status) {
 			SDL_Log("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
@@ -305,7 +306,6 @@ int main(int argc,char *argv[])
 			/* Continue for next window */
 			continue;
 		}
-
 		aspectAdjust = (4.0f / 3.0f) / ((float)state->window_w / state->window_h);
 		glViewport(0, 0, state->window_w, state->window_h);
 		glMatrixMode(GL_PROJECTION);
@@ -340,7 +340,7 @@ int main(int argc,char *argv[])
 							/* Change view port to the new window dimensions */
 							glViewport(0, 0, event.window.data1, event.window.data2);
 							/* Update window content */
-							Render();
+							Render(event.window.data1, event.window.data2);
 							SDL_GL_SwapWindow(state->windows[i]);
 							break;
 						}
@@ -351,16 +351,18 @@ int main(int argc,char *argv[])
 			SDLTest_CommonEvent(state, &event, &done);
 		}
 		for (i = 0; i < state->num_windows; ++i) {
+			int w, h;
 			if (state->windows[i] == NULL)
 				continue;
 			status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
+			SDL_GetWindowSize(state->windows[i], &w, &h);
 			if (status) {
 				SDL_Log("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
 
 				/* Continue for next window */
 				continue;
 			}
-			Render();
+			Render(w,h);
 			SDL_GL_SwapWindow(state->windows[i]);
 		}
 	}
