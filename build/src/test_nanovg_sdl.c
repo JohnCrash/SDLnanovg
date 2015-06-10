@@ -29,7 +29,6 @@
 #define NANOVG_GL2_IMPLEMENTATION
 //#define NANOVG_GLES2_IMPLEMENTATION
 #include "nanovg_gl.h"
-#include "nanovg_gl_utils.h"
 #include "demo.h"
 #include "perf.h"
 
@@ -96,6 +95,7 @@ void renderNanovg( int w,int h )
 
 void releaseNanovg()
 {
+	freeDemoData(vg, &data);
 	nvgDeleteGL2(vg);
 	//nvgDeleteGLES2(vg);
 }
