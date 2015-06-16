@@ -55,6 +55,41 @@ int initSDL(SDLState *state)
 				SDL_GetCurrentVideoDriver());
 		}
 	}
+
+	if (state->flags & SDL_INIT_AUDIO) {
+		if (state->verbose & VERBOSE_AUDIO) {
+			n = SDL_GetNumAudioDrivers();
+			if (n == 0) {
+				fprintf(stderr, "No built-in audio drivers\n");
+			}
+			else {
+				fprintf(stderr, "Built-in audio drivers:");
+				for (i = 0; i < n; ++i) {
+					if (i > 0) {
+						fprintf(stderr, ",");
+					}
+					fprintf(stderr, " %s", SDL_GetAudioDriver(i));
+				}
+				fprintf(stderr, "\n");
+			}
+		}
+		if (SDL_AudioInit(state->audiodriver) < 0) {
+			fprintf(stderr, "Couldn't initialize audio driver: %s\n",
+				SDL_GetError());
+			return SDL_FALSE;
+		}
+		if (state->verbose & VERBOSE_VIDEO) {
+			fprintf(stderr, "Audio driver: %s\n",
+				SDL_GetCurrentAudioDriver());
+		}
+
+		if (SDL_OpenAudio(&state->audiospec, NULL) < 0) {
+			fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
+			return SDL_FALSE;
+		}
+	}
+
+	return SDL_TRUE;
 }
 
 void releaseSDL(SDLState *state)
