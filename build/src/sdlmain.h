@@ -2,8 +2,8 @@
 #define _SDLMAIN_H_
 #include "SDL.h"
 
-#define DEFAULT_WINDOW_WIDTH  640
-#define DEFAULT_WINDOW_HEIGHT 480
+#define DEFAULT_WINDOW_WIDTH  1024
+#define DEFAULT_WINDOW_HEIGHT 576
 
 #define VERBOSE_VIDEO   0x00000001
 #define VERBOSE_MODES   0x00000002
@@ -34,11 +34,33 @@ extern "C"{
 		int window_minH;
 		int window_maxW;
 		int window_maxH;
+		int logical_w;
+		int logical_h;
+		float scale;
+		int depth;
+		int refresh_rate;
+		SDL_Window *window;
+
+		/* Renderer info */
+		const char *renderdriver;
+		Uint32 render_flags;
+		SDL_Renderer *renderer;
+		SDL_Texture *target;
 
 		/* Audio info */
 		const char *audiodriver;
 		SDL_AudioSpec audiospec;
 
+		/* GL settings */
+		int gl_red_size;
+		int gl_green_size;
+		int gl_blue_size;
+		int gl_alpha_size;
+		int gl_buffer_size;
+		int gl_depth_size;
+		int gl_stencil_size;
+		int gl_double_buffer;
+		SDL_GLContext *context;
 	} SDLState;
 
 	SDLState *defaultSDLState(int argc, char **argv);
