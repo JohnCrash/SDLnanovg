@@ -31,13 +31,13 @@ SDLState *defaultSDLState(int argc,char **argv)
 	_state.audiospec.samples = 2048;
 
 	/* OpenGL 默认设置 */
-	_state.gl_red_size = 8;
-	_state.gl_green_size = 8;
-	_state.gl_blue_size = 8;
-	_state.gl_alpha_size = 8;
+	_state.gl_red_size = 3;
+	_state.gl_green_size = 3;
+	_state.gl_blue_size = 2;
+	_state.gl_alpha_size = 0;
 	_state.gl_blue_size = 0;
 	_state.gl_depth_size = 16;
-	_state.gl_stencil_size = 8;
+	_state.gl_stencil_size = 1;
 	_state.gl_double_buffer = 1;
 	return &_state;
 }
@@ -389,6 +389,12 @@ int initSDL(SDLState *state)
 	if (status) {
 		fprintf(stderr, "SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
 		return SDL_FALSE;
+	}
+	if (state->render_flags & SDL_RENDERER_PRESENTVSYNC) {
+		SDL_GL_SetSwapInterval(1);
+	}
+	else {
+		SDL_GL_SetSwapInterval(0);
 	}
 	/* 初始化声音驱动 */
 	if (state->flags & SDL_INIT_AUDIO) {

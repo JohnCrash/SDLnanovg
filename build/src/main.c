@@ -26,7 +26,7 @@ freely.
 
 int main(int argc,char *argv[])
 {
-	int done;
+	int done, mx, my;
 	SDL_Event event;
 	SDLState * state = defaultSDLState(argc, argv);
 
@@ -38,12 +38,18 @@ int main(int argc,char *argv[])
 		printf("initSDL failed!\n");
 		return -1;
 	}
-	if (!initNanovg())
+	if (glewInit()!=GLEW_OK)
+	{
+		printf("glewInit failed!");
+		return -1;
+	}
+	if (initNanovg()<0)
 	{
 		printf("initNanovg failed!\n");
 		return -1;
 	}
 	done = 0;
+	mx = my = 0;
 	while (!done)
 	{
 		while (SDL_PollEvent(&event))
@@ -56,10 +62,19 @@ int main(int argc,char *argv[])
 					SDL_DestroyWindow(state->window);
 					done = 1;
 				}
+				else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+				{
+					state->window_w = event.window.data1;
+					state->window_h = event.window.data2;
+				}
+				break;
+			case SDL_MOUSEMOTION:
+				mx = event.motion.x;
+				my = event.motion.y;
 				break;
 			}
 		}
-		renderNanovg(state->window_w,state->window_h);
+		renderNanovg(mx,my,state->window_w,state->window_h);
 		SDL_GL_SwapWindow(state->window);
 	}
 

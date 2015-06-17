@@ -10,3 +10,8 @@ build/win32/Debug/
 VisualC/SDLmain/Win32/Debug/
 VisualC/SDLtest/Win32/Debug/
 *.suo
+VisualC/SDL/Win32/Release/
+build/win32/Release/
+VisualC/SDLtest/Win32/Release/
+VisualC/SDLmain/Win32/Release/
+build/win32/Win32/Release/
