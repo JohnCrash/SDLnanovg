@@ -11,7 +11,7 @@ SDLState *createSDLState(int argc,char **argv)
         SDL_OutOfMemory();
         return NULL;
     }
-	memset(state, 0, sizeof(_state));
+	memset(state, 0, sizeof(*state));
 
 	state->argc = argc;
 	state->argv = argv;
@@ -429,6 +429,7 @@ static int initSDLAudio(SDLState *state)
 /* 创建OpenGL上行文 */
 static int initSDLGL(SDLState *state)
 {
+	int status;
 	state->context = SDL_GL_CreateContext(state->window);
 	if (!state->context) {
 		fprintf(stderr, "SDL_GL_CreateContext(): %s\n", SDL_GetError());
@@ -445,6 +446,7 @@ static int initSDLGL(SDLState *state)
 	else {
 		SDL_GL_SetSwapInterval(0);
 	}	
+	return SDL_TRUE;
 }
 
 int initSDL(SDLState *state)
@@ -468,10 +470,10 @@ int initSDL(SDLState *state)
 	
 	/* 初始化renderer */
 	if(!initSDLRenderer(state))
-		return SDL_FASLE;
+		return SDL_FALSE;
 	
 	if(!initSDLGL(state))
-		return SDL_FASLE;
+		return SDL_FALSE;
 	
 	if(!initSDLAudio(state))
 		return SDL_FALSE;
@@ -496,4 +498,5 @@ void releaseSDL(SDLState *state)
     if (state->flags & SDL_INIT_AUDIO) {
         SDL_AudioQuit();
     }
+	SDL_free(state);
 }

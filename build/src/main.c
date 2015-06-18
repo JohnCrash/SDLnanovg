@@ -28,7 +28,7 @@ int main(int argc,char *argv[])
 {
 	int done, mx, my;
 	SDL_Event event;
-	SDLState * state = defaultSDLState(argc, argv);
+	SDLState * state = createSDLState(argc, argv);
 
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
