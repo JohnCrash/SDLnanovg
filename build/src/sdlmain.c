@@ -4,42 +4,45 @@
 /*
 	代码来自于SDLTest,主要进行梳理和修改。
 */
-static SDLState _state;
-
-SDLState *defaultSDLState(int argc,char **argv)
+SDLState *createSDLState(int argc,char **argv)
 {
-	memset(&_state, 0, sizeof(_state));
+	SDLState *state = (SDLState *)SDL_calloc(1,sizeof(*state));
+	 if (!state) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+	memset(state, 0, sizeof(_state));
 
-	_state.argc = argc;
-	_state.argv = argv;
+	state->argc = argc;
+	state->argv = argv;
 
-	_state.flags = SDL_INIT_VIDEO;
+	state->flags = SDL_INIT_VIDEO;
 
 	/* 默认窗口设置 */
-	_state.window_title = "OpenGL Test Window";
-	_state.window_icon = "icon.bmp";
-	_state.window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-	_state.window_x = 100;
-	_state.window_y = 100;
-	_state.window_w = DEFAULT_WINDOW_WIDTH;
-	_state.window_h = DEFAULT_WINDOW_HEIGHT;
+	state->window_title = "OpenGL Test Window";
+	state->window_icon = "icon.bmp";
+	state->window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+	state->window_x = 100;
+	state->window_y = 100;
+	state->window_w = DEFAULT_WINDOW_WIDTH;
+	state->window_h = DEFAULT_WINDOW_HEIGHT;
 
 	/* 默认声音设置 */
-	_state.audiospec.freq = 22050;
-	_state.audiospec.format = AUDIO_S16;
-	_state.audiospec.channels = 2;
-	_state.audiospec.samples = 2048;
+	state->audiospec.freq = 22050;
+	state->audiospec.format = AUDIO_S16;
+	state->audiospec.channels = 2;
+	state->audiospec.samples = 2048;
 
 	/* OpenGL 默认设置 */
-	_state.gl_red_size = 3;
-	_state.gl_green_size = 3;
-	_state.gl_blue_size = 2;
-	_state.gl_alpha_size = 0;
-	_state.gl_blue_size = 0;
-	_state.gl_depth_size = 16;
-	_state.gl_stencil_size = 1;
-	_state.gl_double_buffer = 1;
-	return &_state;
+	state->gl_red_size = 3;
+	state->gl_green_size = 3;
+	state->gl_blue_size = 2;
+	state->gl_alpha_size = 0;
+	state->gl_blue_size = 0;
+	state->gl_depth_size = 16;
+	state->gl_stencil_size = 1;
+	state->gl_double_buffer = 1;
+	return state;
 }
 
 static SDL_Surface *
@@ -221,12 +224,9 @@ SDLTest_PrintRenderer(SDL_RendererInfo * info)
 	}
 }
 
-int initSDL(SDLState *state)
+static int initSDLVideo(SDLState *state)
 {
-	int i, j, n, w, h, m, status;
-	SDL_DisplayMode fullscreen_mode;
-	char title[512];
-
+	int i,n;
 	if (state->flags & SDL_INIT_VIDEO) {
 		if (state->verbose & VERBOSE_VIDEO) {
 			n = SDL_GetNumVideoDrivers();
@@ -254,15 +254,15 @@ int initSDL(SDLState *state)
 				SDL_GetCurrentVideoDriver());
 		}
 	}
-	/* Upload GL settings */
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, state->gl_red_size);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, state->gl_green_size);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, state->gl_blue_size);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, state->gl_alpha_size);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, state->gl_double_buffer);
-	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, state->gl_buffer_size);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, state->gl_depth_size);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, state->gl_stencil_size);
+	return 	SDL_TRUE;
+}
+
+static int initSDLWindow(SDLState *state)
+{
+	int i,n,w,h;
+	SDL_DisplayMode fullscreen_mode;
+	char title[512];
+	
 	/* 创建主窗口 */
 	if (state->window_title)
 		SDL_strlcpy(title, state->window_title, SDL_arraysize(title));
@@ -337,7 +337,12 @@ int initSDL(SDLState *state)
 		}
 	}
 	SDL_ShowWindow(state->window);
-	/* 初始化renderer */
+	return SDL_TRUE;
+}
+
+static int initSDLRenderer(SDLState *state)
+{
+	int j,m,n;
 	if (state->renderdriver || !(state->window_flags & SDL_WINDOW_OPENGL)){
 		m = -1;
 		if (state->renderdriver) {
@@ -379,24 +384,13 @@ int initSDL(SDLState *state)
 			SDLTest_PrintRenderer(&info);
 		}
 	}
-	/* 创建OpenGL上行文 */
-	state->context = SDL_GL_CreateContext(state->window);
-	if (!state->context) {
-		fprintf(stderr, "SDL_GL_CreateContext(): %s\n", SDL_GetError());
-		return SDL_FALSE;
-	}
-	status = SDL_GL_MakeCurrent(state->window, state->context);
-	if (status) {
-		fprintf(stderr, "SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
-		return SDL_FALSE;
-	}
-	if (state->render_flags & SDL_RENDERER_PRESENTVSYNC) {
-		SDL_GL_SetSwapInterval(1);
-	}
-	else {
-		SDL_GL_SetSwapInterval(0);
-	}
-	/* 初始化声音驱动 */
+	return SDL_TRUE;
+}
+
+/* 初始化声音驱动 */
+static int initSDLAudio(SDLState *state)
+{
+	int i,n;
 	if (state->flags & SDL_INIT_AUDIO) {
 		if (state->verbose & VERBOSE_AUDIO) {
 			n = SDL_GetNumAudioDrivers();
@@ -429,11 +423,77 @@ int initSDL(SDLState *state)
 			return SDL_FALSE;
 		}
 	}
+	return 	SDL_TRUE;
+}
 
+/* 创建OpenGL上行文 */
+static int initSDLGL(SDLState *state)
+{
+	state->context = SDL_GL_CreateContext(state->window);
+	if (!state->context) {
+		fprintf(stderr, "SDL_GL_CreateContext(): %s\n", SDL_GetError());
+		return SDL_FALSE;
+	}
+	status = SDL_GL_MakeCurrent(state->window, state->context);
+	if (status) {
+		fprintf(stderr, "SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
+		return SDL_FALSE;
+	}
+	if (state->render_flags & SDL_RENDERER_PRESENTVSYNC) {
+		SDL_GL_SetSwapInterval(1);
+	}
+	else {
+		SDL_GL_SetSwapInterval(0);
+	}	
+}
+
+int initSDL(SDLState *state)
+{
+	int status;
+	if(!initSDLVideo(state))
+		return SDL_FALSE;
+	
+	/* Upload GL settings */
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, state->gl_red_size);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, state->gl_green_size);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, state->gl_blue_size);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, state->gl_alpha_size);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, state->gl_double_buffer);
+	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, state->gl_buffer_size);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, state->gl_depth_size);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, state->gl_stencil_size);
+	
+	if(!initSDLWindow(state))
+		return SDL_FALSE;
+	
+	/* 初始化renderer */
+	if(!initSDLRenderer(state))
+		return SDL_FASLE;
+	
+	if(!initSDLGL(state))
+		return SDL_FASLE;
+	
+	if(!initSDLAudio(state))
+		return SDL_FALSE;
+	
 	return SDL_TRUE;
 }
 
 void releaseSDL(SDLState *state)
 {
-
+	if( state->window )
+		SDL_DestroyWindow(state->window);
+	if( state->target )
+		SDL_DestroyTexture(state->target);
+	if(state->renderer)
+	{
+		SDL_DestroyRenderer(state->renderer);
+		SDL_free(state->renderer);
+	}
+    if (state->flags & SDL_INIT_VIDEO) {
+        SDL_VideoQuit();
+    }
+    if (state->flags & SDL_INIT_AUDIO) {
+        SDL_AudioQuit();
+    }
 }

@@ -63,7 +63,7 @@ extern "C"{
 		SDL_GLContext *context;
 	} SDLState;
 
-	SDLState *defaultSDLState(int argc, char **argv);
+	SDLState *createSDLState(int argc, char **argv);
 	int initSDL(SDLState *state);
 	void releaseSDL(SDLState *state);
 #ifdef __cplusplus
