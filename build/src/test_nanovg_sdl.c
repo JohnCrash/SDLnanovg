@@ -20,15 +20,17 @@
 #include "SDL.h"
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #include "SDL_opengles.h"
+#include "nanovg.h"
+#define NANOVG_GLES2_IMPLEMENTATION
+#include "nanovg_gl2.h"
 #else
-//#include "SDL_opengl.h"
-#include "GL/glew.h"
-#endif
 
+#include "GL/glew.h"
 #include "nanovg.h"
 #define NANOVG_GL2_IMPLEMENTATION
-//#define NANOVG_GLES2_IMPLEMENTATION
 #include "nanovg_gl.h"
+#endif
+
 #include "demo.h"
 #include "perf.h"
 

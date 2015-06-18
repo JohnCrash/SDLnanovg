@@ -15,3 +15,8 @@ build/win32/Release/
 VisualC/SDLtest/Win32/Release/
 VisualC/SDLmain/Win32/Release/
 build/win32/Win32/Release/
+build/org.libsdl.testgles/jni/SDL/src/
+build/org.libsdl.testgles/jni/SDL/include/
+build/android/obj/local/
+build/android/libs/
+build/android/bin/

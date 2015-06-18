@@ -11,7 +11,7 @@ SDLState *createSDLState(int argc,char **argv)
         SDL_OutOfMemory();
         return NULL;
     }
-	memset(state, 0, sizeof(*state));
+	 SDL_zerop(state);
 
 	state->argc = argc;
 	state->argv = argv;
@@ -42,6 +42,21 @@ SDLState *createSDLState(int argc,char **argv)
 	state->gl_depth_size = 16;
 	state->gl_stencil_size = 1;
 	state->gl_double_buffer = 1;
+	state->gl_accum_red_size = 0;
+	state->gl_accum_green_size = 0;
+	state->gl_accum_blue_size = 0;
+	state->gl_accum_alpha_size = 0;
+	state->gl_stereo = 0;
+	state->gl_multisamplebuffers = 0;
+	state->gl_multisamplesamples = 0;
+	state->gl_retained_backing = 1;
+	state->gl_accelerated = -1;
+	state->gl_debug = 0;
+#ifdef __ANDROID__
+	state->gl_profile_mask = SDL_GL_CONTEXT_PROFILE_ES;
+#else
+	state->gl_profile_mask = SDL_GL_CONTEXT_PROFILE_CORE;
+#endif
 	return state;
 }
 
@@ -221,6 +236,85 @@ SDLTest_PrintRenderer(SDL_RendererInfo * info)
 	if (info->max_texture_width || info->max_texture_height) {
 		fprintf(stderr, "    Max Texture Size: %dx%d\n",
 			info->max_texture_width, info->max_texture_height);
+	}
+}
+
+static void verboseModes(SDLState *state)
+{
+	int n, i,j,m;
+	if (state->verbose & VERBOSE_MODES) {
+		SDL_Rect bounds;
+		SDL_DisplayMode mode;
+		int bpp;
+		Uint32 Rmask, Gmask, Bmask, Amask;
+#if SDL_VIDEO_DRIVER_WINDOWS
+		int adapterIndex = 0;
+		int outputIndex = 0;
+#endif
+		n = SDL_GetNumVideoDisplays();
+		fprintf(stderr, "Number of displays: %d\n", n);
+		for (i = 0; i < n; ++i) {
+			fprintf(stderr, "Display %d: %s\n", i, SDL_GetDisplayName(i));
+
+			SDL_zero(bounds);
+			SDL_GetDisplayBounds(i, &bounds);
+			fprintf(stderr, "Bounds: %dx%d at %d,%d\n", bounds.w, bounds.h, bounds.x, bounds.y);
+
+			SDL_GetDesktopDisplayMode(i, &mode);
+			SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask,
+				&Bmask, &Amask);
+			fprintf(stderr,
+				"  Current mode: %dx%d@%dHz, %d bits-per-pixel (%s)\n",
+				mode.w, mode.h, mode.refresh_rate, bpp,
+				SDL_GetPixelFormatName(mode.format));
+			if (Rmask || Gmask || Bmask) {
+				fprintf(stderr, "      Red Mask   = 0x%.8x\n", Rmask);
+				fprintf(stderr, "      Green Mask = 0x%.8x\n", Gmask);
+				fprintf(stderr, "      Blue Mask  = 0x%.8x\n", Bmask);
+				if (Amask)
+					fprintf(stderr, "      Alpha Mask = 0x%.8x\n", Amask);
+			}
+
+			/* Print available fullscreen video modes */
+			m = SDL_GetNumDisplayModes(i);
+			if (m == 0) {
+				fprintf(stderr, "No available fullscreen video modes\n");
+			}
+			else {
+				fprintf(stderr, "  Fullscreen video modes:\n");
+				for (j = 0; j < m; ++j) {
+					SDL_GetDisplayMode(i, j, &mode);
+					SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask,
+						&Gmask, &Bmask, &Amask);
+					fprintf(stderr,
+						"    Mode %d: %dx%d@%dHz, %d bits-per-pixel (%s)\n",
+						j, mode.w, mode.h, mode.refresh_rate, bpp,
+						SDL_GetPixelFormatName(mode.format));
+					if (Rmask || Gmask || Bmask) {
+						fprintf(stderr, "        Red Mask   = 0x%.8x\n",
+							Rmask);
+						fprintf(stderr, "        Green Mask = 0x%.8x\n",
+							Gmask);
+						fprintf(stderr, "        Blue Mask  = 0x%.8x\n",
+							Bmask);
+						if (Amask)
+							fprintf(stderr,
+							"        Alpha Mask = 0x%.8x\n",
+							Amask);
+					}
+				}
+			}
+
+#if SDL_VIDEO_DRIVER_WINDOWS
+			/* Print the D3D9 adapter index */
+			adapterIndex = SDL_Direct3D9GetAdapterIndex(i);
+			fprintf(stderr, "D3D9 Adapter Index: %d", adapterIndex);
+
+			/* Print the DXGI adapter and output indices */
+			SDL_DXGIGetOutputInfo(i, &adapterIndex, &outputIndex);
+			fprintf(stderr, "DXGI Adapter Index: %d  Output Index: %d", adapterIndex, outputIndex);
+#endif
+		}
 	}
 }
 
@@ -451,7 +545,6 @@ static int initSDLGL(SDLState *state)
 
 int initSDL(SDLState *state)
 {
-	int status;
 	if(!initSDLVideo(state))
 		return SDL_FALSE;
 	
@@ -464,7 +557,32 @@ int initSDL(SDLState *state)
 	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, state->gl_buffer_size);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, state->gl_depth_size);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, state->gl_stencil_size);
-	
+
+	SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE, state->gl_accum_red_size);
+	SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE, state->gl_accum_green_size);
+	SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, state->gl_accum_blue_size);
+	SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, state->gl_accum_alpha_size);
+	SDL_GL_SetAttribute(SDL_GL_STEREO, state->gl_stereo);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, state->gl_multisamplebuffers);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, state->gl_multisamplesamples);
+	if (state->gl_accelerated >= 0) {
+		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL,
+			state->gl_accelerated);
+	}
+	SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, state->gl_retained_backing);
+	if (state->gl_major_version) {
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, state->gl_major_version);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, state->gl_minor_version);
+	}
+	if (state->gl_debug) {
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	}
+	if (state->gl_profile_mask) {
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, state->gl_profile_mask);
+	}
+
+	verboseModes(state);
+
 	if(!initSDLWindow(state))
 		return SDL_FALSE;
 	

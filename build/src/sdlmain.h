@@ -60,6 +60,21 @@ extern "C"{
 		int gl_depth_size;
 		int gl_stencil_size;
 		int gl_double_buffer;
+
+		int gl_accum_red_size;
+		int gl_accum_green_size;
+		int gl_accum_blue_size;
+		int gl_accum_alpha_size;
+		int gl_stereo;
+		int gl_multisamplebuffers;
+		int gl_multisamplesamples;
+		int gl_retained_backing;
+		int gl_accelerated;
+
+		int gl_major_version;
+		int gl_minor_version;
+		int gl_debug;
+		int gl_profile_mask;
 		SDL_GLContext *context;
 	} SDLState;
 
