@@ -799,6 +799,12 @@ void drawLines(NVGcontext* vg, float x, float y, float w, float h, float t)
 	nvgRestore(vg);
 }
 
+#ifdef __ANDROID__
+	#define PREFIX "assets"
+#else
+	#define PREFIX "."
+#endif
+
 int loadDemoData(NVGcontext* vg, DemoData* data)
 {
 	int i;
@@ -808,25 +814,25 @@ int loadDemoData(NVGcontext* vg, DemoData* data)
 
 	for (i = 0; i < 12; i++) {
 		char file[128];
-		snprintf(file, 128, "./images/image%d.jpg", i+1);
+		snprintf(file, 128, PREFIX"/images/image%d.jpg", i+1);
 		data->images[i] = nvgCreateImage(vg, file, 0);
 		if (data->images[i] == 0) {
-			printf("Could not load %s.\n", file);
+			LOG("Could not load %s.\n", file);
 			return -1;
 		}
 	}
 
-	data->fontIcons = nvgCreateFont(vg, "icons", "./fonts/entypo.ttf");
+	data->fontIcons = nvgCreateFont(vg, "icons", PREFIX"/fonts/entypo.ttf");
 	if (data->fontIcons == -1) {
 		printf("Could not add font icons.\n");
 		return -1;
 	}
-	data->fontNormal = nvgCreateFont(vg, "sans", "./fonts/Roboto-Regular.ttf");
+	data->fontNormal = nvgCreateFont(vg, "sans", PREFIX"/fonts/Roboto-Regular.ttf");
 	if (data->fontNormal == -1) {
 		printf("Could not add font italic.\n");
 		return -1;
 	}
-	data->fontBold = nvgCreateFont(vg, "sans-bold", "./fonts/Roboto-Bold.ttf");
+	data->fontBold = nvgCreateFont(vg, "sans-bold", PREFIX"/fonts/Roboto-Bold.ttf");
 	if (data->fontBold == -1) {
 		printf("Could not add font bold.\n");
 		return -1;
