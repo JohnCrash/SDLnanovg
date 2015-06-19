@@ -2,10 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-//#ifdef NANOVG_GLEW
-#include <GL/glew.h>
-//#endif
-//#include <GLFW/glfw3.h>
+#include "gles.h"
 #include "nanovg.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -14,7 +11,7 @@
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #elif !defined(__MINGW32__)
-#include <iconv.h>
+//#include <iconv.h>
 #endif
 
 #define ICON_SEARCH 0x1F50D

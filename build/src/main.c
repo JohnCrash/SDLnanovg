@@ -13,14 +13,8 @@ freely.
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#define NANOVG_GL2_IMPLEMENTATION
-#if defined(__IPHONEOS__) || defined(__ANDROID__)
-#include "SDL_opengles.h"
-#else
-//#include "SDL_opengl.h"
-#include "GL/glew.h"
-#endif
 #include "SDL.h"
+#include "gles.h"
 #include "sdlmain.h"
 #include "test_nanovg_sdl.h"
 
@@ -33,16 +27,21 @@ int main(int argc,char *argv[])
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
+	SDL_Log("initSLD..");
 	if (!initSDL(state))
 	{
 		printf("initSDL failed!\n");
 		return -1;
 	}
+#if !defined(__GLES__)
+	SDL_Log("glewInit..");
 	if (glewInit()!=GLEW_OK)
 	{
 		printf("glewInit failed!");
 		return -1;
 	}
+#endif	
+	SDL_Log("initNanovg..");
 	if (initNanovg()<0)
 	{
 		printf("initNanovg failed!\n");
@@ -50,6 +49,7 @@ int main(int argc,char *argv[])
 	}
 	done = 0;
 	mx = my = 0;
+	SDL_Log("Main loop..");
 	while (!done)
 	{
 		while (SDL_PollEvent(&event))
@@ -77,8 +77,10 @@ int main(int argc,char *argv[])
 		renderNanovg(mx,my,state->window_w,state->window_h);
 		SDL_GL_SwapWindow(state->window);
 	}
-
+	SDL_Log("releaseNanovg..");
 	releaseNanovg();
+	SDL_Log("releaseSDL..");
 	releaseSDL(state);
+	SDL_Log("DONE..");
 	return 0;
 }

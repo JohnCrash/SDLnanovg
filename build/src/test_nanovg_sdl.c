@@ -18,22 +18,12 @@
 
 #include <stdio.h>
 #include "SDL.h"
-#if defined(__IPHONEOS__) || defined(__ANDROID__)
-#include "SDL_opengles.h"
+#include "gles.h"
 #include "nanovg.h"
-#define NANOVG_GLES2_IMPLEMENTATION
-#include "nanovg_gl2.h"
-#else
-
-#include "GL/glew.h"
-#include "nanovg.h"
-#define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
-#endif
-
+#include "nanovg_gl_utils.h"
 #include "demo.h"
 #include "perf.h"
-
 
 static int winWidth, winHeight;
 static DemoData data;
@@ -52,8 +42,11 @@ int initNanovg()
 #ifdef DEMO_MSAA
 	vg = nvgCreateGL2(NVG_STENCIL_STROKES | NVG_DEBUG);
 #else
-	vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
-	//vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+	#ifdef __GLES__
+		vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+	#else
+		vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+	#endif
 #endif
 	if (vg == NULL) {
 		printf("Could not init nanovg.\n");
@@ -98,6 +91,9 @@ void renderNanovg(int _mx, int _my, int w, int h)
 void releaseNanovg()
 {
 	freeDemoData(vg, &data);
-	nvgDeleteGL2(vg);
-	//nvgDeleteGLES2(vg);
+	#ifdef __GLES__
+		nvgDeleteGLES2(vg);
+	#else
+		nvgDeleteGL2(vg);
+	#endif
 }

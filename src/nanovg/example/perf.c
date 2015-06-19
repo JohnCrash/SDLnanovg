@@ -2,16 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-//#ifdef NANOVG_GLEW
-#  include <GL/glew.h>
-//#endif
-//#include <GLFW/glfw3.h>
+#include "gles.h"
 #include "nanovg.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #elif !defined(__MINGW32__)
-#include <iconv.h>
+//#include <iconv.h>
 #endif
 
 // timer query support
@@ -43,7 +40,10 @@ void startGPUTimer(GPUtimer* timer)
 {
 	if (!timer->supported)
 		return;
+	/* gles2 不支持glBeginQuery */
+#if 0	
 	glBeginQuery(GL_TIME_ELAPSED, timer->queries[timer->cur % GPU_QUERY_COUNT] );
+#endif	
 	timer->cur++;
 }
 
@@ -55,7 +55,8 @@ int stopGPUTimer(GPUtimer* timer, float* times, int maxTimes)
 	int n = 0;
 	if (!timer->supported)
 		return 0;
-
+	/* gles2 不支持glEndQuery */
+#if 0
 	glEndQuery(GL_TIME_ELAPSED);
 	while (available && timer->ret <= timer->cur) {
 		// check for results if there are any
@@ -70,6 +71,7 @@ int stopGPUTimer(GPUtimer* timer, float* times, int maxTimes)
 			}*/
 		}
 	}
+#endif	
 	return n;
 }
 
