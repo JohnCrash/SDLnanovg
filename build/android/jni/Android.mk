@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := SDL/src/main/android/SDL_android_main.c \
 	$(SRC_PATH)/main.c \
 	$(SRC_PATH)/test_nanovg_sdl.c \
 	$(NANOVG_SRC_PATH)/nanovg.c \
+	$(NANOVG_SRC_PATH)/sdlport.c \
 	$(NANOVG_SRC_PATH)/example/demo.c \
 	$(NANOVG_SRC_PATH)/example/perf.c
 	

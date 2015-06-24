@@ -421,7 +421,6 @@ typedef struct
    stbi_uc *img_buffer_original;
 } stbi__context;
 
-
 static void stbi__refill_buffer(stbi__context *s);
 
 // initialize a memory-stbi__jpeg_huff_decode context

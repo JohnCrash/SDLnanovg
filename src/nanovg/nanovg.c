@@ -19,10 +19,9 @@
 #include <stdio.h>
 #include <math.h>
 #include "nanovg.h"
-#define FONTSTASH_IMPLEMENTATION
 #include "fontstash.h"
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "sdlport.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4100)  // unreferenced formal parameter
@@ -709,7 +708,7 @@ int nvgCreateImage(NVGcontext* ctx, const char* filename, int imageFlags)
 	unsigned char* img;
 	stbi_set_unpremultiply_on_load(1);
 	stbi_convert_iphone_png_to_rgb(1);
-	img = stbi_load(filename, &w, &h, &n, 4);
+	img = stbi_load2(filename, &w, &h, &n, 4);
 	if (img == NULL) {
 //		printf("Failed to load %s - %s\n", filename, stbi_failure_reason());
 		return 0;
@@ -2156,7 +2155,7 @@ void nvgStroke(NVGcontext* ctx)
 // Add fonts
 int nvgCreateFont(NVGcontext* ctx, const char* name, const char* path)
 {
-	return fonsAddFont(ctx->fs, name, path);
+	return fonsAddFont2(ctx->fs, name, path);
 }
 
 int nvgCreateFontMem(NVGcontext* ctx, const char* name, unsigned char* data, int ndata, int freeData)

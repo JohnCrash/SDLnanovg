@@ -20,3 +20,4 @@ build/org.libsdl.testgles/jni/SDL/include/
 build/android/obj/local/
 build/android/libs/
 build/android/bin/
+build/android/assets/
