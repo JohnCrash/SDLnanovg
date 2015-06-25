@@ -74,9 +74,7 @@ int main(int argc,char *argv[])
 				break;
 			}
 		}
-		LOG("renderNanovg 1");
 		renderNanovg(mx,my,state->window_w,state->window_h);
-		LOG("renderNanovg 2");
 		SDL_GL_SwapWindow(state->window);
 	}
 	LOG("releaseNanovg..");

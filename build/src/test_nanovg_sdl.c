@@ -72,9 +72,9 @@ void renderNanovg(int _mx, int _my, int w, int h)
 	my = _my;
 	fbWidth = w;
 	fbHeight = h;
-	pxRatio = (float)fbWidth / (float)winWidth;
 	winWidth = w;
 	winHeight = h;
+	pxRatio = (float)fbWidth / (float)winWidth;
 
 	glViewport(0, 0, fbWidth, fbHeight);
 	if (premult)
