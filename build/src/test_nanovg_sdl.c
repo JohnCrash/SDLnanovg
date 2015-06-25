@@ -43,7 +43,8 @@ int initNanovg()
 	vg = nvgCreateGL2(NVG_STENCIL_STROKES | NVG_DEBUG);
 #else
 	#ifdef __GLES__
-		vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+		//vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+		vg = nvgCreateGLES2(NVG_STENCIL_STROKES | NVG_DEBUG);
 	#else
 		vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
 	#endif
