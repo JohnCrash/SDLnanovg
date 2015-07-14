@@ -68,5 +68,8 @@
     <ClCompile Include="..\src\sdlmain.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\nanovg\sdlport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

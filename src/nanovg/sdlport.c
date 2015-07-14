@@ -1,4 +1,5 @@
 #include "SDL.h"
+#include <stdio.h>
 #define FONTSTASH_IMPLEMENTATION
 #include "fontstash.h"
 #define STB_IMAGE_IMPLEMENTATION
