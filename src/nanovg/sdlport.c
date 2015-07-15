@@ -16,11 +16,11 @@ static unsigned char *stbi_load_from_sdlrw(SDL_RWops *f, int *x, int *y, int *co
 	len = SDL_RWsize(f);
 	if( len>0 )
 	{
-	   buffer = SDL_calloc(len,1);
+	   buffer = malloc(len,1);
 	   SDL_RWread(f,buffer,1,len);
 	   stbi__start_mem(&s,buffer,len);
 	   result = stbi_load_main(&s,x,y,comp,req_comp);
-	   SDL_free(buffer);
+	   free(buffer);
 	}
 	return result;
 }
@@ -49,7 +49,7 @@ int fonsAddFont2(FONScontext* stash, const char* name, const char* path)
 	fp = SDL_RWFromFile(path,"rb");	
 	if (fp == NULL) goto error;
 	dataSize = SDL_RWsize(fp);
-	data = (unsigned char*)SDL_calloc(dataSize,1);
+	data = (unsigned char*)malloc(dataSize,1);
 	if (data == NULL) goto error;
 	//fread(data, 1, dataSize, fp);
 	SDL_RWread(fp,data,1,dataSize);
