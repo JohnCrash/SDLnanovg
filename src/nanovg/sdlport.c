@@ -6,6 +6,15 @@
 #include "stb_image.h"
 #include "sdlport.h"
 
+/*
+ * stb库不能访问android assets中的文件(apk包中的文件)
+ * sdl库可以访问assets中的文件，并且提供统一的接口。
+ * 如访问文件fonts/entypo.ttf,windows下放在exe同目录下就可以了
+ * android下将访问assets下的fonts/entypo.ttf
+ * stbi_load2
+ * fonsAddFont2
+ * 重写stb库中对应的函数stbi_load和fonsAddFont
+ */
 static unsigned char *stbi_load_from_sdlrw(SDL_RWops *f, int *x, int *y, int *comp, int req_comp)
 {
 	stbi__context s;
@@ -14,8 +23,7 @@ static unsigned char *stbi_load_from_sdlrw(SDL_RWops *f, int *x, int *y, int *co
 	int len;
 	result = NULL;
 	len = SDL_RWsize(f);
-	if( len>0 )
-	{
+	if( len>0 ){
 	   buffer = malloc(len,1);
 	   SDL_RWread(f,buffer,1,len);
 	   stbi__start_mem(&s,buffer,len);
@@ -29,8 +37,7 @@ STBIDEF unsigned char *stbi_load2(char const *filename, int *x, int *y, int *com
 {
    SDL_RWops *f = SDL_RWFromFile(filename,"rb");
    unsigned char *result;
-   if (!f) 
-   {
+   if (!f){
 	   return stbi__errpuc("can't fopen", "Unable to open file");
    }
    result = stbi_load_from_sdlrw(f,x,y,comp,req_comp);
@@ -40,7 +47,6 @@ STBIDEF unsigned char *stbi_load2(char const *filename, int *x, int *y, int *com
 
 int fonsAddFont2(FONScontext* stash, const char* name, const char* path)
 {
-	//FILE* fp = 0;
 	SDL_RWops *fp;
 	int dataSize = 0;
 	unsigned char* data = NULL;
@@ -51,7 +57,6 @@ int fonsAddFont2(FONScontext* stash, const char* name, const char* path)
 	dataSize = SDL_RWsize(fp);
 	data = (unsigned char*)malloc(dataSize,1);
 	if (data == NULL) goto error;
-	//fread(data, 1, dataSize, fp);
 	SDL_RWread(fp,data,1,dataSize);
 	SDL_RWclose(fp);
 	fp = 0;

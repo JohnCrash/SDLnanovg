@@ -51,7 +51,9 @@ extern "C"{
 		const char *audiodriver;
 		SDL_AudioSpec audiospec;
 
-		/* GL settings */
+		/*
+		 * opengl ≥ı ºªØ…Ë÷√
+		 */
 		int gl_red_size;
 		int gl_green_size;
 		int gl_blue_size;
@@ -60,7 +62,6 @@ extern "C"{
 		int gl_depth_size;
 		int gl_stencil_size;
 		int gl_double_buffer;
-
 		int gl_accum_red_size;
 		int gl_accum_green_size;
 		int gl_accum_blue_size;
