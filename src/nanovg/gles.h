@@ -1,5 +1,6 @@
 /*
-*/
+ * opengl 头文件配置文件，根据不同的系统配置相应的头文件。
+ */
 #if defined(__IPHONEOS__)
 	#define __GLES__
 	#include <OpenGLES/ES2/gl.h>

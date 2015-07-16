@@ -2,8 +2,8 @@
 #include <stdio.h>
 
 /*
-	代码来自于SDLTest,主要进行梳理和修改。
-*/
+ *	代码来自于SDLTest,主要进行梳理和修改。
+ */
 SDLState *createSDLState(int argc,char **argv)
 {
 	SDLState *state = (SDLState *)SDL_calloc(1,sizeof(*state));
