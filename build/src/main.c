@@ -27,29 +27,29 @@ int main(int argc,char *argv[])
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
-	LOG("initSLD..");
+	SDL_Log("initSDL..");
 	if (!initSDL(state))
 	{
-		printf("initSDL failed!\n");
+		SDL_Log("initSDL failed!\n");
 		return -1;
 	}
 #if !defined(__GLES__)
-	LOG("glewInit..");
+	SDL_Log("glewInit..");
 	if (glewInit()!=GLEW_OK)
 	{
-		printf("glewInit failed!");
+		SDL_Log("glewInit failed!");
 		return -1;
 	}
 #endif	
-	LOG("initNanovg..");
+	SDL_Log("initNanovg..");
 	if (initNanovg()<0)
 	{
-		printf("initNanovg failed!\n");
+		SDL_Log("initNanovg failed!\n");
 		return -1;
 	}
 	done = 0;
 	mx = my = 0;
-	LOG("Main loop..");
+	SDL_Log("Main loop..");
 	while (!done)
 	{
 		while (SDL_PollEvent(&event))
@@ -77,10 +77,10 @@ int main(int argc,char *argv[])
 		renderNanovg(mx,my,state->window_w,state->window_h);
 		SDL_GL_SwapWindow(state->window);
 	}
-	LOG("releaseNanovg..");
+	SDL_Log("releaseNanovg..");
 	releaseNanovg();
-	LOG("releaseSDL..");
+	SDL_Log("releaseSDL..");
 	releaseSDL(state);
-	LOG("DONE..");
+	SDL_Log("DONE..");
 	return 0;
 }
