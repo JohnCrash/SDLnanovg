@@ -17,6 +17,7 @@ freely.
 #include "gles.h"
 #include "sdlmain.h"
 #include "test_nanovg_sdl.h"
+#include "fs.h"
 
 int main(int argc,char *argv[])
 {
@@ -26,8 +27,8 @@ int main(int argc,char *argv[])
 
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-
 	SDL_Log("initSDL..");
+	SDL_Log("Writeable directory : %s", getWriteDirectory());
 	if (!initSDL(state))
 	{
 		SDL_Log("initSDL failed!\n");

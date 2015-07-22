@@ -19,6 +19,7 @@
     <ClInclude Include="..\..\src\nanovg\nanovg_gl_utils.h" />
     <ClInclude Include="..\..\src\nanovg\stb_image.h" />
     <ClInclude Include="..\..\src\nanovg\stb_truetype.h" />
+    <ClInclude Include="..\src\fs.h" />
     <ClInclude Include="..\src\sdlmain.h" />
     <ClInclude Include="..\src\test_nanovg_sdl.h" />
     <ClInclude Include="resource.h" />
@@ -28,6 +29,7 @@
     <ClCompile Include="..\..\src\nanovg\example\perf.c" />
     <ClCompile Include="..\..\src\nanovg\nanovg.c" />
     <ClCompile Include="..\..\src\nanovg\sdlport.c" />
+    <ClCompile Include="..\src\fs.c" />
     <ClCompile Include="..\src\main.c" />
     <ClCompile Include="..\src\sdlmain.c" />
     <ClCompile Include="..\src\test_nanovg_sdl.c" />
@@ -94,11 +96,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;NANOVG_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../include;../../src/nanovg;../../src/nanovg/example;../../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -106,8 +108,8 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>Win32/Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Win32/Release;../../../glew\lib\Release\Win32</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

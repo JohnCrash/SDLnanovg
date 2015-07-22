@@ -17,6 +17,7 @@ LOCAL_C_INCLUDES := $(SRC_PATH) \
 LOCAL_SRC_FILES := SDL/src/main/android/SDL_android_main.c \
 	$(SRC_PATH)/sdlmain.c \
 	$(SRC_PATH)/main.c \
+	$(SRC_PATH)/fs.c \
 	$(SRC_PATH)/test_nanovg_sdl.c \
 	$(NANOVG_SRC_PATH)/nanovg.c \
 	$(NANOVG_SRC_PATH)/sdlport.c \
