@@ -21,6 +21,7 @@
     <ClInclude Include="..\..\src\nanovg\stb_truetype.h" />
     <ClInclude Include="..\src\fs.h" />
     <ClInclude Include="..\src\sdlmain.h" />
+    <ClInclude Include="..\src\shader.h" />
     <ClInclude Include="..\src\test_nanovg_sdl.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -32,6 +33,7 @@
     <ClCompile Include="..\src\fs.c" />
     <ClCompile Include="..\src\main.c" />
     <ClCompile Include="..\src\sdlmain.c" />
+    <ClCompile Include="..\src\shader.c" />
     <ClCompile Include="..\src\test_nanovg_sdl.c" />
   </ItemGroup>
   <ItemGroup>
