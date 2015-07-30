@@ -9,6 +9,7 @@ Permission is granted to anyone to use this software for any purpose,
 including commercial applications, and to alter it and redistribute it
 freely.
 */
+#ifdef _DEMO_
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -85,3 +86,4 @@ int main(int argc,char *argv[])
 	SDL_Log("DONE..");
 	return 0;
 }
+#endif //_DEMO_

@@ -19,7 +19,10 @@
     <ClInclude Include="..\..\src\nanovg\nanovg_gl_utils.h" />
     <ClInclude Include="..\..\src\nanovg\stb_image.h" />
     <ClInclude Include="..\..\src\nanovg\stb_truetype.h" />
+    <ClInclude Include="..\src\basetype.h" />
+    <ClInclude Include="..\src\examples.h" />
     <ClInclude Include="..\src\fs.h" />
+    <ClInclude Include="..\src\geometry.h" />
     <ClInclude Include="..\src\sdlmain.h" />
     <ClInclude Include="..\src\shader.h" />
     <ClInclude Include="..\src\test_nanovg_sdl.h" />
@@ -30,10 +33,14 @@
     <ClCompile Include="..\..\src\nanovg\example\perf.c" />
     <ClCompile Include="..\..\src\nanovg\nanovg.c" />
     <ClCompile Include="..\..\src\nanovg\sdlport.c" />
+    <ClCompile Include="..\src\basetype.c" />
+    <ClCompile Include="..\src\examples.c" />
     <ClCompile Include="..\src\fs.c" />
+    <ClCompile Include="..\src\geometry.c" />
     <ClCompile Include="..\src\main.c" />
     <ClCompile Include="..\src\sdlmain.c" />
     <ClCompile Include="..\src\shader.c" />
+    <ClCompile Include="..\src\test.c" />
     <ClCompile Include="..\src\test_nanovg_sdl.c" />
   </ItemGroup>
   <ItemGroup>
@@ -80,7 +87,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NANOVG_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NANOVG_GLEW;_TEST_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
