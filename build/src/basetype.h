@@ -71,4 +71,7 @@ typedef struct surface_t{
 	triangle_t *trians;	//Èý½Ç
 } surface_t;
 
+surface_t * allocSurface(int nvec,int ntrians);
+void deleteSurface(surface_t *surface);
+
 #endif

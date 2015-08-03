@@ -4,11 +4,15 @@
 
 /*
  * createSphereTriangle 创建一个球
- * 方法是当n=1时构造一个等边的三角体，从中心到顶点的距离为r
- * n=2时，以三角体的一个三角面为底面，该三角的中心垂线和球面
- * 的交点为顶点作作3个三角形。n=3时继续做该操作。
+ * 创建一个球体，中心位置在（0，0，0），u,v分别是经纬的密度
  */
-surface_t * createSphereTriangle(float r,int n);
+surface_t * createSphere(float r,int u,int v);
+
+/*
+ * createBox 创建一个盒子
+ * 盒子的长宽高由v指定
+ */
+surface_t * createBox(vec3_t v);
 
 // 释放表面
 void deleteSurface(surface_t *surface);
