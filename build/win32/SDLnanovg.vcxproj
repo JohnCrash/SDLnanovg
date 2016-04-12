@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\nanovg\fontstash.h" />
+    <ClInclude Include="..\..\src\nanovg\luaext.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl2.h" />
@@ -31,6 +32,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\nanovg\example\demo.c" />
     <ClCompile Include="..\..\src\nanovg\example\perf.c" />
+    <ClCompile Include="..\..\src\nanovg\luaext.c" />
     <ClCompile Include="..\..\src\nanovg\nanovg.c" />
     <ClCompile Include="..\..\src\nanovg\sdlport.c" />
     <ClCompile Include="..\src\basetype.c" />
@@ -87,12 +89,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NANOVG_GLEW;_TEST_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;NANOVG_GLEW;_DEMO_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../include;../../src/nanovg;../../src/nanovg/example;../../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../include;../../src/nanovg;../../src/nanovg/example;../../../glew/include;../../../luajit/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -109,7 +111,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../../include;../../src/nanovg;../../src/nanovg/example;../../../glew/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../include;../../src/nanovg;../../src/nanovg/example;../../../glew/include;../../../luajit/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
