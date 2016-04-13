@@ -1,6 +1,12 @@
 #include "sdlmain.h"
 #include <stdio.h>
 
+static SDLState *_state = NULL;
+
+SDLState *getSDLState()
+{
+	return _state;
+}
 /*
  *	代码来自于SDLTest,主要进行梳理和修改。
  */
@@ -57,6 +63,7 @@ SDLState *createSDLState(int argc,char **argv)
 #else
 	state->gl_profile_mask = SDL_GL_CONTEXT_PROFILE_CORE;
 #endif
+	_state = state;
 	return state;
 }
 

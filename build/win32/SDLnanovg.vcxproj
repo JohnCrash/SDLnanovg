@@ -13,37 +13,39 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\nanovg\fontstash.h" />
     <ClInclude Include="..\..\src\nanovg\luaext.h" />
+    <ClInclude Include="..\..\src\nanovg\luananovg.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl2.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl3.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl_utils.h" />
+    <ClInclude Include="..\..\src\nanovg\nanovg_sdl.h" />
+    <ClInclude Include="..\..\src\nanovg\sdlmain.h" />
     <ClInclude Include="..\..\src\nanovg\stb_image.h" />
     <ClInclude Include="..\..\src\nanovg\stb_truetype.h" />
     <ClInclude Include="..\src\basetype.h" />
     <ClInclude Include="..\src\examples.h" />
     <ClInclude Include="..\src\fs.h" />
     <ClInclude Include="..\src\geometry.h" />
-    <ClInclude Include="..\src\sdlmain.h" />
     <ClInclude Include="..\src\shader.h" />
-    <ClInclude Include="..\src\test_nanovg_sdl.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\nanovg\example\demo.c" />
     <ClCompile Include="..\..\src\nanovg\example\perf.c" />
     <ClCompile Include="..\..\src\nanovg\luaext.c" />
+    <ClCompile Include="..\..\src\nanovg\luananovg.c" />
     <ClCompile Include="..\..\src\nanovg\nanovg.c" />
+    <ClCompile Include="..\..\src\nanovg\nanovg_sdl.c" />
+    <ClCompile Include="..\..\src\nanovg\sdlmain.c" />
     <ClCompile Include="..\..\src\nanovg\sdlport.c" />
     <ClCompile Include="..\src\basetype.c" />
     <ClCompile Include="..\src\examples.c" />
     <ClCompile Include="..\src\fs.c" />
     <ClCompile Include="..\src\geometry.c" />
     <ClCompile Include="..\src\main.c" />
-    <ClCompile Include="..\src\sdlmain.c" />
     <ClCompile Include="..\src\shader.c" />
     <ClCompile Include="..\src\test.c" />
-    <ClCompile Include="..\src\test_nanovg_sdl.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\VisualC\SDLmain\SDLmain_VS2013.vcxproj">

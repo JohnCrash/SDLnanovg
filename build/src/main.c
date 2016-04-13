@@ -17,13 +17,14 @@ freely.
 #include "SDL.h"
 #include "gles.h"
 #include "sdlmain.h"
-#include "test_nanovg_sdl.h"
+#include "nanovg_sdl.h"
 #include "fs.h"
 #include "luaext.h"
 
 int main(int argc,char *argv[])
 {
 	int done, mx, my;
+	Uint32 t,t0;
 	SDL_Event event;
 	SDLState * state = createSDLState(argc, argv);
 
@@ -35,6 +36,7 @@ int main(int argc,char *argv[])
 		SDL_Log("initLua failed!\n");
 		return -1;
 	}
+	lua_EventInit();
 	SDL_Log("initSDL..");
 	SDL_Log("Writeable directory : %s", getWriteDirectory());
 	if (!initSDL(state))
@@ -59,6 +61,7 @@ int main(int argc,char *argv[])
 	done = 0;
 	mx = my = 0;
 	SDL_Log("Main loop..");
+	t0 = SDL_GetTicks();
 	while (!done)
 	{
 		while (SDL_PollEvent(&event))
@@ -83,13 +86,17 @@ int main(int argc,char *argv[])
 				break;
 			}
 		}
-		renderNanovg(mx,my,state->window_w,state->window_h);
+		//renderNanovg(mx,my,state->window_w,state->window_h);
+		t = SDL_GetTicks();
+		lua_EventLoop((double)(t-t0)/1000.0);
+		t0 = t;
 		SDL_GL_SwapWindow(state->window);
 	}
 	SDL_Log("releaseNanovg..");
 	releaseNanovg();
 	SDL_Log("releaseSDL..");
 	releaseSDL(state);
+	lua_EventRelease();
 	SDL_Log("releaseLua..");
 	releaseLua();
 	SDL_Log("DONE..");

@@ -2,6 +2,7 @@
 #include "luaext.h"
 #include "lua.h"
 #include "lauxlib.h"
+#include "luananovg.h"
 
 static lua_State * _state = NULL;
 static int _callFromLua = 0;
@@ -284,6 +285,58 @@ int lua_executeScriptFile(const char *filename)
 	return lua_executeString(code);
 }
 
+int _eventRef[EVENT_COUNT];
+static void registerEventFunction(lua_State *L, int nfunction, int eventid)
+{
+	if (_eventRef[eventid] != LUA_REFNIL){
+		lua_rawgeti(L, LUA_REGISTRYINDEX, _eventRef[eventid]);
+		lua_unref(L, _eventRef[eventid]);
+		_eventRef[eventid] = LUA_REFNIL;
+	}
+	else{
+		lua_pushnil(L);
+	}
+	if (lua_isfunction(L, nfunction)){
+		lua_pushvalue(L, nfunction);
+		_eventRef[eventid] = luaL_ref(L, LUA_REGISTRYINDEX);
+	}
+}
+
+static int lua_pushEventFunction(int n)
+{
+	if (n>=0&&n < EVENT_COUNT&&_eventRef[n] != LUA_REFNIL){
+		lua_rawgeti(_state, LUA_REGISTRYINDEX, _eventRef[n]);
+		return 1;
+	}
+	return 0;
+}
+/*
+ * 向系统注册事件
+ */
+static int lua_eventFunction(lua_State *L)
+{
+	const char *ev = luaL_checkstring(L, 1);
+	if (ev){
+		if (strcmp(ev, "init") == 0){
+			registerEventFunction(L, 2, EVENT_INIT);
+		}
+		else if (strcmp(ev, "release") == 0){
+			registerEventFunction(L, 2, EVENT_RELEASE);
+		}
+		else if (strcmp(ev, "loop") == 0){
+			registerEventFunction(L, 2, EVENT_LOOP);
+		}
+		else if (strcmp(ev, "touch") == 0){
+			registerEventFunction(L, 2, EVENT_TOUCH);
+		}
+		else
+			lua_pushnil(L);
+	}
+	else
+		lua_pushnil(L);
+	return 1;
+}
+
 /*
  * 初始Lua环境
  */
@@ -299,8 +352,12 @@ int initLua()
 
 	const luaL_reg global_functions[] = {
 		{ "print", lua_print },
+		{ "eventFunction", lua_eventFunction },
+		{ "nanovgRender",lua_nanovgRender},
 		{ NULL, NULL }
 	};
+	for (int i = 0; i < EVENT_COUNT; i++)
+		_eventRef[i] = LUA_REFNIL;
 	luaL_register(_state, "_G", global_functions);
 	initLuaLoader(lua_loader);
 	lua_executeScriptFile("init.lua");
@@ -311,6 +368,35 @@ void releaseLua()
 {
 	if (_state){
 		lua_executeScriptFile("release.lua");
+		for (int i = 0; i < EVENT_COUNT; i++){
+			if (_eventRef[i] != LUA_REFNIL){
+				lua_rawgeti(_state, LUA_REGISTRYINDEX, _eventRef[i]);
+				lua_unref(_state, _eventRef[i]);
+			}
+			_eventRef[i] = LUA_REFNIL;
+		}
 		lua_close(_state);
+	}
+}
+
+void lua_EventLoop(double dt)
+{
+	if (lua_pushEventFunction(EVENT_LOOP)){
+		lua_pushnumber(_state, dt);
+		lua_executeFunction(1);
+	}
+}
+
+void lua_EventInit()
+{
+	if (lua_pushEventFunction(EVENT_INIT)){
+		lua_executeFunction(0);
+	}
+}
+
+void lua_EventRelease()
+{
+	if (lua_pushEventFunction(EVENT_RELEASE)){
+		lua_executeFunction(0);
 	}
 }
