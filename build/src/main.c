@@ -19,6 +19,7 @@ freely.
 #include "sdlmain.h"
 #include "test_nanovg_sdl.h"
 #include "fs.h"
+#include "luaext.h"
 
 int main(int argc,char *argv[])
 {
@@ -28,6 +29,12 @@ int main(int argc,char *argv[])
 
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
+	SDL_Log("initLua..");
+	if (!initLua())
+	{
+		SDL_Log("initLua failed!\n");
+		return -1;
+	}
 	SDL_Log("initSDL..");
 	SDL_Log("Writeable directory : %s", getWriteDirectory());
 	if (!initSDL(state))
@@ -83,6 +90,8 @@ int main(int argc,char *argv[])
 	releaseNanovg();
 	SDL_Log("releaseSDL..");
 	releaseSDL(state);
+	SDL_Log("releaseLua..");
+	releaseLua();
 	SDL_Log("DONE..");
 	return 0;
 }

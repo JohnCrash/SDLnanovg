@@ -22,6 +22,11 @@ extern "C"{
 	int initLua();
 	void releaseLua();
 	int luaEvent(int type,EventParam *param);
+
+	void lua_addSearchPath(const char* path);
+	int lua_executeFunction(int numArgs);
+	int lua_executeString(const char *code);
+	int lua_executeScriptFile(const char *filename);
 #ifdef __cplusplus
 }
 #endif
