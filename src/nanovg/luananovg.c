@@ -16,6 +16,9 @@ static int nanovgRenderTable(lua_State *L, int n)
 }
 /*
  *  π”√nanovg‰÷»æ
+ * {
+ *		{ fill,stroke,text,trasform,}
+  * }
  */
 int lua_nanovgRender(lua_State *L)
 {
@@ -31,8 +34,6 @@ int lua_nanovgRender(lua_State *L)
 
 		pxRatio = (float)fbWidth / (float)winWidth;
 		glViewport(0, 0, fbWidth, fbHeight);
-		glClearColor(0, 0, 0, 0);
-		glClear(GL_STENCIL_BUFFER_BIT);
 		nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
 		nanovgRenderTable(L, 1);
 		nvgEndFrame(vg);
