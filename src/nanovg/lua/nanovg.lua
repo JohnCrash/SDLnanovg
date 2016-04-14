@@ -18,6 +18,24 @@ vg.NVG_ALIGN_MIDDLE = 16
 vg.NVG_ALIGN_BOTTOM = 32
 vg.NVG_ALIGN_BASELINE = 64
 
+vg.NVG_IMAGE_GENERATE_MIPMAPS	= 0
+vg.NVG_IMAGE_REPEATX			= 2
+vg.NVG_IMAGE_REPEATY			= 4
+vg.NVG_IMAGE_FLIPY				= 8
+vg.NVG_IMAGE_PREMULTIPLIED		= 16
+	
+vg.NVG_CCW = 1
+vg.NVG_CW = 2
+
+vg.NVG_BUTT = 0
+vg.NVG_ROUND = 1
+vg.NVG_SQUARE = 2
+vg.NVG_BEVEL = 3
+vg.NVG_MITER = 4
+
+vg.NVG_TEXTURE_ALPHA = 1
+vg.NVG_TEXTURE_RGBA = 2
+
 vg.rgba = function(r,g,b,a)
 	return {r=r,g=g,b=b,a=a}
 end
