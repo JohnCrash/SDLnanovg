@@ -1,3 +1,4 @@
+#include <string.h>
 #include "SDL.h"
 #include "luaext.h"
 #include "lua.h"
@@ -12,7 +13,7 @@ static int _callFromLua = 0;
 /*
  * 自动增长的指针
  */
-static void addstring( char **t,char *s,int *len,int *cur)
+static void addstring( char **t,const char *s,int *len,int *cur)
 {
 	int l;
 	char *temp;
@@ -138,7 +139,7 @@ static int luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, const c
  */
 static int lua_loader(lua_State *L)
 {
-	char *filename, *searchpath;
+	const char *filename, *searchpath;
 	int i,j,len;
 	char fn[MAX_PATH];
 	char f[MAX_PATH];
@@ -182,7 +183,7 @@ static int lua_loader(lua_State *L)
 		}
 	}
 	if (fp){
-		len = SDL_RWsize(fp);
+		len = (int)SDL_RWsize(fp);
 		data = (unsigned char *)malloc(len);
 		if (!data){
 			SDL_RWclose(fp);
@@ -362,7 +363,7 @@ int initLua()
 		{ "vg", luaopen_nanovg },
 		{ NULL, NULL }
 	};
-	luaL_Reg* lib = luax_exts;
+	luaL_Reg* lib = (luaL_Reg*)luax_exts;
 	_state = lua_open();
 	
 	if (!_state){

@@ -608,11 +608,11 @@ int initSDL(SDLState *state)
 
 void releaseSDL(SDLState *state)
 {
-	if( state->window )
-		SDL_DestroyWindow(state->window);
-	if( state->target )
+	if (state->target)
 		SDL_DestroyTexture(state->target);
-	if(state->renderer)
+	if (state->context)
+		SDL_GL_DeleteContext(state->context);
+	if (state->renderer)
 	{
 		SDL_DestroyRenderer(state->renderer);
 		SDL_free(state->renderer);
@@ -623,5 +623,8 @@ void releaseSDL(SDLState *state)
     if (state->flags & SDL_INIT_AUDIO) {
         SDL_AudioQuit();
     }
+	if (state->window)
+		SDL_DestroyWindow(state->window);
 	SDL_free(state);
+	SDL_Quit();
 }

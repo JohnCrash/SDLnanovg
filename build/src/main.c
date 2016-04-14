@@ -21,13 +21,29 @@ freely.
 #include "fs.h"
 #include "luaext.h"
 
+#ifdef _DEBUG
+#include <Windows.h>
+static void openConsole()
+{
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+}
+#endif
+
 int main(int argc,char *argv[])
 {
 	int done, mx, my;
 	Uint32 t,t0;
 	SDL_Event event;
-	SDLState * state = createSDLState(argc, argv);
+	SDLState * state;
 
+#ifdef _DEBUG
+	openConsole();
+rerun:
+#endif
+	state = createSDLState(argc, argv);
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 	SDL_Log("initLua..");
@@ -71,7 +87,7 @@ int main(int argc,char *argv[])
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_CLOSE)
 				{
-					SDL_DestroyWindow(state->window);
+					//SDL_DestroyWindow(state->window);
 					done = 1;
 				}
 				else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
@@ -86,22 +102,26 @@ int main(int argc,char *argv[])
 				break;
 			}
 		}
-		//renderNanovg(mx,my,state->window_w,state->window_h);
+		if (done)break; //窗口已经被销毁
+		//renderNanovg(mx,my,state->window_w,state->window_h);		
 		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		t = SDL_GetTicks();
-		lua_EventLoop((double)(t-t0)/1000.0);
+		lua_EventLoop((double)(t - t0) / 1000.0);
 		t0 = t;
 		SDL_GL_SwapWindow(state->window);
 	}
+	lua_EventRelease();
+	SDL_Log("releaseLua..");
 	releaseLua();
 	SDL_Log("releaseNanovg..");
 	releaseNanovg();
 	SDL_Log("releaseSDL..");
 	releaseSDL(state);
-	lua_EventRelease();
-	SDL_Log("releaseLua..");
 	SDL_Log("DONE..");
+#ifdef _DEBUG
+	goto rerun;
+#endif
 	return 0;
 }
 #endif //_DEMO_

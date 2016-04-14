@@ -37,6 +37,15 @@ vg.NVG_TEXTURE_ALPHA = 1
 vg.NVG_TEXTURE_RGBA = 2
 
 vg.rgba = function(r,g,b,a)
+	return {r=r/255,g=g/255,b=b/255,a=a/255}
+end
+
+vg.rgbaf = function(r,g,b,a)
+	return {r=r,g=g,b=b,a=a}
+end
+
+vg.hsla = function(h,s,l,a)
+	local r,g,b,a = vg.HSLA(h,s,l,a)
 	return {r=r,g=g,b=b,a=a}
 end
 

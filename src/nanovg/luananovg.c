@@ -283,7 +283,7 @@ int lua_translate(lua_State *L)
 {
 	float x, y;
 	x = (float)luaL_checknumber(L, 1);
-	y = (float)luaL_checknumber(L, 1);
+	y = (float)luaL_checknumber(L, 2);
 	nvgTranslate(_vg,x,y);
 	return 0;
 }
@@ -667,6 +667,62 @@ int lua_textBreakLines(lua_State *L)
 	return 0;
 }
 
+int lua_closePath(lua_State *L)
+{
+	nvgClosePath(_vg);
+	return 0;
+}
+
+int lua_HSLA(lua_State *L)
+{
+	float h, s, l,a;
+	h = (float)luaL_checknumber(L, 1);
+	s = (float)luaL_checknumber(L, 2);
+	l = (float)luaL_checknumber(L, 3);
+	a = (float)luaL_checknumber(L, 4);
+	NVGcolor c=nvgHSLA(h,s,l,(unsigned char)a);
+	lua_pushnumber(L, c.r);
+	lua_pushnumber(L, c.g);
+	lua_pushnumber(L, c.b);
+	lua_pushnumber(L, c.a);
+	return 4;
+}
+
+int lua_degToRad(lua_State *L)
+{
+	lua_pushnumber(L, nvgDegToRad((float)luaL_checknumber(L, 1)));
+	return 1;
+}
+
+static char* cpToUTF8(int cp, char* str)
+{
+	int n = 0;
+	if (cp < 0x80) n = 1;
+	else if (cp < 0x800) n = 2;
+	else if (cp < 0x10000) n = 3;
+	else if (cp < 0x200000) n = 4;
+	else if (cp < 0x4000000) n = 5;
+	else if (cp <= 0x7fffffff) n = 6;
+	str[n] = '\0';
+	switch (n) {
+	case 6: str[5] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x4000000;
+	case 5: str[4] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x200000;
+	case 4: str[3] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x10000;
+	case 3: str[2] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x800;
+	case 2: str[1] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0xc0;
+	case 1: str[0] = cp;
+	}
+	return str;
+}
+
+int lua_cpToUTF8(lua_State *L)
+{
+	char str[8];
+	cpToUTF8(luaL_checkinteger(L, 1), str);
+	lua_pushstring(L, str);
+	return 1;
+}
+
 static const struct luaL_Reg nanovg_methods[] =
 {
 	{ "beginNanoVG", lua_beginNanoVG },
@@ -713,6 +769,7 @@ static const struct luaL_Reg nanovg_methods[] =
 	{ "circle", lua_circle },
 	{ "pathWinding", lua_pathWinding },
 	{ "path", lua_path },
+	{ "closePath", lua_closePath },
 	{ "fill", lua_fill },
 	{ "stroke", lua_stroke },
 
@@ -732,6 +789,10 @@ static const struct luaL_Reg nanovg_methods[] =
 	{ "textGlyphPositions", lua_textGlyphPositions },
 	{ "textMetrics", lua_textMetrics },
 	{ "textBreakLines", lua_textBreakLines },
+
+	{ "HSLA", lua_HSLA },
+	{ "degToRad", lua_degToRad },
+	{ "cpToUTF8", lua_cpToUTF8 },
 	{ NULL, NULL }
 };
 
