@@ -36,7 +36,6 @@ int main(int argc,char *argv[])
 		SDL_Log("initLua failed!\n");
 		return -1;
 	}
-	lua_EventInit();
 	SDL_Log("initSDL..");
 	SDL_Log("Writeable directory : %s", getWriteDirectory());
 	if (!initSDL(state))
@@ -58,6 +57,7 @@ int main(int argc,char *argv[])
 		SDL_Log("initNanovg failed!\n");
 		return -1;
 	}
+	lua_EventInit();
 	done = 0;
 	mx = my = 0;
 	SDL_Log("Main loop..");
@@ -94,13 +94,13 @@ int main(int argc,char *argv[])
 		t0 = t;
 		SDL_GL_SwapWindow(state->window);
 	}
+	releaseLua();
 	SDL_Log("releaseNanovg..");
 	releaseNanovg();
 	SDL_Log("releaseSDL..");
 	releaseSDL(state);
 	lua_EventRelease();
 	SDL_Log("releaseLua..");
-	releaseLua();
 	SDL_Log("DONE..");
 	return 0;
 }

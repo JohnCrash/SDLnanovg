@@ -45,3 +45,5 @@ render
 {
 	stroke=shape,
 }
+
+fill{x,y,w,h,}

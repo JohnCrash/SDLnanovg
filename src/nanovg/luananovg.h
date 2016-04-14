@@ -5,6 +5,7 @@
 extern "C"{
 #endif
 	int lua_nanovgRender(lua_State *L);
+	int luaopen_nanovg(lua_State *L);
 #ifdef __cplusplus
 }
 #endif

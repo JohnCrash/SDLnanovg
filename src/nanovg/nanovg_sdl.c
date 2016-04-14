@@ -24,7 +24,7 @@
 #include "nanovg_gl_utils.h"
 #include "nanovg_sdl.h"
 
-static NVGcontext* _vg = NULL;
+NVGcontext* _vg = NULL;
 
 int initNanovg()
 {

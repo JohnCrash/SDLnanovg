@@ -3,6 +3,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "luananovg.h"
+#include "sdlmain.h"
 
 static lua_State * _state = NULL;
 static int _callFromLua = 0;
@@ -337,11 +338,31 @@ static int lua_eventFunction(lua_State *L)
 	return 1;
 }
 
+static int lua_screenSize(lua_State *L)
+{
+	SDLState * state = getSDLState();
+	lua_pushnumber(L, state->window_w);
+	lua_pushnumber(L, state->window_h);
+	return 2;
+}
 /*
  * 初始Lua环境
  */
 int initLua()
 {
+	int i;
+	const luaL_reg global_functions[] = {
+		{ "print", lua_print },
+		{ "eventFunction", lua_eventFunction },
+		{ "nanovgRender", lua_nanovgRender },
+		{ "screenSize",lua_screenSize },
+		{ NULL, NULL }
+	};
+	const luaL_reg luax_exts[] = {
+		{ "vg", luaopen_nanovg },
+		{ NULL, NULL }
+	};
+	luaL_Reg* lib = luax_exts;
 	_state = lua_open();
 	
 	if (!_state){
@@ -350,16 +371,24 @@ int initLua()
 	}
 	luaL_openlibs(_state);
 
-	const luaL_reg global_functions[] = {
-		{ "print", lua_print },
-		{ "eventFunction", lua_eventFunction },
-		{ "nanovgRender",lua_nanovgRender},
-		{ NULL, NULL }
-	};
-	for (int i = 0; i < EVENT_COUNT; i++)
+	/* 组成全局函数 */
+	for (i = 0; i < EVENT_COUNT; i++)
 		_eventRef[i] = LUA_REFNIL;
 	luaL_register(_state, "_G", global_functions);
+	
+	/* 扩展库 */
+	lua_getglobal(_state, "package");
+	lua_getfield(_state, -1, "preload");
+	for (; lib->func; lib++)
+	{
+		lua_pushcfunction(_state, lib->func);
+		lua_setfield(_state, -2, lib->name);
+	}
+	lua_pop(_state, 2);
+
+	/* 初始化脚本装载器 */
 	initLuaLoader(lua_loader);
+	/* 执行初始化代码 */
 	lua_executeScriptFile("init.lua");
 	return 1;
 }
@@ -367,6 +396,7 @@ int initLua()
 void releaseLua()
 {
 	if (_state){
+		/* 执行退出脚本 */
 		lua_executeScriptFile("release.lua");
 		for (int i = 0; i < EVENT_COUNT; i++){
 			if (_eventRef[i] != LUA_REFNIL){
