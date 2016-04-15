@@ -624,6 +624,9 @@ int lua_text(lua_State *L)
 	return 0;
 }
 
+/*
+ * 绘制宽度限制多行文本
+ */
 int lua_textBox(lua_State *L)
 {
 	float x, y, breakRowWidth;
@@ -633,22 +636,79 @@ int lua_textBox(lua_State *L)
 	y = (float)luaL_checknumber(L, 2);
 	breakRowWidth = (float)luaL_checknumber(L, 3);
 	string = luaL_checklstring(L, 4, &len);
-	nvgTextBox(_vg, x, y, breakRowWidth,string, string + len);
+	nvgTextBox(_vg, x, y, breakRowWidth,string, NULL);
 	return 0;
 }
 
+/*
+ * 取文本在当前字体下的范围
+ */
 int lua_textBounds(lua_State *L)
 {
-	return 0;
+	float x, y;
+	const char * string;
+	float bounds[4];
+
+	x = (float)luaL_checknumber(L, 1);
+	y = (float)luaL_checknumber(L, 2);
+	string = luaL_checkstring(L, 3);
+	nvgTextBounds(_vg,x, y, string, NULL, bounds);
+	for (int i = 0; i < 4;i++)
+		lua_pushnumber(L, bounds[i]);
+	return 4;
 }
 
+/*
+ * 取折行文本的范围
+ */
 int lua_textBoxBounds(lua_State *L)
 {
-	return 0;
+	float x, y,breakRowWidth;
+	float bounds[4];
+	const char * string;
+
+	x = (float)luaL_checknumber(L, 1);
+	y = (float)luaL_checknumber(L, 2);
+	breakRowWidth = (float)luaL_checknumber(L, 3);
+	string = luaL_checkstring(L, 4);
+	nvgTextBoxBounds(_vg, x, y, breakRowWidth, string, NULL, bounds);
+	for (int i = 0; i < 4; i++)
+		lua_pushnumber(L, bounds[i]);
+	return 4;
 }
 
+/*
+ * 范围每个字符绘制的位置以及占据的宽度范围
+ */
 int lua_textGlyphPositions(lua_State *L)
 {
+	float x, y;
+	const char * string;
+	int maxPositions;
+	NVGglyphPosition *positions;
+	x = (float)luaL_checknumber(L, 1);
+	y = (float)luaL_checknumber(L, 2);
+	string = luaL_checkstring(L, 3);
+	maxPositions = strlen(string);
+	if (maxPositions > 0){
+		positions = (NVGglyphPosition *)malloc((maxPositions+1)*sizeof(NVGglyphPosition));
+		int npos = nvgTextGlyphPositions(_vg, x, y, string, NULL, positions, maxPositions);
+		lua_newtable(L);
+		for (int i = 0; i < maxPositions; i++){
+			lua_newtable(L);
+			lua_pushinteger(L, (lua_Integer)(positions[i].str - string));
+			lua_setfield(L, -2, "pos");
+			lua_pushnumber(L, (lua_Number)positions[i].x);
+			lua_setfield(L, -2, "x");
+			lua_pushnumber(L, (lua_Number)positions[i].minx);
+			lua_setfield(L, -2, "minx");
+			lua_pushnumber(L, (lua_Number)positions[i].maxx);
+			lua_setfield(L, -2, "maxx");
+			lua_rawseti(L, -2, i + 1);
+		}
+		free(positions);
+		return 1;
+	}
 	return 0;
 }
 
@@ -664,6 +724,33 @@ int lua_textMetrics(lua_State *L)
 
 int lua_textBreakLines(lua_State *L)
 {
+	const char *string = luaL_checkstring(L, 1);
+	float breakRowWidth = (float)luaL_checknumber(L, 2);
+	int maxRows = (int)luaL_checkinteger(L, 3);
+	if (maxRows > 0){
+		NVGtextRow * rows = (NVGtextRow *)malloc((maxRows+1)*sizeof(NVGtextRow));
+		if (!rows)return 0;
+		int nrows = nvgTextBreakLines(_vg, string, NULL, breakRowWidth, rows, maxRows);
+		lua_newtable(L);
+		for (int i = 0; i < nrows; i++){
+			lua_newtable(L);
+			lua_pushinteger(L,(lua_Integer)(rows[i].start-string) );
+			lua_setfield(L, -2, "head");
+			lua_pushinteger(L, (lua_Integer)(rows[i].end - string));
+			lua_setfield(L, -2, "tail");
+			lua_pushinteger(L, (lua_Integer)(rows[i].next - string));
+			lua_setfield(L, -2, "next");
+			lua_pushnumber(L, (lua_Number)rows[i].width);
+			lua_setfield(L, -2, "width");
+			lua_pushnumber(L, (lua_Number)rows[i].minx);
+			lua_setfield(L, -2, "minx");
+			lua_pushnumber(L, (lua_Number)rows[i].maxx);
+			lua_setfield(L, -2, "maxx");
+			lua_rawseti(L, -2, i + 1);
+		}
+		free(rows);
+		return 1;
+	}
 	return 0;
 }
 

@@ -9,6 +9,10 @@ local ICON_CHECK = 0x2713
 local ICON_LOGIN = 0xE740
 local ICON_TRASH = 0xE729
 
+local function clampf(a, mn, mx)
+	return a < mn and mn or (a > mx and mx or a)
+end
+
 eventFunction("init",function()
 	print("init..")
 	fontIcons = vg.createFont("icons","fonts/entypo.ttf")
@@ -192,9 +196,194 @@ local function drawEyes(x, y, w, h, mx, my, t)
 end
 
 local function drawParagraph(x, y, width, height, mx, my)
+	local rows
+	local glyphs
+	local text = "This is longer chunk of text.\n  \n  Would have used lorem ipsum but she    was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party."
+	local nrows, i, nglyphs, j, lnum
+	local lineh
+	local caretx, px
+	local bounds={}
+	local a
+	local gx,gy
+	local gutter = 0
+
+	gx = 0
+	gy = 0
+	lnum = 0
+	vg.save()
+
+	vg.fontSize( 18.0)
+	vg.fontFace( "sans")
+	vg.textAlign( vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_TOP)
+	_,_,lineh = vg.textMetrics()
+
+	-- The text break API can be used to fill a large buffer of rows,
+	-- or to iterate over the text just few lines (or just one) at a time.
+	-- The "next" variable of the last returned item tells where to continue.
+
+	rows = vg.textBreakLines(text,width,10)
+	if rows and #rows > 0 then
+		nrows = #rows
+		for i=1,nrows do
+			local row = rows[i]
+			local hit = mx > x and mx < (x+width) and my >= y and my < (y+lineh)
+			vg.beginPath()
+			vg.fillColor(vg.rgba(255,255,255,(hit and 64 or 16)))
+			vg.rect(x, y, row.width, lineh)
+			vg.fill()
+
+			vg.fillColor(vg.rgba(255,255,255,255))
+			vg.text(x,y,string.sub(text,row.head,row.tail))
+
+			if hit then
+				caretx = (mx < x+row.width/2) and x or x+row.width
+				px = x
+				glyphs = vg.textGlyphPositions( x, y, string.sub(text,row.head,row.tail))
+				nglyphs = #glyphs
+				for j=1,nglyphs do
+					local x0 = glyphs[j].x
+					local x1 = (j+1 < nglyphs) and glyphs[j+1].x or x+row.width
+					local gx = x0 * 0.3 + x1 * 0.7
+					if mx >= px and mx < gx then
+						caretx = glyphs[j].x
+					end
+					px = gx
+				end
+				vg.beginPath()
+				vg.fillColor( vg.rgba(255,192,0,255))
+				vg.rect( caretx, y, 1, lineh)
+				vg.fill()
+
+				gutter = lnum+1
+				gx = x - 10
+				gy = y + lineh/2
+			end
+			lnum=lnum+1
+			y = y+lineh
+		end
+		-- Keep going...
+		start = rows[nrows-1].next
+	end
+
+	if gutter then
+		local txt = tonumber(gutter)
+		vg.fontSize( 13.0)
+		vg.textAlign( vg.NVG_ALIGN_RIGHT+vg.NVG_ALIGN_MIDDLE)
+
+		bounds[0],bounds[1],bounds[2],bounds[3] = vg.textBounds( gx,gy, txt)
+
+		vg.beginPath()
+		vg.fillColor(vg.rgba(255,192,0,255))
+		vg.roundedRect( bounds[0]-4,bounds[1]-2, (bounds[2]-bounds[0])+8, (bounds[3]-bounds[1])+4, ((bounds[3]-bounds[1])+4)/2-1)
+		vg.fill()
+
+		vg.fillColor( vg.rgba(32,32,32,255))
+		vg.text( gx,gy, txt, nil)
+	end
+
+	y = y+20.0
+
+	vg.fontSize( 13.0)
+	vg.textAlign( vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_TOP)
+	vg.textLineHeight( 1.2)
+
+	bounds[0],bounds[1],bounds[2],bounds[3] = vg.textBoxBounds( x,y, 150, "Hover your mouse over the text to see calculated caret position.")
+
+	-- Fade the tooltip out when close to it.
+	gx = math.abs((mx - (bounds[0]+bounds[2])*0.5) / (bounds[0] - bounds[2]))
+	gy = math.abs((my - (bounds[1]+bounds[3])*0.5) / (bounds[1] - bounds[3]))
+	a = math.max(gx, gy) - 0.5
+	a = clampf(a, 0, 1)
+	vg.globalAlpha(a)
+
+	vg.beginPath()
+	vg.fillColor(vg.rgba(220,220,220,255))
+	vg.roundedRect( bounds[0]-2,bounds[1]-2, (bounds[2]-bounds[0])+4, (bounds[3]-bounds[1])+4, 3)
+	px = ((bounds[2]+bounds[0])/2)
+	vg.path{vg.MOVETO,px,bounds[1] - 10,
+			vg.LINETO,px+7,bounds[1]+1,
+			vg.LINETO,px-7,bounds[1]+1}
+	vg.fill()
+
+	vg.fillColor(vg.rgba(0,0,0,220))
+	vg.textBox(x,y, 150, "Hover your mouse over the text to see calculated caret position.")
+	vg.restore()
 end
 
-local function drawGraph()
+local function drawGraph(x, y, w, h, t)
+	local bg
+	local samples = {}
+	local sx={}
+	local sy={}
+	local dx = w/5.0
+	local i
+
+	samples[0] = (1+math.sin(t*1.2345+math.cos(t*0.33457)*0.44))*0.5
+	samples[1] = (1+math.sin(t*0.68363+math.cos(t*1.3)*1.55))*0.5
+	samples[2] = (1+math.sin(t*1.1642+math.cos(t*0.33457)*1.24))*0.5
+	samples[3] = (1+math.sin(t*0.56345+math.cos(t*1.63)*0.14))*0.5
+	samples[4] = (1+math.sin(t*1.6245+math.cos(t*0.254)*0.3))*0.5
+	samples[5] = (1+math.sin(t*0.345+math.cos(t*0.03)*0.6))*0.5
+
+	for i=0,6-1 do
+		sx[i] = x+i*dx
+		sy[i] = y+h*samples[i]*0.8
+	end
+	
+	-- Graph background
+	bg = vg.linearGradient( x,y,x,y+h, vg.rgba(0,160,192,0), vg.rgba(0,160,192,64))
+	vg.beginPath()
+	vg.path{vg.MOVETO,sx[0], sy[0]}
+	for i=1,6-1 do
+		vg.path{vg.BEZIERTO,sx[i-1]+dx*0.5,sy[i-1], sx[i]-dx*0.5,sy[i], sx[i],sy[i]}
+	end
+	vg.path{vg.LINETO,x+w, y+h,
+			vg.LINETO,x, y+h}
+	vg.fillPaint( bg)
+	vg.fill()
+
+	-- Graph line
+	vg.beginPath()
+	vg.path{vg.MOVETO,sx[0], sy[0]+2}
+	for i=1,6-1 do
+		vg.path{vg.BEZIERTO,sx[i-1]+dx*0.5,sy[i-1]+2, sx[i]-dx*0.5,sy[i]+2, sx[i],sy[i]+2}
+	end
+	vg.strokeColor( vg.rgba(0,0,0,32))
+	vg.strokeWidth( 3.0)
+	vg.stroke()
+
+	vg.beginPath()
+	vg.path{vg.MOVETO,sx[0], sy[0]}
+	for i=1,6-1 do
+		vg.path{vg.BEZIERTO,sx[i-1]+dx*0.5,sy[i-1], sx[i]-dx*0.5,sy[i], sx[i],sy[i]}
+	end
+	vg.strokeColor( vg.rgba(0,160,192,255))
+	vg.strokeWidth( 3.0)
+	vg.stroke()
+
+	-- Graph sample pos
+	for i=0,6-1 do
+		bg = vg.radialGradient( sx[i],sy[i]+2, 3.0,8.0, vg.rgba(0,0,0,32), vg.rgba(0,0,0,0))
+		vg.beginPath()
+		vg.rect( sx[i]-10, sy[i]-10+2, 20,20)
+		vg.fillPaint( bg)
+		vg.fill()
+	end
+
+	vg.beginPath()
+	for i=0,6-1 do
+		vg.circle( sx[i], sy[i], 4.0)
+	end
+	vg.fillColor( vg.rgba(0,160,192,255))
+	vg.fill()
+	vg.beginPath()
+	for i=0,6-1 do
+		vg.circle( sx[i], sy[i], 2.0)
+	end
+	vg.fillColor( vg.rgba(220,220,220,255))
+	vg.fill()
+
+	vg.strokeWidth( 1.0)
 end
 
 local function drawColorwheel(x, y, w, h, t)
