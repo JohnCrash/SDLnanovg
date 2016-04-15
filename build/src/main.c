@@ -19,6 +19,7 @@ freely.
 #include "sdlmain.h"
 #include "nanovg_sdl.h"
 #include "fs.h"
+#include "eventhandler.h"
 #include "luaext.h"
 
 #ifdef _DEBUG
@@ -34,9 +35,7 @@ static void openConsole()
 
 int main(int argc,char *argv[])
 {
-	int done, mx, my;
 	Uint32 t,t0;
-	SDL_Event event;
 	SDLState * state;
 
 #ifdef _DEBUG
@@ -74,36 +73,10 @@ rerun:
 		return -1;
 	}
 	lua_EventInit();
-	done = 0;
-	mx = my = 0;
 	SDL_Log("Main loop..");
 	t0 = SDL_GetTicks();
-	while (!done)
+	while (!eventLoop(state))
 	{
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-			case SDL_WINDOWEVENT:
-				if (event.window.event == SDL_WINDOWEVENT_CLOSE)
-				{
-					//SDL_DestroyWindow(state->window);
-					done = 1;
-				}
-				else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-				{
-					state->window_w = event.window.data1;
-					state->window_h = event.window.data2;
-				}
-				break;
-			case SDL_MOUSEMOTION:
-				mx = event.motion.x;
-				my = event.motion.y;
-				break;
-			}
-		}
-		if (done)break; //窗口已经被销毁
-		//renderNanovg(mx,my,state->window_w,state->window_h);		
 		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		t = SDL_GetTicks();

@@ -7,15 +7,16 @@ extern "C"{
 		EVENT_INIT = 0,
 		EVENT_RELEASE,
 		EVENT_LOOP,
-		EVENT_TOUCH,
+		EVENT_INPUT,
 		EVENT_COUNT,
-	} ;
+	};
 
 	int initLua();
 	void releaseLua();
 	void lua_EventLoop(double dt);
 	void lua_EventInit();
 	void lua_EventRelease();
+	void lua_EventInput(inputEvent *ie);
 
 	void lua_addSearchPath(const char* path);
 	int lua_executeFunction(int numArgs);

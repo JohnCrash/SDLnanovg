@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\nanovg\eventhandler.h" />
     <ClInclude Include="..\..\src\nanovg\fontstash.h" />
     <ClInclude Include="..\..\src\nanovg\luaext.h" />
     <ClInclude Include="..\..\src\nanovg\luananovg.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\nanovg\eventhandler.c" />
     <ClCompile Include="..\..\src\nanovg\example\demo.c" />
     <ClCompile Include="..\..\src\nanovg\example\perf.c" />
     <ClCompile Include="..\..\src\nanovg\luaext.c" />

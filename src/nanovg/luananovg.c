@@ -6,6 +6,7 @@
 #include "nanovg.h"
 #include "nanovg_sdl.h"
 #include "sdlmain.h"
+#include "eventhandler.h"
 
 #if LUA_VERSION_NUM < 502
 #  define luaL_newlib(L,l) (lua_newtable(L), luaL_register(L,NULL,l))
@@ -652,10 +653,11 @@ int lua_textBounds(lua_State *L)
 	x = (float)luaL_checknumber(L, 1);
 	y = (float)luaL_checknumber(L, 2);
 	string = luaL_checkstring(L, 3);
-	nvgTextBounds(_vg,x, y, string, NULL, bounds);
+	float width = nvgTextBounds(_vg,x, y, string, NULL, bounds);
+	lua_pushnumber(L, width);
 	for (int i = 0; i < 4;i++)
 		lua_pushnumber(L, bounds[i]);
-	return 4;
+	return 5;
 }
 
 /*
@@ -696,7 +698,7 @@ int lua_textGlyphPositions(lua_State *L)
 		lua_newtable(L);
 		for (int i = 0; i < maxPositions; i++){
 			lua_newtable(L);
-			lua_pushinteger(L, (lua_Integer)(positions[i].str - string));
+			lua_pushinteger(L, (lua_Integer)(positions[i].str - string)+1);
 			lua_setfield(L, -2, "pos");
 			lua_pushnumber(L, (lua_Number)positions[i].x);
 			lua_setfield(L, -2, "x");
@@ -734,11 +736,11 @@ int lua_textBreakLines(lua_State *L)
 		lua_newtable(L);
 		for (int i = 0; i < nrows; i++){
 			lua_newtable(L);
-			lua_pushinteger(L,(lua_Integer)(rows[i].start-string) );
+			lua_pushinteger(L,(lua_Integer)(rows[i].start-string)+1 );
 			lua_setfield(L, -2, "head");
-			lua_pushinteger(L, (lua_Integer)(rows[i].end - string));
+			lua_pushinteger(L, (lua_Integer)(rows[i].end - string)+1);
 			lua_setfield(L, -2, "tail");
-			lua_pushinteger(L, (lua_Integer)(rows[i].next - string));
+			lua_pushinteger(L, (lua_Integer)(rows[i].next - string)+1);
 			lua_setfield(L, -2, "next");
 			lua_pushnumber(L, (lua_Number)rows[i].width);
 			lua_setfield(L, -2, "width");

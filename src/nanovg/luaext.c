@@ -1,10 +1,12 @@
 #include <string.h>
 #include "SDL.h"
-#include "luaext.h"
+
 #include "lua.h"
 #include "lauxlib.h"
 #include "luananovg.h"
 #include "sdlmain.h"
+#include "eventhandler.h"
+#include "luaext.h"
 
 static lua_State * _state = NULL;
 static int _callFromLua = 0;
@@ -328,8 +330,8 @@ static int lua_eventFunction(lua_State *L)
 		else if (strcmp(ev, "loop") == 0){
 			registerEventFunction(L, 2, EVENT_LOOP);
 		}
-		else if (strcmp(ev, "touch") == 0){
-			registerEventFunction(L, 2, EVENT_TOUCH);
+		else if (strcmp(ev, "input") == 0){
+			registerEventFunction(L, 2, EVENT_INPUT);
 		}
 		else
 			lua_pushnil(L);
@@ -429,5 +431,21 @@ void lua_EventRelease()
 {
 	if (lua_pushEventFunction(EVENT_RELEASE)){
 		lua_executeFunction(0);
+	}
+}
+
+void lua_EventInput(inputEvent *ie)
+{
+	if (lua_pushEventFunction(EVENT_INPUT)){
+		lua_pushinteger(_state,ie->type);
+		if (ie->type == MOUSE_MOVE){
+			lua_newtable(_state);
+			lua_pushnumber(_state, ie->x);
+			lua_setfield(_state, -2, "x");
+			lua_pushnumber(_state, ie->y);
+			lua_setfield(_state, -2, "y");
+			lua_executeFunction(2);
+		}else
+			lua_executeFunction(1);
 	}
 }

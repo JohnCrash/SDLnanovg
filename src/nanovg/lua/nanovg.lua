@@ -10,7 +10,7 @@ vg.QUADTO = 4
 vg.ARCTO = 5
 vg.CLOSE = 6
 
-vg.NVG_ALIGN_LEFT = 0
+vg.NVG_ALIGN_LEFT = 1
 vg.NVG_ALIGN_CENTER = 2
 vg.NVG_ALIGN_RIGHT = 4
 vg.NVG_ALIGN_TOP = 8
@@ -18,7 +18,7 @@ vg.NVG_ALIGN_MIDDLE = 16
 vg.NVG_ALIGN_BOTTOM = 32
 vg.NVG_ALIGN_BASELINE = 64
 
-vg.NVG_IMAGE_GENERATE_MIPMAPS	= 0
+vg.NVG_IMAGE_GENERATE_MIPMAPS	= 1
 vg.NVG_IMAGE_REPEATX			= 2
 vg.NVG_IMAGE_REPEATY			= 4
 vg.NVG_IMAGE_FLIPY				= 8
@@ -61,6 +61,6 @@ vg.radialGradient = function(cx,cy,inr,outr,icol,ocol)
 	return {type=2,cx=cx,cy=cy,inr=inr,outr=outr,icol=icol,ocol=ocol}
 end
 
-vg.imageGradient = function(ox,oy,ex,ey,angle,alpha,image)
-	return {type=3,ox=ox,oy=oy,ex=ey,angle=angle,alpha=alpha,image=image}
+vg.imagePattern = function(ox,oy,ex,ey,angle,image,alpha)
+	return {type=3,ox=ox,oy=oy,ex=ex,ey=ey,angle=angle,alpha=alpha,image=image}
 end

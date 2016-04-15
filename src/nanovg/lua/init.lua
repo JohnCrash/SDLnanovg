@@ -12,16 +12,34 @@ local ICON_TRASH = 0xE729
 local function clampf(a, mn, mx)
 	return a < mn and mn or (a > mx and mx or a)
 end
-
+local data = {images={}}
 eventFunction("init",function()
 	print("init..")
 	fontIcons = vg.createFont("icons","fonts/entypo.ttf")
 	fontNormal = vg.createFont("sans","fonts/Roboto-Regular.ttf")
 	fontBold = vg.createFont("sans-bold","fonts/Roboto-Bold.ttf")
+	for i=0,12-1 do
+		local file = string.format("images/image%d.jpg",i+1)
+		data.images[i] = vg.createImage(file, 0)
+		if data.images[i] == 0 then
+			print(string.format("Could not load %s.\n", file))
+			return -1
+		end
+	end
 end)
 
 eventFunction("release",function()
 	print("release")
+end)
+
+local mx,my
+mx = 0
+my = 0
+eventFunction("input",function(e,pt)
+	if e==3 then
+		mx = pt.x
+		my = pt.y
+	end
 end)
 
 local function drawWindow(title,x,y,w,h)
@@ -270,7 +288,7 @@ local function drawParagraph(x, y, width, height, mx, my)
 		vg.fontSize( 13.0)
 		vg.textAlign( vg.NVG_ALIGN_RIGHT+vg.NVG_ALIGN_MIDDLE)
 
-		bounds[0],bounds[1],bounds[2],bounds[3] = vg.textBounds( gx,gy, txt)
+		_,bounds[0],bounds[1],bounds[2],bounds[3] = vg.textBounds( gx,gy, txt)
 
 		vg.beginPath()
 		vg.fillColor(vg.rgba(255,192,0,255))
@@ -306,7 +324,7 @@ local function drawParagraph(x, y, width, height, mx, my)
 	vg.fill()
 
 	vg.fillColor(vg.rgba(0,0,0,220))
-	vg.textBox(x,y, 150, "Hover your mouse over the text to see calculated caret position.")
+	vg.textBox(x,y,150,"Hover your mouse over the text to see calculated caret position.")
 	vg.restore()
 end
 
@@ -629,6 +647,343 @@ local function drawScissor(x, y, t)
 	vg.restore()
 end
 
+local function drawLabel(text, x, y, w, h)
+	vg.fontSize( 18.0)
+	vg.fontFace( "sans")
+	vg.fillColor( vg.rgba(255,255,255,128))
+
+	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+	vg.text( x,y+h*0.5,text)
+end
+
+local function drawEditBoxBase(x, y, w, h)
+	local bg
+	-- Edit
+	bg = vg.boxGradient( x+1,y+1+1.5, w-2,h-2, 3,4, vg.rgba(255,255,255,32), vg.rgba(32,32,32,32))
+	vg.beginPath()
+	vg.roundedRect( x+1,y+1, w-2,h-2, 4-1)
+	vg.fillPaint( bg)
+	vg.fill()
+
+	vg.beginPath()
+	vg.roundedRect( x+0.5,y+0.5, w-1,h-1, 4-0.5)
+	vg.strokeColor( vg.rgba(0,0,0,48))
+	vg.stroke()
+end
+
+local function  drawEditBox(text, x, y, w, h)
+	drawEditBoxBase(x,y, w,h)
+
+	vg.fontSize( 20.0)
+	vg.fontFace( "sans")
+	vg.fillColor( vg.rgba(255,255,255,64))
+	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+	vg.text(x+h*0.3,y+h*0.5,text)
+end
+
+local function drawCheckBox(text, x,  y, w, h)
+	local bg;
+
+	vg.fontSize( 18.0)
+	vg.fontFace( "sans")
+	vg.fillColor( vg.rgba(255,255,255,160))
+
+	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+	vg.text( x+28,y+h*0.5,text)
+
+	bg = vg.boxGradient( x+1,y+(h*0.5)-9+1, 18,18, 3,3, vg.rgba(0,0,0,32), vg.rgba(0,0,0,92))
+	vg.beginPath()
+	vg.roundedRect( x+1,y+(h*0.5)-9, 18,18, 3)
+	vg.fillPaint( bg)
+	vg.fill()
+
+	vg.fontSize( 40)
+	vg.fontFace( "icons")
+	vg.fillColor( vg.rgba(255,255,255,128))
+	vg.textAlign(vg.NVG_ALIGN_CENTER+vg.NVG_ALIGN_MIDDLE)
+	vg.text( x+9+2, y+h*0.5,vg.cpToUTF8(ICON_CHECK))
+end
+
+local function isBlack(col)
+	return col
+end
+
+local function drawButton(preicon, text, x, y, w, h, col)
+	local bg
+	local cornerRadius = 4.0
+	local tw = 0
+	local iw = 0
+
+	bg = vg.linearGradient( x,y,x,y+h, vg.rgba(255,255,255,isBlack(col) and 16 or 32), vg.rgba(0,0,0,isBlack(col) and 16 or 32))
+	vg.beginPath()
+	vg.roundedRect( x+1,y+1, w-2,h-2, cornerRadius-1)
+	if not isBlack(col) then
+		vg.fillColor( col)
+		vg.fill()
+	end
+	vg.fillPaint( bg)
+	vg.fill()
+
+	vg.beginPath()
+	vg.roundedRect( x+0.5,y+0.5, w-1,h-1, cornerRadius-0.5)
+	vg.strokeColor( vg.rgba(0,0,0,48))
+	vg.stroke()
+
+	vg.fontSize( 20.0)
+	vg.fontFace( "sans-bold")
+	tw = vg.textBounds( 0,0, text)
+	if preicon ~= 0 then
+		vg.fontSize( h*1.3)
+		vg.fontFace( "icons")
+		iw = vg.textBounds( 0,0, vg.cpToUTF8(preicon))
+		iw = iw+h*0.15
+	end
+
+	if preicon ~= 0 then
+		vg.fontSize( h*1.3)
+		vg.fontFace( "icons")
+		vg.fillColor( vg.rgba(255,255,255,96))
+		vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+		vg.text( x+w*0.5-tw*0.5-iw*0.75, y+h*0.5, vg.cpToUTF8(preicon))
+	end
+
+	vg.fontSize( 20.0)
+	vg.fontFace( "sans-bold")
+	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+	vg.fillColor( vg.rgba(0,0,0,160))
+	vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5-1,text)
+	vg.fillColor( vg.rgba(255,255,255,160))
+	vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5,text)
+end
+
+local function drawSpinner( cx,  cy,  r,  t)
+	local a0 = 0.0 + t*6
+	local a1 = math.pi + t*6
+	local r0 = r
+	local r1 = r * 0.75
+	local ax,ay, bx,by
+	local paint
+
+	vg.save()
+
+	vg.beginPath()
+	vg.arc(cx,cy, r0, a0, a1, vg.NVG_CW)
+	vg.arc(cx,cy, r1, a1, a0, vg.NVG_CCW)
+	vg.closePath()
+	ax = cx + math.cos(a0) * (r0+r1)*0.5
+	ay = cy + math.sin(a0) * (r0+r1)*0.5
+	bx = cx + math.cos(a1) * (r0+r1)*0.5
+	by = cy + math.sin(a1) * (r0+r1)*0.5
+	paint = vg.linearGradient(ax,ay, bx,by, vg.rgba(0,0,0,0), vg.rgba(0,0,0,128))
+	vg.fillPaint(paint)
+	vg.fill()
+
+	vg.restore()
+end
+
+local function drawThumbnails(x, y, w, h, images, nimages, t)
+	local cornerRadius = 3.0
+	local shadowPaint, imgPaint, fadePaint
+	local ix,iy,iw,ih
+	local thumb = 60.0
+	local arry = 30.5
+	local imgw, imgh
+	local stackh = (nimages/2) * (thumb+10) + 10
+	local i
+	local u = (1+math.cos(t*0.5))*0.5
+	local u2 = (1-math.cos(t*0.2))*0.5
+	local scrollh, dv
+
+	vg.save()
+--	nvgClearState(vg)
+
+	-- Drop shadow
+	shadowPaint = vg.boxGradient( x,y+4, w,h, cornerRadius*2, 20, vg.rgba(0,0,0,128), vg.rgba(0,0,0,0))
+	vg.beginPath()
+	vg.rect( x-10,y-10, w+20,h+30)
+	vg.roundedRect( x,y, w,h, cornerRadius)
+	vg.pathWinding( vg.NVG_HOLE)
+	vg.fillPaint( shadowPaint)
+	vg.fill()
+
+	-- Window
+	vg.beginPath()
+	vg.roundedRect( x,y, w,h, cornerRadius)
+	vg.path{vg.MOVETO,x-10,y+arry,
+			vg.LINETO,x+1,y+arry-11,
+			vg.LINETO,x+1,y+arry+11}
+	vg.fillColor( vg.rgba(200,200,200,255))
+	vg.fill()
+
+	vg.save()
+	vg.scissor( x,y,w,h)
+	vg.translate( 0, -(stackh - h)*u)
+
+	dv = 1.0 / (nimages-1)
+
+	for i = 0,nimages-1 do
+		local tx, ty, v, a
+		tx = x+10
+		ty = y+10
+		tx = tx+(i%2) * (thumb+10)
+		ty = ty+(i/2) * (thumb+10)
+		imgw,imgh =vg.imageSize( images[i] )
+		if imgw < imgh then
+			iw = thumb;
+			ih = iw * imgh/imgw;
+			ix = 0;
+			iy = -(ih-thumb)*0.5
+		else
+			ih = thumb;
+			iw = ih * imgw/imgh;
+			ix = -(iw-thumb)*0.5
+			iy = 0;
+		end
+
+		v = i * dv
+		a = clampf((u2-v) / dv, 0, 1)
+
+		if a < 1.0 then
+			drawSpinner(tx+thumb/2,ty+thumb/2, thumb*0.25, t)
+		end
+		imgPaint = vg.imagePattern( tx+ix, ty+iy, iw,ih, 0.0/180.0*math.pi, images[i], a)
+		vg.beginPath()
+		vg.roundedRect( tx,ty, thumb,thumb, 5)
+		vg.fillPaint( imgPaint)
+		vg.fill()
+
+		shadowPaint = vg.boxGradient( tx-1,ty, thumb+2,thumb+2, 5, 3, vg.rgba(0,0,0,128), vg.rgba(0,0,0,0))
+		vg.beginPath()
+		vg.rect( tx-5,ty-5, thumb+10,thumb+10)
+		vg.roundedRect( tx,ty, thumb,thumb, 6)
+		vg.pathWinding( vg.NVG_HOLE)
+		vg.fillPaint( shadowPaint)
+		vg.fill()
+
+		vg.beginPath()
+		vg.roundedRect( tx+0.5,ty+0.5, thumb-1,thumb-1, 4-0.5)
+		vg.strokeWidth(1.0)
+		vg.strokeColor( vg.rgba(255,255,255,192))
+		vg.stroke()
+	end
+	vg.restore()
+
+	-- Hide fades
+	fadePaint = vg.linearGradient( x,y,x,y+6, vg.rgba(200,200,200,255), vg.rgba(200,200,200,0))
+	vg.beginPath()
+	vg.rect( x+4,y,w-8,6)
+	vg.fillPaint( fadePaint)
+	vg.fill()
+
+	fadePaint = vg.linearGradient( x,y+h,x,y+h-6, vg.rgba(200,200,200,255), vg.rgba(200,200,200,0))
+	vg.beginPath()
+	vg.rect( x+4,y+h-6,w-8,6)
+	vg.fillPaint( fadePaint)
+	vg.fill()
+
+	-- Scroll bar
+	shadowPaint = vg.boxGradient( x+w-12+1,y+4+1, 8,h-8, 3,4, vg.rgba(0,0,0,32), vg.rgba(0,0,0,92))
+	vg.beginPath()
+	vg.roundedRect( x+w-12,y+4, 8,h-8, 3)
+	vg.fillPaint( shadowPaint)
+--	vg.fillColor( vg.rgba(255,0,0,128))
+	vg.fill()
+
+	scrollh = (h/stackh) * (h-8)
+	shadowPaint = vg.boxGradient( x+w-12-1,y+4+(h-8-scrollh)*u-1, 8,scrollh, 3,4, vg.rgba(220,220,220,255), vg.rgba(128,128,128,255))
+	vg.beginPath()
+	vg.roundedRect( x+w-12+1,y+4+1 + (h-8-scrollh)*u, 8-2,scrollh-2, 2)
+	vg.fillPaint( shadowPaint)
+--	vg.fillColor( vg.rgba(0,0,0,128))
+	vg.fill()
+
+	vg.restore()
+end
+
+local function drawSlider(pos, x, y, w, h)
+	local bg, knob
+	local cy = y+(h*0.5)
+	local kr = (h*0.25)
+
+	vg.save()
+--	nvgClearState(vg);
+
+	-- Slot
+	bg = vg.boxGradient(x,cy-2+1, w,4, 2,2, vg.rgba(0,0,0,32), vg.rgba(0,0,0,128))
+	vg.beginPath()
+	vg.roundedRect( x,cy-2, w,4, 2)
+	vg.fillPaint(bg)
+	vg.fill()
+
+	-- Knob Shadow
+	bg = vg.radialGradient(x+(pos*w),cy+1, kr-3,kr+3, vg.rgba(0,0,0,64), vg.rgba(0,0,0,0))
+	vg.beginPath()
+	vg.rect(x+(pos*w)-kr-5,cy-kr-5,kr*2+5+5,kr*2+5+5+3)
+	vg.circle(x+(pos*w),cy, kr)
+	vg.pathWinding(vg.NVG_HOLE)
+	vg.fillPaint(bg)
+	vg.fill()
+
+	-- Knob
+	knob = vg.linearGradient( x,cy-kr,x,cy+kr, vg.rgba(255,255,255,16), vg.rgba(0,0,0,16))
+	vg.beginPath()
+	vg.circle( x+(pos*w),cy, kr-1)
+	vg.fillColor(vg.rgba(40,43,48,255))
+	vg.fill()
+	vg.fillPaint(knob)
+	vg.fill()
+
+	vg.beginPath()
+	vg.circle(x+(pos*w),cy, kr-0.5)
+	vg.strokeColor(vg.rgba(0,0,0,92))
+	vg.stroke()
+
+	vg.restore()
+end
+
+local function drawEditBoxNum(text, units,x, y, w, h)
+	local uw
+
+	drawEditBoxBase( x,y, w,h)
+
+	uw = vg.textBounds(0,0, units)
+
+	vg.fontSize(18.0)
+	vg.fontFace("sans")
+	vg.fillColor(vg.rgba(255,255,255,64))
+	vg.textAlign(vg.NVG_ALIGN_RIGHT+vg.NVG_ALIGN_MIDDLE)
+	vg.text(x+w-h*0.3,y+h*0.5,units)
+
+	vg.fontSize(20.0)
+	vg.fontFace("sans")
+	vg.fillColor(vg.rgba(255,255,255,128))
+	vg.textAlign(vg.NVG_ALIGN_RIGHT+vg.NVG_ALIGN_MIDDLE)
+	vg.text(x+w-uw-h*0.5,y+h*0.5,text)
+end
+
+local function drawCheckBox(text, x, y, w, h)
+	local bg
+
+	vg.fontSize(18.0)
+	vg.fontFace("sans")
+	vg.fillColor(vg.rgba(255,255,255,160))
+
+	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+	vg.text(x+28,y+h*0.5,text)
+
+	bg = vg.boxGradient( x+1,y+(h*0.5)-9+1, 18,18, 3,3, vg.rgba(0,0,0,32), vg.rgba(0,0,0,92))
+	vg.beginPath()
+	vg.roundedRect(x+1,y+(h*0.5)-9, 18,18, 3)
+	vg.fillPaint(bg)
+	vg.fill()
+
+	vg.fontSize(40)
+	vg.fontFace("icons")
+	vg.fillColor(vg.rgba(255,255,255,128))
+	vg.textAlign(vg.NVG_ALIGN_CENTER+vg.NVG_ALIGN_MIDDLE)
+	vg.text(x+9+2, y+h*0.5, vg.cpToUTF8(ICON_CHECK))
+end
+
 local fps_count = 0
 local fps_acc = 0
 local fps = 0
@@ -636,11 +991,9 @@ local t = 0
 eventFunction("loop",function(dt)
 	local w,h = screenSize()
 	local x,y
-	local width,height,mx,my
+	local width,height
 	
 	t = t+dt
-	mx = 0
-	my = 0
 	width = w
 	height = h
 	
@@ -685,6 +1038,30 @@ eventFunction("loop",function(dt)
 	drawDropDown("Effects", x,y,280,28)
 	popy = y + 14
 	y = y+45
+	
+	-- Form
+	drawLabel("Login", x,y, 280,20)
+	y = y+25
+	drawEditBox("Email",  x,y, 280,28)
+	y = y+35
+	drawEditBox("Password", x,y, 280,28)
+	y = y+38
+	drawCheckBox("Remember me", x,y, 140,28)
+	drawButton(ICON_LOGIN, "Sign in", x+138, y, 140, 28, vg.rgba(0,96,128,255))
+	y = y+45
+
+	-- Slider
+	drawLabel("Diameter", x,y, 280,20)
+	y = y+25
+	drawEditBoxNum("123.00", "px", x+180,y, 100,28)
+	drawSlider(0.4, x,y, 170,28)
+	y = y+55
+
+	drawButton(ICON_TRASH, "Delete", x, y, 160, 28, vg.rgba(128,16,8,255))
+	drawButton(0, "Cancel", x+170, y, 110, 28, vg.rgba(0,0,0,0))
+
+	-- Thumbnails box
+	drawThumbnails(365, popy-30, 160, 300, data.images, 12, t)
 	
 	vg.endFrame()
 end)
