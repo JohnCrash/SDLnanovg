@@ -24,6 +24,7 @@
     <ClInclude Include="..\..\src\nanovg\sdlmain.h" />
     <ClInclude Include="..\..\src\nanovg\stb_image.h" />
     <ClInclude Include="..\..\src\nanovg\stb_truetype.h" />
+    <ClInclude Include="..\..\src\nanovg\ui.h" />
     <ClInclude Include="..\src\basetype.h" />
     <ClInclude Include="..\src\examples.h" />
     <ClInclude Include="..\src\fs.h" />
@@ -41,6 +42,7 @@
     <ClCompile Include="..\..\src\nanovg\nanovg_sdl.c" />
     <ClCompile Include="..\..\src\nanovg\sdlmain.c" />
     <ClCompile Include="..\..\src\nanovg\sdlport.c" />
+    <ClCompile Include="..\..\src\nanovg\ui.c" />
     <ClCompile Include="..\src\basetype.c" />
     <ClCompile Include="..\src\examples.c" />
     <ClCompile Include="..\src\fs.c" />

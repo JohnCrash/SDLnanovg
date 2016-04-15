@@ -72,6 +72,9 @@
     <ClInclude Include="..\..\src\nanovg\eventhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\nanovg\ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\nanovg\nanovg.c">
@@ -120,6 +123,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\nanovg\eventhandler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\nanovg\ui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
