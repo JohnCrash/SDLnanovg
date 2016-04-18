@@ -1,6 +1,9 @@
 #ifndef _LUANANOVG_H_
 #define _LUANANOVG_H_
 
+#include "lua.h"
+#include "lauxlib.h"
+
 #ifdef __cplusplus
 extern "C"{
 #endif

@@ -1,5 +1,3 @@
-#include "lua.h"
-#include "lauxlib.h"
 #include "luananovg.h"
 #include "SDL.h"
 #include "gles.h"

@@ -1,8 +1,5 @@
 #include <string.h>
 #include "SDL.h"
-
-#include "lua.h"
-#include "lauxlib.h"
 #include "luananovg.h"
 #include "sdlmain.h"
 #include "eventhandler.h"
@@ -12,6 +9,10 @@ static lua_State * _state = NULL;
 static int _callFromLua = 0;
 #define MAX_PATH 256
 
+lua_State * lua_GlobalState()
+{
+	return _state;
+}
 /*
  * 自动增长的指针
  */
@@ -293,7 +294,7 @@ int _eventRef[EVENT_COUNT];
 static void registerEventFunction(lua_State *L, int nfunction, int eventid)
 {
 	if (_eventRef[eventid] != LUA_REFNIL){
-		lua_rawgeti(L, LUA_REGISTRYINDEX, _eventRef[eventid]);
+		lua_getref(L, _eventRef[eventid]); //返回老的事件函数给调用者
 		lua_unref(L, _eventRef[eventid]);
 		_eventRef[eventid] = LUA_REFNIL;
 	}
@@ -302,14 +303,14 @@ static void registerEventFunction(lua_State *L, int nfunction, int eventid)
 	}
 	if (lua_isfunction(L, nfunction)){
 		lua_pushvalue(L, nfunction);
-		_eventRef[eventid] = luaL_ref(L, LUA_REGISTRYINDEX);
+		_eventRef[eventid] = lua_ref(L,1);
 	}
 }
 
 static int lua_pushEventFunction(int n)
 {
 	if (n>=0&&n < EVENT_COUNT&&_eventRef[n] != LUA_REFNIL){
-		lua_rawgeti(_state, LUA_REGISTRYINDEX, _eventRef[n]);
+		lua_getref(_state,_eventRef[n]);
 		return 1;
 	}
 	return 0;
@@ -403,7 +404,6 @@ void releaseLua()
 		lua_executeScriptFile("release.lua");
 		for (int i = 0; i < EVENT_COUNT; i++){
 			if (_eventRef[i] != LUA_REFNIL){
-				lua_rawgeti(_state, LUA_REGISTRYINDEX, _eventRef[i]);
 				lua_unref(_state, _eventRef[i]);
 			}
 			_eventRef[i] = LUA_REFNIL;
