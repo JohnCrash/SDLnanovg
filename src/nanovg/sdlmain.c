@@ -1,6 +1,12 @@
 #include "sdlmain.h"
 #include <stdio.h>
 
+static SDLState *_state = NULL;
+
+SDLState *getSDLState()
+{
+	return _state;
+}
 /*
  *	代码来自于SDLTest,主要进行梳理和修改。
  */
@@ -57,6 +63,7 @@ SDLState *createSDLState(int argc,char **argv)
 #else
 	state->gl_profile_mask = SDL_GL_CONTEXT_PROFILE_CORE;
 #endif
+	_state = state;
 	return state;
 }
 
@@ -601,11 +608,11 @@ int initSDL(SDLState *state)
 
 void releaseSDL(SDLState *state)
 {
-	if( state->window )
-		SDL_DestroyWindow(state->window);
-	if( state->target )
+	if (state->target)
 		SDL_DestroyTexture(state->target);
-	if(state->renderer)
+	if (state->context)
+		SDL_GL_DeleteContext(state->context);
+	if (state->renderer)
 	{
 		SDL_DestroyRenderer(state->renderer);
 		SDL_free(state->renderer);
@@ -616,5 +623,8 @@ void releaseSDL(SDLState *state)
     if (state->flags & SDL_INIT_AUDIO) {
         SDL_AudioQuit();
     }
+	if (state->window)
+		SDL_DestroyWindow(state->window);
 	SDL_free(state);
+	SDL_Quit();
 }

@@ -98,3 +98,8 @@ void releaseNanovg()
 		nvgDeleteGL2(vg);
 	#endif
 }
+
+void* nanovgContext()
+{
+	return vg;
+}

@@ -123,7 +123,7 @@ public class SDLActivity extends Activity {
         // So we can call stuff from static callbacks
         mSingleton = this;
 
-        android.os.Debug.waitForDebugger();
+        //android.os.Debug.waitForDebugger();
         // Load shared libraries
         String errorMsgBrokenLib = "";
         try {

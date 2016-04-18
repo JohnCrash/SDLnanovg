@@ -1,5 +1,5 @@
-#ifndef TEST_NANOVG_SDL_H
-#define TEST_NANOVG_SDL_H
+#ifndef _NANOVG_SDL_H_
+#define _NANOVG_SDL_H_
 
 int initNanovg();
 void renderNanovg(int _mx, int _my, int w, int h);

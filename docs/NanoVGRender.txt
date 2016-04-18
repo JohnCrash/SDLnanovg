@@ -1,0 +1,49 @@
+//渲染树根节点
+node
+{
+	//变换表
+	transform={
+		transform,
+		...
+	},
+	//状态操作
+	state = save|restore|reset,
+	//全局alpha
+	alpha,
+	//剪切矩形
+	scissor = rect,
+	//渲染操作
+	renders={
+		render,
+		...
+	},
+	//子节点
+	childs={
+		node,
+		...
+	},
+}
+
+//变换
+transform
+{
+}
+
+//矩形
+rect
+{
+}
+
+//颜色
+color
+{
+	rgb={r,g,b}|rgba={r,g,b,a}|hsl={h,s,l}|hsla={h,s,l,a}
+}
+
+//渲染
+render
+{
+	stroke=shape,
+}
+
+fill{x,y,w,h,}

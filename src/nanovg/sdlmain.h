@@ -82,6 +82,7 @@ extern "C"{
 	SDLState *createSDLState(int argc, char **argv);
 	int initSDL(SDLState *state);
 	void releaseSDL(SDLState *state);
+	SDLState *getSDLState();
 #ifdef __cplusplus
 }
 #endif

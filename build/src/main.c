@@ -9,6 +9,7 @@ Permission is granted to anyone to use this software for any purpose,
 including commercial applications, and to alter it and redistribute it
 freely.
 */
+#ifdef _DEMO_
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,71 +17,84 @@ freely.
 #include "SDL.h"
 #include "gles.h"
 #include "sdlmain.h"
-#include "test_nanovg_sdl.h"
+#include "nanovg_sdl.h"
+#include "fs.h"
+#include "eventhandler.h"
+#include "luaext.h"
+
+#ifdef _DEBUG
+#include <Windows.h>
+static void openConsole()
+{
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+}
+#endif
 
 int main(int argc,char *argv[])
 {
-	int done, mx, my;
-	SDL_Event event;
-	SDLState * state = createSDLState(argc, argv);
+	Uint32 t,t0;
+	SDLState * state;
 
+#ifdef _DEBUG
+	openConsole();
+rerun:
+#endif
+	state = createSDLState(argc, argv);
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-
-	LOG("initSLD..");
+	SDL_Log("initLua..");
+	if (!initLua())
+	{
+		SDL_Log("initLua failed!\n");
+		return -1;
+	}
+	SDL_Log("initSDL..");
+	SDL_Log("Writeable directory : %s", getWriteDirectory());
 	if (!initSDL(state))
 	{
-		printf("initSDL failed!\n");
+		SDL_Log("initSDL failed!\n");
 		return -1;
 	}
 #if !defined(__GLES__)
-	LOG("glewInit..");
+	SDL_Log("glewInit..");
 	if (glewInit()!=GLEW_OK)
 	{
-		printf("glewInit failed!");
+		SDL_Log("glewInit failed!");
 		return -1;
 	}
 #endif	
-	LOG("initNanovg..");
+	SDL_Log("initNanovg..");
 	if (initNanovg()<0)
 	{
-		printf("initNanovg failed!\n");
+		SDL_Log("initNanovg failed!\n");
 		return -1;
 	}
-	done = 0;
-	mx = my = 0;
-	LOG("Main loop..");
-	while (!done)
+	lua_EventInit();
+	SDL_Log("Main loop..");
+	t0 = SDL_GetTicks();
+	while (!eventLoop(state))
 	{
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-			case SDL_WINDOWEVENT:
-				if (event.window.event == SDL_WINDOWEVENT_CLOSE)
-				{
-					SDL_DestroyWindow(state->window);
-					done = 1;
-				}
-				else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-				{
-					state->window_w = event.window.data1;
-					state->window_h = event.window.data2;
-				}
-				break;
-			case SDL_MOUSEMOTION:
-				mx = event.motion.x;
-				my = event.motion.y;
-				break;
-			}
-		}
-		renderNanovg(mx,my,state->window_w,state->window_h);
+		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		t = SDL_GetTicks();
+		lua_EventLoop((double)(t - t0) / 1000.0);
+		t0 = t;
 		SDL_GL_SwapWindow(state->window);
 	}
-	LOG("releaseNanovg..");
+	lua_EventRelease();
+	SDL_Log("releaseLua..");
+	releaseLua();
+	SDL_Log("releaseNanovg..");
 	releaseNanovg();
-	LOG("releaseSDL..");
+	SDL_Log("releaseSDL..");
 	releaseSDL(state);
-	LOG("DONE..");
+	SDL_Log("DONE..");
+#ifdef _DEBUG
+	goto rerun;
+#endif
 	return 0;
 }
+#endif //_DEMO_

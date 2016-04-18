@@ -811,7 +811,7 @@ int loadDemoData(NVGcontext* vg, DemoData* data)
 		snprintf(file, 128, "images/image%d.jpg", i+1);
 		data->images[i] = nvgCreateImage(vg, file, 0);
 		if (data->images[i] == 0) {
-			LOG("Could not load %s.\n", file);
+			printf("Could not load %s.\n", file);
 			return -1;
 		}
 	}
