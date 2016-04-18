@@ -15,6 +15,7 @@
     <ClInclude Include="..\..\src\nanovg\fontstash.h" />
     <ClInclude Include="..\..\src\nanovg\luaext.h" />
     <ClInclude Include="..\..\src\nanovg\luananovg.h" />
+    <ClInclude Include="..\..\src\nanovg\luaui.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl.h" />
     <ClInclude Include="..\..\src\nanovg\nanovg_gl2.h" />
@@ -38,6 +39,7 @@
     <ClCompile Include="..\..\src\nanovg\example\perf.c" />
     <ClCompile Include="..\..\src\nanovg\luaext.c" />
     <ClCompile Include="..\..\src\nanovg\luananovg.c" />
+    <ClCompile Include="..\..\src\nanovg\luaui.c" />
     <ClCompile Include="..\..\src\nanovg\nanovg.c" />
     <ClCompile Include="..\..\src\nanovg\nanovg_sdl.c" />
     <ClCompile Include="..\..\src\nanovg\sdlmain.c" />

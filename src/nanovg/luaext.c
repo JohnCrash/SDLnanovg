@@ -1,6 +1,7 @@
 #include <string.h>
 #include "SDL.h"
 #include "luananovg.h"
+#include "luaui.h"
 #include "sdlmain.h"
 #include "eventhandler.h"
 #include "luaext.h"
@@ -364,6 +365,7 @@ int initLua()
 	};
 	const luaL_reg luax_exts[] = {
 		{ "vg", luaopen_nanovg },
+		{ "ui", luaopen_ui },
 		{ NULL, NULL }
 	};
 	luaL_Reg* lib = (luaL_Reg*)luax_exts;

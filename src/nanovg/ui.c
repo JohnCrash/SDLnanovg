@@ -153,9 +153,31 @@ void uiSetSize(uiWidget *self, float w, float h)
 	self->height = h;
 }
 
+int InWidget(uiWidget *parent, uiWidget *child)
+{
+	if (child->x > parent->x + parent->width || child->x + child->width < parent->x)
+		return 0;
+	if (child->y > parent->y + parent->height || child->y + child->height < parent->y)
+		return 0;
+	return 1;
+}
+
 void uiEnumWidget(uiWidget *root, uiEnumProc func)
 {
-
+	uiWidget * child;
+	if (root && root->isVisible&VISIBLE){
+		func(root);
+		child = root->child;
+		while (child){
+			if (child->isVisible&VISIBLE){
+				if (InWidget(root, child)){
+					func(child);
+					uiEnumWidget(child, func);
+				}
+			}
+			child = child->next;
+		}
+	}
 }
 
 static void renderWidget(uiWidget * widget)
