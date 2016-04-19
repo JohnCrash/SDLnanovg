@@ -217,6 +217,33 @@ void lua_addSearchPath(const char* path)
 
 int lua_executeFunction(int numArgs)
 {
+	if (lua_executeFunctionResult(numArgs, 1)){
+		// get return value
+		int result = 0;
+		if (lua_isnumber(_state, -1))
+		{
+			result = (int)lua_tointeger(_state, -1);
+		}
+		else if (lua_isboolean(_state, -1))
+		{
+			result = (int)lua_toboolean(_state, -1);
+		}
+		lua_pop(_state, 1);
+		return result;
+	}
+	else{
+		return 0;
+	}
+}
+
+/*
+ * -1 arg2
+ * -2 arg1
+ * -3 function
+ * -4 __G__TRACKBACK__
+ */
+int lua_executeFunctionResult(int numArgs,int nRet)
+{
 	int functionIndex = -(numArgs + 1);
 	if (!lua_isfunction(_state, functionIndex))
 	{
@@ -239,7 +266,7 @@ int lua_executeFunction(int numArgs)
 
 	int error = 0;
 	++_callFromLua;
-	error = lua_pcall(_state, numArgs, 1, traceback);                  /* L: ... [G] ret */
+	error = lua_pcall(_state, numArgs, nRet, traceback);                  /* L: ... [G] ret */
 	--_callFromLua;
 	if (error)
 	{
@@ -254,32 +281,28 @@ int lua_executeFunction(int numArgs)
 		}
 		return 0;
 	}
-
-	// get return value
-	int ret = 0;
-	if (lua_isnumber(_state, -1))
-	{
-		ret = (int)lua_tointeger(_state, -1);
-	}
-	else if (lua_isboolean(_state, -1))
-	{
-		ret = (int)lua_toboolean(_state, -1);
-	}
-	// remove return value from stack
-	lua_pop(_state, 1);                                                /* L: ... [G] */
-
 	if (traceback)
 	{
-		lua_pop(_state, 1); // remove __G__TRACKBACK__ from stack      /* L: ... */
+		lua_remove(_state, -nRet-1);// remove __G__TRACKBACK__ from stack      /* L: ... */
 	}
 
-	return ret;
+	return 1;
 }
 
 int lua_executeString(const char *code)
 {
 	luaL_loadstring(_state, code);
 	return lua_executeFunction(0);
+}
+
+int lua_executeScriptFileResult(const char *filename,int nRet)
+{
+	char code[MAX_PATH];
+	strcpy(code, "return require \"");
+	strcat(code, filename);
+	strcat(code, "\"");
+	luaL_loadstring(_state, code);
+	return lua_executeFunctionResult(0, nRet);
 }
 
 int lua_executeScriptFile(const char *filename)
@@ -411,6 +434,7 @@ void releaseLua()
 			_eventRef[i] = LUA_REFNIL;
 		}
 		lua_close(_state);
+		_state = NULL;
 	}
 }
 

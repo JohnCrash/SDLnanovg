@@ -24,8 +24,10 @@ extern "C"{
 
 	void lua_addSearchPath(const char* path);
 	int lua_executeFunction(int numArgs);
+	int lua_executeFunctionResult(int numArgs, int nRet);
 	int lua_executeString(const char *code);
 	int lua_executeScriptFile(const char *filename);
+	int lua_executeScriptFileResult(const char *filename,int nRet);
 	lua_State * lua_GlobalState();
 #ifdef __cplusplus
 }

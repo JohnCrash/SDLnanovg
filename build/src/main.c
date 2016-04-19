@@ -21,6 +21,7 @@ freely.
 #include "fs.h"
 #include "eventhandler.h"
 #include "luaext.h"
+#include "ui.h"
 
 #ifdef _DEBUG
 #include <Windows.h>
@@ -45,12 +46,6 @@ rerun:
 	state = createSDLState(argc, argv);
 	/* Enable standard application logging */
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-	SDL_Log("initLua..");
-	if (!initLua())
-	{
-		SDL_Log("initLua failed!\n");
-		return -1;
-	}
 	SDL_Log("initSDL..");
 	SDL_Log("Writeable directory : %s", getWriteDirectory());
 	if (!initSDL(state))
@@ -72,6 +67,17 @@ rerun:
 		SDL_Log("initNanovg failed!\n");
 		return -1;
 	}
+	if (!initUI())
+	{
+		SDL_Log("initUI failed!\n");
+		return -1;
+	}
+	SDL_Log("initLua..");
+	if (!initLua())
+	{
+		SDL_Log("initLua failed!\n");
+		return -1;
+	}
 	lua_EventInit();
 	SDL_Log("Main loop..");
 	t0 = SDL_GetTicks();
@@ -81,12 +87,14 @@ rerun:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		t = SDL_GetTicks();
 		lua_EventLoop((double)(t - t0) / 1000.0);
+		uiDrawWidget(uiRootWidget());
 		t0 = t;
 		SDL_GL_SwapWindow(state->window);
 	}
 	lua_EventRelease();
 	SDL_Log("releaseLua..");
 	releaseLua();
+	releaseUI();
 	SDL_Log("releaseNanovg..");
 	releaseNanovg();
 	SDL_Log("releaseSDL..");

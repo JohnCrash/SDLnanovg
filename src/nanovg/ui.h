@@ -18,6 +18,11 @@ extern "C"{
 		VISIBLE = 1,
 		LINEAR = 2,
 	};
+	
+	typedef struct {
+		struct uiWidget * widget;
+		int ref;
+	} luaWidget;
 
 	typedef struct uiWidget_t{
 		float x, y, width, height;
@@ -25,10 +30,13 @@ extern "C"{
 		unsigned char handleEvent;
 		int classRef;
 		int selfRef;
-		struct uiWidget_t *parent;
-		struct uiWidget_t *child;
-		struct uiWidget_t *next;
-		struct uiWidget_t *prev;
+		luaWidget * luaobj;
+		struct uiWidget_t *parent; //父窗口
+		struct uiWidget_t *child; //子窗口
+		struct uiWidget_t *next; //兄弟窗口下一个
+		struct uiWidget_t *prev; //兄弟窗口上一个
+		struct uiWidget_t *remove; //将要删除的窗口
+		struct uiWidget_t *enumlist; //正在枚举的窗口
 	} uiWidget;
 
 	typedef struct ThemesList_t{
@@ -54,7 +62,7 @@ extern "C"{
 	uiWidget * uiFormJson(const char *filename);
 	int InWidget(uiWidget *parent, uiWidget *child);
 
-	int loadTheames(const char *name, const char *filename);
+	int loadThemes(const char *name, const char *filename);
 
 	typedef void(*uiEnumProc)(uiWidget *);
 	void uiEnumWidget(uiWidget *root, uiEnumProc func);
