@@ -45,20 +45,43 @@ end
 
 return
 {
+	onInit=function()
+	end,
+	onRelease=function()
+	end,
 	window={
+		onInit=function(self)
+		end,
+		onRelease=function(self)
+		end,
 		onDraw=function()
 			print("window onDraw")
 		end,
 		onEvent=function()
 			print("window onEvent")
 		end,
+		setTitle=function(self,title)
+			self._title = title
+		end,
 	},
 	button={
+		onInit=function(self)
+			print("button onInit")
+			fontIcons = vg.createFont("icons","fonts/entypo.ttf")
+			fontNormal = vg.createFont("sans","fonts/Roboto-Regular.ttf")
+			fontBold = vg.createFont("sans-bold","fonts/Roboto-Bold.ttf")			
+		end,
+		onRelease=function(self)
+			print("button onRelease")
+		end,	
 		onDraw=function(self,x,y,w,h)
 			drawWindow(self.title or "OK",x,y,w,h)
 		end,
 		onEvent=function()
 			print("button onEvent")
 		end,
+		setTitle=function(self,title)
+			self._title = title
+		end,		
 	},	
 }

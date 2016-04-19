@@ -34,19 +34,61 @@ int initUI()
 	return 1;
 }
 
+/*
+ * 调用对象的类方法如:onInit,onRelease
+ */
+static void callWidgetEvent(uiWidget * widget, const char *strEvent)
+{
+	if (widget->classRef != LUA_REFNIL){
+		lua_State * L = lua_GlobalState();
+		if (L){
+			lua_getref(L, widget->classRef);
+			lua_getfield(L, -1, strEvent);
+			if (lua_isfunction(L, -1)){
+				lua_getref(L, widget->selfRef);
+				lua_executeFunction(1);
+				lua_pop(L, 1); //classRef;
+			}
+			else{
+				lua_pop(L, 2);
+			}
+		}
+	}
+}
+
+static uiWidget * _delayList = NULL;
+static int _delayEnable = 0;
+/*
+ * 打开关闭延时删除功能，当开启延时删除时。
+ * 要删除的对象都被链接起来稍后集中删除。
+ */
+static void uiDelayDelete(int b)
+{
+	_delayEnable = b;
+}
+
 static void uiDeleteWidgetSelf(uiWidget *self)
 {
 	if (self){
 		uiRemoveFromParent(self);
-		lua_State * L = lua_GlobalState();
-		if (L && self->selfRef != LUA_REFNIL){
-			lua_unref(L, self->selfRef);
+		if (_delayEnable){
+			/* 放入延时删除表 */
+			self->remove = _delayList;
+			_delayList = self;
 		}
-		if (L && self->luaobj){
-			self->luaobj->widget = NULL;
-			lua_unref(L, self->luaobj->ref);
+		else{
+			/* 立刻删除对象 */
+			lua_State * L = lua_GlobalState();
+			callWidgetEvent(self, "onRelease");
+			if (L && self->selfRef != LUA_REFNIL){
+				lua_unref(L, self->selfRef);
+			}
+			if (L && self->luaobj){
+				self->luaobj->widget = NULL;
+				lua_unref(L, self->luaobj->ref);
+			}
+			free(self);
 		}
-		free(self);
 	}
 }
 
@@ -73,6 +115,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 	ThemesList * themes = _themes;
 	lua_State * L = lua_GlobalState();
 	while (themes){
+		/* 先在样式表中查找对应的样式 */
 		if (strcmp(themes_name, themes->name) == 0 && themes->themeRef!=LUA_REFNIL){
 			lua_getref(L, themes->themeRef);
 			lua_getfield(L, -1, widget_name);
@@ -93,6 +136,8 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 				lua_pop(L, 1);
 				self->isVisible = VISIBLE;
 				self->handleEvent = EVENT_NONE;
+
+				callWidgetEvent(self, "onInit");
 				return self;
 			}
 			else{
@@ -143,7 +188,11 @@ void uiAddChild(uiWidget *parent, uiWidget *child)
 void uiRemoveFromParent(uiWidget *self)
 {
 	if (self){
-		self->parent = NULL;
+		if (self->parent){
+			if (self->parent->child == self)
+				self->parent->child = self->next;
+			self->parent = NULL;
+		}
 		if (self->next){
 			self->next->prev = self->prev;
 		}
@@ -216,21 +265,44 @@ int InWidget(uiWidget *parent, uiWidget *child)
 void uiEnumWidget(uiWidget *root, uiEnumProc func)
 {
 	uiWidget * child;
+	uiWidget * head,*tail;
+	head = NULL;
 	if (root && root->isVisible&VISIBLE){
-		func(root);
+		head = root;
+		tail = root;
+		tail->enum_next = NULL;
 		child = root->child;
 		while (child){
 			if (child->isVisible&VISIBLE){
 				if (InWidget(root, child)){
-					func(child);
+					tail->enum_next = child;
+					tail = child;
+					tail->enum_next = NULL;
 					uiEnumWidget(child, func);
 				}
 			}
 			child = child->next;
 		}
 	}
+	/* 打开延时删除表 */
+	uiDelayDelete(1);
+	while (head){
+		func(head);
+		head = head->enum_next;
+	}
+	uiDelayDelete(0);
+	/* 删除延迟表中的对象 */
+	head = _delayList;
+	while (head){
+		tail = head->remove;
+		uiDeleteWidgetSelf(head);
+		head = tail;
+	}
 }
 
+/*
+ * 调用对象的渲染方法onDraw
+ */
 static void renderWidget(uiWidget * widget)
 {
 	if (widget->classRef != LUA_REFNIL){
@@ -252,6 +324,9 @@ static void renderWidget(uiWidget * widget)
 	}
 }
 
+/*
+ * 渲染对象树结构
+ */
 void uiDrawWidget(uiWidget *self)
 {
 	if (self){

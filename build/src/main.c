@@ -67,15 +67,15 @@ rerun:
 		SDL_Log("initNanovg failed!\n");
 		return -1;
 	}
-	if (!initUI())
-	{
-		SDL_Log("initUI failed!\n");
-		return -1;
-	}
 	SDL_Log("initLua..");
 	if (!initLua())
 	{
 		SDL_Log("initLua failed!\n");
+		return -1;
+	}
+	if (!initUI())
+	{
+		SDL_Log("initUI failed!\n");
 		return -1;
 	}
 	lua_EventInit();
@@ -93,8 +93,8 @@ rerun:
 	}
 	lua_EventRelease();
 	SDL_Log("releaseLua..");
-	releaseLua();
 	releaseUI();
+	releaseLua();
 	SDL_Log("releaseNanovg..");
 	releaseNanovg();
 	SDL_Log("releaseSDL..");

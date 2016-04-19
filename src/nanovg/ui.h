@@ -36,7 +36,7 @@ extern "C"{
 		struct uiWidget_t *next; //兄弟窗口下一个
 		struct uiWidget_t *prev; //兄弟窗口上一个
 		struct uiWidget_t *remove; //将要删除的窗口
-		struct uiWidget_t *enumlist; //正在枚举的窗口
+		struct uiWidget_t *enum_next; //正在枚举的窗口
 	} uiWidget;
 
 	typedef struct ThemesList_t{

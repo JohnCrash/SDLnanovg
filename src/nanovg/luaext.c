@@ -417,16 +417,12 @@ int initLua()
 
 	/* 初始化脚本装载器 */
 	initLuaLoader(lua_loader);
-	/* 执行初始化代码 */
-	lua_executeScriptFile("init.lua");
 	return 1;
 }
 
 void releaseLua()
 {
 	if (_state){
-		/* 执行退出脚本 */
-		lua_executeScriptFile("release.lua");
 		for (int i = 0; i < EVENT_COUNT; i++){
 			if (_eventRef[i] != LUA_REFNIL){
 				lua_unref(_state, _eventRef[i]);
@@ -448,6 +444,9 @@ void lua_EventLoop(double dt)
 
 void lua_EventInit()
 {
+	/* 执行初始化代码 */
+	lua_executeScriptFile("init.lua");
+
 	if (lua_pushEventFunction(EVENT_INIT)){
 		lua_executeFunction(0);
 	}
@@ -458,6 +457,8 @@ void lua_EventRelease()
 	if (lua_pushEventFunction(EVENT_RELEASE)){
 		lua_executeFunction(0);
 	}
+	/* 执行退出脚本 */
+	lua_executeScriptFile("release.lua");
 }
 
 void lua_EventInput(inputEvent *ie)
