@@ -25,7 +25,10 @@ extern "C"{
 	} luaWidget;
 
 	typedef struct uiWidget_t{
-		float x, y, width, height;
+		float width, height;
+		float xform[6];
+		float curxform[6];
+		float angle, sx, sy;
 		char isVisible;
 		unsigned char handleEvent;
 		int classRef;
@@ -55,6 +58,8 @@ extern "C"{
 	void uiSetVisible(uiWidget *self, int b);
 	void uiSetPosition(uiWidget *self, float x, float y);
 	void uiSetSize(uiWidget *self, float w, float h);
+	void uiRotate(uiWidget *self, float angle);
+	void uiScale(uiWidget *self, float sx, float sy);
 	uiWidget * uiCreateWidget(const char *themes, const char *name);
 	void uiDeleteWidget(uiWidget *self);
 	void uiDrawWidget(uiWidget *self);

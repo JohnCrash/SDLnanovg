@@ -8,18 +8,14 @@ local ui = require "ui"
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
 	print( string.format("%d %d",w,h) )
-	local quit = ui.createWidget("normal","button")
-	root:addChild(quit)
-	quit:setTitle("title")
-	quit:setPosition(200,300)
-	quit:setSize(100,120)
-	local prev = quit.onRelease
-	quit.onRelease=function(self)
-		print("quit onRelease")
-		if prev then
-			prev(self)
-		else
-			print("prev = nil")
-		end
-	end
+	local top = ui.createWidget("normal","button")
+	root:addChild(top)
+	top:setTitle("top")
+	top:setPosition(0,0)
+	top:setSize(100,120)
+	local bottom = ui.createWidget("normal","button")
+	root:addChild(bottom)
+	bottom:setTitle("bottom")
+	bottom:setPosition(w-100,h-120)
+	bottom:setSize(100,120)	
 --end)

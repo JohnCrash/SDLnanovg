@@ -236,6 +236,7 @@ void nvgGlobalAlpha(NVGcontext* ctx, float alpha);
 // Resets current transform to a identity matrix.
 void nvgResetTransform(NVGcontext* ctx);
 
+void nvgSetTransform(NVGcontext* ctx, float xform[6]);
 // Premultiplies current coordinate system by specified matrix.
 // The parameters are interpreted as matrix as follows:
 //   [a c e]

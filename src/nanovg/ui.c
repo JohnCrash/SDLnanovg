@@ -1,3 +1,4 @@
+#include <math.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "gles.h"
@@ -17,16 +18,30 @@ uiWidget * uiRootWidget()
 	return _root;
 }
 
+/*
+ * 通过sx,sy,angle计算出矩阵的旋转部分和缩放部分，这里舍弃了切变换
+ */
+static void calcXForm(uiWidget *self)
+{
+	float cs = cosf(self->angle);
+	float sn = sinf(self->angle);
+	self->xform[0] = self->sx*cs;
+	self->xform[1] = sn;
+	self->xform[2] = -sn;
+	self->xform[3] = self->sy*cs;
+}
+
 int initUI()
 {
 	SDLState * state = getSDLState();
 	_root = (uiWidget *)malloc(sizeof(uiWidget));
 	if (!_root)return 0;
 	memset(_root, 0, sizeof(uiWidget));
-	_root->x = 0;
-	_root->y = 0;
 	_root->width = (float)state->window_w;
 	_root->height = (float)state->window_h;
+	_root->sx = 1.0f;
+	_root->sy = 1.0f;
+	calcXForm(_root);
 	_root->isVisible = VISIBLE;
 	_root->handleEvent = EVENT_NONE;
 	_root->classRef = LUA_REFNIL;
@@ -159,8 +174,10 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 				lua_pop(L, 1);
 				self->isVisible = VISIBLE;
 				self->handleEvent = EVENT_NONE;
-
 				callWidgetEvent(self, "onInit");
+				_root->sx = 1.0f;
+				_root->sy = 1.0f;
+				calcXForm(_root);
 				return self;
 			}
 			else{
@@ -259,8 +276,21 @@ void uiSetVisible(uiWidget *self, int b)
 
 void uiSetPosition(uiWidget *self, float x, float y)
 {
-	self->x = x;
-	self->y = y;
+	self->xform[4] = x;
+	self->xform[5] = y;
+}
+
+void uiRotate(uiWidget *self, float angle)
+{
+	self->angle = angle;
+	calcXForm(self);
+}
+
+void uiScale(uiWidget *self, float sx, float sy)
+{
+	self->sx = sx;
+	self->sy = sy;
+	calcXForm(self);
 }
 
 void uiSetSize(uiWidget *self, float w, float h)
@@ -271,29 +301,35 @@ void uiSetSize(uiWidget *self, float w, float h)
 
 int InWidget(uiWidget *parent, uiWidget *child)
 {
-	if (child->x > parent->x + parent->width || child->x + child->width < parent->x)
+	if (child->xform[4] > parent->width || child->xform[4] + child->width < 0)
 		return 0;
-	if (child->y > parent->y + parent->height || child->y + child->height < parent->y)
+	if (child->xform[5] > parent->height || child->xform[5] + child->height < 0)
 		return 0;
 	return 1;
 }
 
 /*
- * 枚举的过程中func可能改变窗口结构甚至删除窗口
- * 这需要特殊处理，首先将满足调用func的窗口放入一个表中
- * 然后才调用func函数，如果在func函数中删除了窗口，后面
- * 的调用会访问非法指针，因此func中将要删除的窗口标记，
- * 等枚举结束才进行真正的删除。
+ * 将所有可见的对象都链接在一起，并且返回其头
+ * 通过enum_next进行遍历
  */
-void uiEnumWidget(uiWidget *root, uiEnumProc func)
+static uiWidget * uiEnumWidgetVisible(uiWidget *root,uiWidget *tail)
 {
 	uiWidget * child;
-	uiWidget * head,*tail;
-	head = NULL;
+	uiWidget * head = tail;
 	if (root && root->isVisible&VISIBLE){
-		head = root;
+		if (tail)
+			tail->enum_next = root;
+		else
+			head = root;
+		if (root->parent){
+			memcpy(root->curxform, root->parent->curxform, sizeof(float)* 6);
+			nvgTransformMultiply(root->curxform, root->xform);
+		}
+		else{
+			memcpy(root->curxform,root->xform,sizeof(float)*6);
+		}
 		tail = root;
-		tail->enum_next = NULL;
+		root->enum_next = NULL;
 		child = root->child;
 		while (child){
 			if (child->isVisible&VISIBLE){
@@ -301,15 +337,31 @@ void uiEnumWidget(uiWidget *root, uiEnumProc func)
 					tail->enum_next = child;
 					tail = child;
 					tail->enum_next = NULL;
-					uiEnumWidget(child, func);
+					tail = uiEnumWidgetVisible(child, tail);
 				}
 			}
 			child = child->next;
 		}
 	}
+	return head;
+}
+
+/*
+* 枚举的过程中func可能改变窗口结构甚至删除窗口
+* 这需要特殊处理，首先将满足调用func的窗口放入一个表中
+* 然后才调用func函数，如果在func函数中删除了窗口，后面
+* 的调用会访问非法指针，因此func中将要删除的窗口标记，
+* 等枚举结束才进行真正的删除。
+*/
+void uiEnumWidget(uiWidget *root, uiEnumProc func)
+{
+	uiWidget * head,*temp;
+	head = uiEnumWidgetVisible(root, NULL);
 	/* 打开延时删除表 */
 	uiDelayDelete(1);
+	nvgResetTransform(_vg);
 	while (head){
+		nvgSetTransform(_vg, head->curxform);
 		func(head);
 		head = head->enum_next;
 	}
@@ -317,9 +369,9 @@ void uiEnumWidget(uiWidget *root, uiEnumProc func)
 	/* 删除延迟表中的对象 */
 	head = _delayList;
 	while (head){
-		tail = head->remove;
+		temp = head->remove;
 		uiDeleteWidgetSelf(head);
-		head = tail;
+		head = temp;
 	}
 }
 
@@ -336,8 +388,8 @@ static void renderWidget(uiWidget * widget)
 		if (lua_isfunction(L, -1)){
 			//lua_getref(L, widget->selfRef);
 			lua_pushWidget(L, widget);
-			lua_pushnumber(L, widget->x);
-			lua_pushnumber(L, widget->y);
+			lua_pushnumber(L, widget->xform[4]);
+			lua_pushnumber(L, widget->xform[5]);
 			lua_pushnumber(L, widget->width);
 			lua_pushnumber(L, widget->height);
 			lua_executeFunction(5);
@@ -356,8 +408,8 @@ static void renderWidget(uiWidget * widget)
 		if (lua_isfunction(L, -1)){
 			//lua_getref(L, widget->selfRef);
 			lua_pushWidget(L, widget);
-			lua_pushnumber(L, widget->x);
-			lua_pushnumber(L, widget->y);
+			lua_pushnumber(L, widget->xform[4]);
+			lua_pushnumber(L, widget->xform[5]);
 			lua_pushnumber(L, widget->width);
 			lua_pushnumber(L, widget->height);
 			lua_executeFunction(5);
@@ -377,6 +429,7 @@ void uiDrawWidget(uiWidget *self)
 	if (self){
 		glViewport(0, 0, (int)self->width, (int)self->height);
 		nvgBeginFrame(_vg, (int)self->width, (int)self->height, 1);
+		nvgResetTransform(_vg);
 		uiEnumWidget(_root, renderWidget);
 		nvgEndFrame(_vg);
 	}

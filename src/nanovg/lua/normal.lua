@@ -74,8 +74,10 @@ return
 		onRelease=function(self)
 			print("button onRelease")
 		end,	
-		onDraw=function(self,x,y,w,h)
-			drawWindow(self._title or "OK",x,y,w,h)
+		onDraw=function(self)
+			--print( string.format("x=%d y=%d",x,y) )
+			local w,h = self:getSize()
+			drawWindow(self._title or "OK",0,0,w,h)
 		end,
 		onEvent=function()
 			print("button onEvent")

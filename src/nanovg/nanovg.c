@@ -623,6 +623,13 @@ void nvgTransform(NVGcontext* ctx, float a, float b, float c, float d, float e, 
 	nvgTransformPremultiply(state->xform, t);
 }
 
+void nvgSetTransform(NVGcontext* ctx, float xform[6])
+{
+	NVGstate* state = nvg__getState(ctx);
+	for (int i = 0; i < 6; i++)
+		state->xform[i] = xform[i];
+}
+
 void nvgResetTransform(NVGcontext* ctx)
 {
 	NVGstate* state = nvg__getState(ctx);

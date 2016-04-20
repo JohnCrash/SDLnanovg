@@ -2,6 +2,7 @@
 #include "sdlmain.h"
 #include "eventhandler.h"
 #include "luaext.h"
+#include "ui.h"
 
 int eventLoop(SDLState *state)
 {
@@ -20,8 +21,10 @@ int eventLoop(SDLState *state)
 			}
 			else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
 			{
+				uiWidget * root = uiRootWidget();
 				state->window_w = event.window.data1;
 				state->window_h = event.window.data2;
+				uiSetSize(root, state->window_w, state->window_h);
 			}
 			break;
 		case SDL_MOUSEMOTION:

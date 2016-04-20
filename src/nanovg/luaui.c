@@ -122,8 +122,8 @@ int lua_positionWidget(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
 	if (self){
-		lua_pushnumber(L, self->x);
-		lua_pushnumber(L, self->y);
+		lua_pushnumber(L, self->xform[4]);
+		lua_pushnumber(L, self->xform[5]);
 	}
 	else{
 		lua_pushnil(L);
