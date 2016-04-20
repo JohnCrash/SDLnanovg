@@ -10,6 +10,16 @@ local ui = require "ui"
 	print( string.format("%d %d",w,h) )
 	local quit = ui.createWidget("normal","button")
 	root:addChild(quit)
+	quit:setTitle("title")
 	quit:setPosition(200,300)
 	quit:setSize(100,120)
+	local prev = quit.onRelease
+	quit.onRelease=function(self)
+		print("quit onRelease")
+		if prev then
+			prev(self)
+		else
+			print("prev = nil")
+		end
+	end
 --end)

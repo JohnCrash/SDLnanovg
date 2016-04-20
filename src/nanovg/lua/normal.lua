@@ -75,7 +75,7 @@ return
 			print("button onRelease")
 		end,	
 		onDraw=function(self,x,y,w,h)
-			drawWindow(self.title or "OK",x,y,w,h)
+			drawWindow(self._title or "OK",x,y,w,h)
 		end,
 		onEvent=function()
 			print("button onEvent")

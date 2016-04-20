@@ -163,9 +163,8 @@ int lua_loadThemes(lua_State *L)
 	return 1;
 }
 
-static const struct luaL_Reg uimeta_methods[] =
+static const struct luaL_Reg uimeta_methods_c[] =
 {
-	{ "__gc", lua_gcWidget },
 	{ "addChild", lua_addChild },
 	{ "removeFromParent", lua_removeFromParent },
 	{ "getSize", lua_sizeWidget },
@@ -175,8 +174,74 @@ static const struct luaL_Reg uimeta_methods[] =
 	{ NULL, NULL },
 };
 
-static const  struct luaL_Reg uimember_methods[] =
+/*
+ * 取一个对象的元素顺序是先对象表，然后类表，然后才是c提供的默认方法
+ */
+int lua_indexWidget(lua_State *L)
 {
+	uiWidget *self = lua_checkWidget(L, 1);
+	const char * key = luaL_checkstring(L, 2);
+	if (self){
+		/* 在对象表中找对应的元素 */
+		if (self->selfRef != LUA_REFNIL){
+			lua_getref(L, self->selfRef);
+			lua_getfield(L, -1, key);
+			if (!lua_isnoneornil(L, -1)){
+				lua_remove(L, -2);
+				lua_remove(L, -2);
+				return 1;
+			}
+			else{
+				lua_pop(L, 3);
+			}
+		}
+		/* 在类表中找对应的元素 */
+		if (self->classRef!=LUA_REFNIL){
+			lua_getref(L, self->classRef);
+			lua_getfield(L, -1, key);
+			if (!lua_isnoneornil(L, -1)){
+				lua_remove(L, -2);
+				lua_remove(L, -2);
+				return 1;
+			}
+			else{
+				lua_pop(L, 3);
+			}
+		}
+		for (int i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg); i++){
+			if (uimeta_methods_c[i].name && strcmp(uimeta_methods_c[i].name, key) == 0){
+				lua_pushcfunction(L, uimeta_methods_c[i].func);
+				return 1;
+			}
+		}
+	}
+	lua_pushnil(L);
+	return 1;
+}
+
+/*
+ * 将新加的索引项都加入到selfRef表中
+ */
+int lua_newindexWidget(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	const char * key = luaL_checkstring(L, 2);
+	if (self){
+		if (self->selfRef != LUA_REFNIL){
+			lua_getref(L, self->selfRef);
+			lua_pushvalue(L, 3);
+			lua_setfield(L, -2, key);
+			lua_pop(L, 1);
+		}
+	}
+	return 0;
+}
+
+static const struct luaL_Reg uimeta_methods[] =
+{
+	{ "__gc", lua_gcWidget },
+	{ "__index",lua_indexWidget },
+	{ "__newindex",lua_newindexWidget},
 	{ NULL, NULL },
 };
 

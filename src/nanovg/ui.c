@@ -34,18 +34,41 @@ int initUI()
 	return 1;
 }
 
+/* luaui.c 中的方法 */
+extern void lua_pushWidget(lua_State *L, uiWidget * widget);
+
 /*
  * 调用对象的类方法如:onInit,onRelease
  */
 static void callWidgetEvent(uiWidget * widget, const char *strEvent)
 {
+	/* 先找对象的重载方法 */
+	if (widget->selfRef != LUA_REFNIL){
+		lua_State * L = lua_GlobalState();
+		if (L){
+			lua_getref(L, widget->selfRef);
+			lua_getfield(L, -1, strEvent);
+			if (lua_isfunction(L, -1)){
+				//lua_getref(L, widget->selfRef);
+				lua_pushWidget(L, widget);
+				lua_executeFunction(1);
+				lua_pop(L, 1); //classRef;
+				return;
+			}
+			else{
+				lua_pop(L, 2);
+			}
+		}
+	}
+	/* 然后访问类方法方法 */
 	if (widget->classRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		if (L){
 			lua_getref(L, widget->classRef);
 			lua_getfield(L, -1, strEvent);
 			if (lua_isfunction(L, -1)){
-				lua_getref(L, widget->selfRef);
+				//lua_getref(L, widget->selfRef);
+				lua_pushWidget(L, widget);
 				lua_executeFunction(1);
 				lua_pop(L, 1); //classRef;
 			}
@@ -301,16 +324,38 @@ void uiEnumWidget(uiWidget *root, uiEnumProc func)
 }
 
 /*
- * 调用对象的渲染方法onDraw
+ * 调用对象的渲染方法onDraw,允许对象重载
  */
 static void renderWidget(uiWidget * widget)
 {
+	/* 首先搜索对象的onDraw方法 */
+	if (widget->selfRef != LUA_REFNIL){
+		lua_State * L = lua_GlobalState();
+		lua_getref(L, widget->selfRef);
+		lua_getfield(L, -1, "onDraw");
+		if (lua_isfunction(L, -1)){
+			//lua_getref(L, widget->selfRef);
+			lua_pushWidget(L, widget);
+			lua_pushnumber(L, widget->x);
+			lua_pushnumber(L, widget->y);
+			lua_pushnumber(L, widget->width);
+			lua_pushnumber(L, widget->height);
+			lua_executeFunction(5);
+			lua_pop(L, 1); //classRef;
+			return;
+		}
+		else{
+			lua_pop(L, 2);
+		}
+	}
+	/* 在搜索类方法 */
 	if (widget->classRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		lua_getref(L, widget->classRef);
 		lua_getfield(L, -1, "onDraw");
 		if (lua_isfunction(L, -1)){
-			lua_getref(L, widget->selfRef);
+			//lua_getref(L, widget->selfRef);
+			lua_pushWidget(L, widget);
 			lua_pushnumber(L, widget->x);
 			lua_pushnumber(L, widget->y);
 			lua_pushnumber(L, widget->width);
