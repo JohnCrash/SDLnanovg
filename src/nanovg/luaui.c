@@ -122,8 +122,8 @@ int lua_positionWidget(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
 	if (self){
-		lua_pushnumber(L, self->xform[4]);
-		lua_pushnumber(L, self->xform[5]);
+		lua_pushnumber(L, self->x);
+		lua_pushnumber(L, self->y);
 	}
 	else{
 		lua_pushnil(L);
@@ -163,6 +163,93 @@ int lua_loadThemes(lua_State *L)
 	return 1;
 }
 
+int lua_getScale(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	if (self){
+		lua_pushnumber(L, self->sx);
+		lua_pushnumber(L, self->sy);
+	}
+	else{
+		lua_pushnumber(L, 0);
+		lua_pushnumber(L, 0);
+	}
+	return 2;
+}
+
+int lua_setScale(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	float sx = luaL_checknumber(L, 2);
+	float sy = luaL_checknumber(L, 3);
+	if (self){
+		/* 设置缩放中心点 */
+		if (lua_isnumber(L, 4) && lua_isnumber(L, 5)){
+			float ox = luaL_checknumber(L, 4);
+			float oy = luaL_checknumber(L, 5);
+			self->ox = ox;
+			self->oy = oy;
+		}
+		uiScale(self, sx, sy);
+	}
+	return 0;
+}
+
+int lua_getRotate(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	if (self){
+		lua_pushnumber(L, self->angle);
+	}
+	else{
+		lua_pushnumber(L, 0);
+	}
+	return 1;
+}
+
+int lua_setRotate(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	float angle = luaL_checknumber(L, 2);
+	if (self){
+		/* 设置旋转中心点 */
+		if (lua_isnumber(L, 3) && lua_isnumber(L, 4)){
+			float ox = luaL_checknumber(L, 3);
+			float oy = luaL_checknumber(L, 4);
+			self->ox = ox;
+			self->oy = oy;
+		}
+		uiRotate(self,angle);
+	}
+	return 0;
+}
+
+int lua_getOrigin(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	if (self){
+		lua_pushnumber(L, self->ox);
+		lua_pushnumber(L, self->oy);
+	}
+	else{
+		lua_pushnumber(L, 0);
+		lua_pushnumber(L, 0);
+	}
+	return 2;
+}
+
+int lua_enableClip(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	if (self){
+		if (lua_toboolean(L, 2))
+			self->isVisible |= CLIP;
+		else
+			self->isVisible &= !CLIP;
+	}
+	return 0;
+}
+
 static const struct luaL_Reg uimeta_methods_c[] =
 {
 	{ "addChild", lua_addChild },
@@ -171,6 +258,12 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "getPosition", lua_positionWidget },
 	{ "setSize", lua_setSizeWidget },
 	{ "setPosition", lua_setPositionWidget },
+	{ "getScale", lua_getScale },
+	{ "setScale", lua_setScale },
+	{ "getRotate", lua_getRotate },
+	{ "setRotate", lua_setRotate },
+	{ "getOrigin", lua_getOrigin },
+	{ "enableClip", lua_enableClip },
 	{ NULL, NULL },
 };
 

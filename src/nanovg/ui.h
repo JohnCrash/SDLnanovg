@@ -17,6 +17,7 @@ extern "C"{
 		INVISIBLE = 0,
 		VISIBLE = 1,
 		LINEAR = 2,
+		CLIP = 4,
 	};
 	
 	typedef struct {
@@ -28,7 +29,7 @@ extern "C"{
 		float width, height;
 		float xform[6];
 		float curxform[6];
-		float angle, sx, sy;
+		float x,y,angle, sx, sy,ox,oy;
 		char isVisible;
 		unsigned char handleEvent;
 		int classRef;

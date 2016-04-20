@@ -2,7 +2,7 @@
 
 surface_t * createSphereTriangle(float r, int u, int v)
 {
-	
+	return 0;
 }
 
 surface_t * createBox(vec3_t v)

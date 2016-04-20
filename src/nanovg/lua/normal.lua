@@ -54,8 +54,9 @@ return
 		end,
 		onRelease=function(self)
 		end,
-		onDraw=function()
-			print("window onDraw")
+		onDraw=function(self)
+			local w,h = self:getSize()
+			drawWindow(self._title or "Window",0,0,w,h)
 		end,
 		onEvent=function()
 			print("window onEvent")
