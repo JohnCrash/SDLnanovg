@@ -73,6 +73,7 @@ extern "C"{
 	int InWidget(uiWidget *parent, uiWidget *child);
 
 	int loadThemes(const char *name, const char *filename);
+	void unloadThemes(const char *name);
 
 	typedef void(*uiEnumProc)(uiWidget *);
 	void uiEnumWidget(uiWidget *root, uiEnumProc func);

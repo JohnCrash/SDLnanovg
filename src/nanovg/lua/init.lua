@@ -2,18 +2,46 @@ require "nanovg"
 local vg = require "vg"
 local ui = require "ui"
 
+local function messagebox(str)
+	local window = ui.createWidget("normal","window")
+	local label = ui.createWidget("normal","label")
+	local button = ui.createWidget("normal","button")
+	
+	label:setString(str)
+	local w,h = label:getSize()
+	local ww,hh
+	print("label w = "..w..",h="..h)
+
+	ww = w+12
+	hh = h+30+30+6
+	window:setSize( ww,hh )
+	label:setPosition(6,33)
+	button:setTitle("OK")
+	button:setSize(64,30)
+	button:setPosition((ww-64)/2,33+h)
+	window:addChild(label)
+	window:addChild(button)
+	
+	local root = ui.rootWidget()
+	local sw,sh = root:getSize()
+	x = (sw-ww)/2
+	y = (sh-hh)/2
+	window:setPosition(x,y)
+	return window
+end
+
 --eventFunction("init",function()
 	ui.loadThemes("normal","normal")
 
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
 	local window = ui.createWidget("normal","window")
-	root:addChild(window)
+	--root:addChild(window)
 	window:setSize(w/2,h/2)
 	window:enableClip(true)
 	window:setPosition(0,0)
 	local window2 = ui.createWidget("normal","window")
-	root:addChild(window2)
+	--root:addChild(window2)
 	window2:setSize(w/2,h/2)	
 	window2:setPosition(w/2,h/2)	
 	window2:enableClip(true)
@@ -31,7 +59,8 @@ local ui = require "ui"
 	--bottom:setPosition(w-100,h-120)
 	bottom:setSize(100,120)	
 --end)
-
+local box = messagebox("Hello world! \nHello world! Hello world!")
+root:addChild(box)
 local t = 0
 local angle = 0
 local sx,sy = 1,1

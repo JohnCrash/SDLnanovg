@@ -1,6 +1,20 @@
 local vg = require "vg"
 
 print("normal themes")
+
+local function isBlack(col)
+	return col
+end
+
+local function drawLabel(text, x, y, w, h)
+	vg.fontSize( 18.0)
+	vg.fontFace( "sans")
+	vg.fillColor( vg.rgba(255,255,255,128))
+
+	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+	vg.text( x,y+h*0.5,text)
+end
+
 local function drawWindow(title,x,y,w,h)
 	local cornerRadius = 3.0;
 	vg.save()
@@ -43,11 +57,63 @@ local function drawWindow(title,x,y,w,h)
 	vg.restore()
 end
 
+local function drawButton(preicon, text, x, y, w, h, col)
+	local bg
+	local cornerRadius = 4.0
+	local tw = 0
+	local iw = 0
+
+	bg = vg.linearGradient( x,y,x,y+h, vg.rgba(255,255,255,isBlack(col) and 16 or 32), vg.rgba(0,0,0,isBlack(col) and 16 or 32))
+	vg.beginPath()
+	vg.roundedRect( x+1,y+1, w-2,h-2, cornerRadius-1)
+	if not isBlack(col) then
+		vg.fillColor( col)
+		vg.fill()
+	end
+	vg.fillPaint( bg)
+	vg.fill()
+
+	vg.beginPath()
+	vg.roundedRect( x+0.5,y+0.5, w-1,h-1, cornerRadius-0.5)
+	vg.strokeColor( vg.rgba(0,0,0,48))
+	vg.stroke()
+
+	vg.fontSize( 20.0)
+	vg.fontFace( "sans-bold")
+	tw = vg.textBounds( 0,0, text)
+	if preicon ~= 0 then
+		vg.fontSize( h*1.3)
+		vg.fontFace( "icons")
+		iw = vg.textBounds( 0,0, vg.cpToUTF8(preicon))
+		iw = iw+h*0.15
+	end
+
+	if preicon ~= 0 then
+		vg.fontSize( h*1.3)
+		vg.fontFace( "icons")
+		vg.fillColor( vg.rgba(255,255,255,96))
+		vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+		vg.text( x+w*0.5-tw*0.5-iw*0.75, y+h*0.5, vg.cpToUTF8(preicon))
+	end
+
+	vg.fontSize( 20.0)
+	vg.fontFace( "sans-bold")
+	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
+	vg.fillColor( vg.rgba(0,0,0,160))
+	vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5-1,text)
+	vg.fillColor( vg.rgba(255,255,255,160))
+	vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5,text)
+end
+
 return
 {
 	onInit=function()
+		vg.createFont("icons","fonts/entypo.ttf")
+		vg.createFont("sans","fonts/Roboto-Regular.ttf")
+		vg.createFont("sans-bold","fonts/Roboto-Bold.ttf")	
 	end,
 	onRelease=function()
+		print("normal onRelease")
 	end,
 	window={
 		onInit=function(self)
@@ -64,27 +130,56 @@ return
 		setTitle=function(self,title)
 			self._title = title
 		end,
+		getTitleHeight=function(self)
+			return 30
+		end,
 	},
 	button={
-		onInit=function(self)
-			print("button onInit")
-			fontIcons = vg.createFont("icons","fonts/entypo.ttf")
-			fontNormal = vg.createFont("sans","fonts/Roboto-Regular.ttf")
-			fontBold = vg.createFont("sans-bold","fonts/Roboto-Bold.ttf")			
+		onInit=function(self)		
+			self._color = vg.rgba(255,0,0,0)
 		end,
 		onRelease=function(self)
-			print("button onRelease")
 		end,	
 		onDraw=function(self)
-			--print( string.format("x=%d y=%d",x,y) )
 			local w,h = self:getSize()
-			drawWindow(self._title or "OK",0,0,w,h)
+			drawButton(0,self._title or "OK",0,0,w,h,self._color)
 		end,
 		onEvent=function()
-			print("button onEvent")
 		end,
 		setTitle=function(self,title)
 			self._title = title
 		end,		
+	},	
+	label={
+		onInit=function(self)		
+		end,
+		onRelease=function(self)
+		end,	
+		onDraw=function(self)
+			local w,h = self:getSize()
+			drawLabel(self._string or "",0,0,w,h);
+		end,
+		onEvent=function()
+		end,
+		setString=function(self,str)
+			self._string = str
+			vg.save()
+			vg.fontSize(18.0)
+			vg.fontFace("sans")
+			local linewidth,x,y,w,h = vg.textBounds(0,0,str)
+			print(string.format("%d,%d,%d,%d,%d",linewidth,x,y,w,h))
+			self:setSize(w,h-y)
+			vg.restore()
+		end,
+	},
+	progress={
+		onInit=function(self)		
+		end,
+		onRelease=function(self)
+		end,	
+		onDraw=function(self)
+		end,
+		onEvent=function()
+		end,	
 	},	
 }

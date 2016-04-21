@@ -147,8 +147,19 @@ void releaseUI()
 	while(_themes){
 		ThemesList * ptemp = _themes;
 		_themes = ptemp->next;
-		if (L && ptemp->themeRef)
+		if (L && ptemp->themeRef){
+			lua_getref(L, ptemp->themeRef);
+			lua_getfield(L, -1, "onRelease");
+			if (lua_isfunction(L, -1)){
+				lua_pushvalue(L, -2);
+				lua_executeFunction(1);
+				lua_pop(L, 1);
+			}
+			else{
+				lua_pop(L, 2);
+			}
 			lua_unref(L, ptemp->themeRef);
+		}
 		free(ptemp->filename);
 		free(ptemp->name);
 		free(ptemp);
@@ -254,6 +265,12 @@ void uiRemoveFromParent(uiWidget *self)
 int loadThemes(const char *name, const char *filename)
 {
 	lua_State *L;
+	ThemesList * theme = _themes;
+	while (theme){
+		if (strcmp(theme->name, name) == 0)
+			return 1;
+		theme = theme->next;
+	}
 	L = lua_GlobalState();
 	if (lua_executeScriptFileResult(filename, 1)){
 		if (lua_istable(L, -1)){
@@ -261,9 +278,31 @@ int loadThemes(const char *name, const char *filename)
 			if (!ptl)return 0;
 			ptl->filename = strdup(filename);
 			ptl->name = strdup(name);
+			lua_pushvalue(L, -1);
 			ptl->themeRef = lua_ref(L, 1);
 			ptl->next = _themes;
 			_themes = ptl;
+			/*
+			 * 调用样式初始化
+			 */
+			lua_getfield(L, -1, "onInit");
+			/*
+			 * -1 onInit function
+			 * -2 themeTable
+			 */
+			if (lua_isfunction(L, -1)){
+				lua_pushvalue(L,-2);
+				/*
+				 * -1 thememTable
+				 * -2 onInit function
+				 * -3 themeTable
+				 */
+				lua_executeFunction(1);
+				lua_pop(L, 1);
+			}
+			else{
+				lua_pop(L, 2);
+			}
 			return 1;
 		}
 		else{
@@ -271,6 +310,43 @@ int loadThemes(const char *name, const char *filename)
 		}
 	}
 	return 0;
+}
+
+void unloadThemes(const char *name)
+{
+	ThemesList * theme = _themes;
+	ThemesList * prev = NULL;
+	while (theme){
+		if (strcmp(name, theme->name) == 0){
+			if (prev){
+				prev->next = theme->next;
+			}
+			else{
+				_themes = theme->next;
+			}
+			/*
+			 * 调用释放函数
+			 */
+			lua_State *L = lua_GlobalState();
+			if (L&&theme->themeRef != LUA_REFNIL){
+				lua_getref(L, theme->themeRef);
+				lua_getfield(L, -1, "onRelease");
+				if (lua_isfunction(L, -1)){
+					lua_pushvalue(L, -2);
+					lua_executeFunction(1);
+					lua_pop(L, 1);
+				}
+				else{
+					lua_pop(L, 2);
+				}
+				lua_unref(L, theme->themeRef);
+			}
+			free(theme);
+			return;
+		}
+		prev = theme;
+		theme = theme->next;
+	}
 }
 
 void uiSetVisible(uiWidget *self, int b)
