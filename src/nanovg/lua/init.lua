@@ -11,6 +11,7 @@ local ui = require "ui"
 	root:addChild(window)
 	window:setSize(w/2,h/2)
 	window:enableClip(true)
+	window:setPosition(0,0)
 	local window2 = ui.createWidget("normal","window")
 	root:addChild(window2)
 	window2:setSize(w/2,h/2)	

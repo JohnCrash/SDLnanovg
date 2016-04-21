@@ -242,13 +242,36 @@ int lua_enableClip(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
 	if (self){
-		if (lua_toboolean(L, 2))
-			self->isVisible |= CLIP;
+		if (lua_isboolean(L,2))
+			enableClipClient(self, lua_toboolean(L, 2)?1:0);
 		else
-			self->isVisible &= !CLIP;
+			enableClipClient(self, 0);
 	}
 	return 0;
 }
+
+int lua_themeFunction(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	const char *fname = luaL_checkstring(L, 2);
+	/* 在类表中找对应的元素 */
+	if (self->classRef != LUA_REFNIL){
+		lua_getref(L, self->classRef);
+		lua_getfield(L, -1, fname);
+		if (!lua_isnoneornil(L, -1)){
+			lua_remove(L, -2);
+			lua_remove(L, -2);
+			return 1;
+		}
+		else{
+			lua_pop(L, 3);
+		}
+	}
+	lua_pushnil(L);
+	return 1;
+}
+
+int lua_widgetFunction(lua_State *L);
 
 static const struct luaL_Reg uimeta_methods_c[] =
 {
@@ -264,8 +287,24 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "setRotate", lua_setRotate },
 	{ "getOrigin", lua_getOrigin },
 	{ "enableClip", lua_enableClip },
+	{ "widgetFunction", lua_widgetFunction },
+	{ "themeFunction", lua_themeFunction },
 	{ NULL, NULL },
 };
+
+int lua_widgetFunction(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	const char *fname = luaL_checkstring(L, 2);
+	for (int i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg); i++){
+		if (uimeta_methods_c[i].name && strcmp(uimeta_methods_c[i].name, fname) == 0){
+			lua_pushcfunction(L, uimeta_methods_c[i].func);
+			return 1;
+		}
+	}
+	lua_pushnil(L);
+	return 1;
+}
 
 /*
  * 取一个对象的元素顺序是先对象表，然后类表，然后才是c提供的默认方法

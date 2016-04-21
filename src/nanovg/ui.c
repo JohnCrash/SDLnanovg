@@ -307,6 +307,14 @@ void uiSetSize(uiWidget *self, float w, float h)
 	self->height = h;
 }
 
+void enableClipClient(uiWidget *self, int b)
+{
+	if (b)
+		self->isVisible |= CLIP;
+	else
+		self->isVisible &= !CLIP;
+}
+
 int InWidget(uiWidget *parent, uiWidget *child)
 {
 	if (child->x > parent->width || child->x + child->width < 0)
@@ -320,15 +328,24 @@ int InWidget(uiWidget *parent, uiWidget *child)
  * 将所有可见的对象都链接在一起，并且返回其头
  * 通过enum_next进行遍历
  */
-static uiWidget * uiEnumWidgetVisible(uiWidget *root,uiWidget *tail)
+static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiEnumProc renderFunc)
 {
 	uiWidget * child;
+	int isclip = 0;
 	if (root->parent){
 		memcpy(root->curxform, root->xform, sizeof(float)* 6);
 		nvgTransformMultiply(root->curxform, root->parent->curxform);
 	}
 	else{
 		memcpy(root->curxform,root->xform,sizeof(float)*6);
+	}
+	nvgSetTransform(_vg, root->curxform);
+	renderFunc(root);
+	/* 对子窗口设置剪切区域 */
+	if (root->isVisible&CLIP){
+		nvgSave(_vg);
+		nvgScissor(_vg, 0, 0, root->width, root->height);
+		isclip = 1;
 	}
 	child = root->child;
 	while (child){
@@ -337,38 +354,42 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root,uiWidget *tail)
 				tail->enum_next = child;
 				tail = child;
 				tail->enum_next = NULL;
-				tail = uiEnumWidgetVisible(child, tail);
+				tail = uiEnumWidgetVisible(child, tail, renderFunc);
 			}
 		}
 		child = child->next;
 	}
 
+	if (isclip){
+		nvgRestore(_vg);
+	}
 	return tail;
 }
 
 /*
-* 枚举的过程中func可能改变窗口结构甚至删除窗口
+* 枚举的过程中eventFunc可能改变窗口结构甚至删除窗口
 * 这需要特殊处理，首先将满足调用func的窗口放入一个表中
-* 然后才调用func函数，如果在func函数中删除了窗口，后面
-* 的调用会访问非法指针，因此func中将要删除的窗口标记，
+* 然后才调用eventFunc函数，如果在func函数中删除了窗口，后面
+* 的调用会访问非法指针，因此eventFunc中将要删除的窗口标记，
 * 等枚举结束才进行真正的删除。
 */
-void uiEnumWidget(uiWidget *root, uiEnumProc func)
+void uiEnumWidget(uiWidget *root, 
+	uiEnumProc renderFunc,uiEnumProc eventFunc,
+	int winWidth, int winHeight, float devicePixelRatio)
 {
 	uiWidget * head,*temp;
 	head = root;
 	head->enum_next = NULL;
-	uiEnumWidgetVisible(root, head);
+	uiEnumWidgetVisible(root, head, renderFunc);
+	/*
+	 * 下面分发事件
+	 */
 	/* 打开延时删除表 */
 	uiDelayDelete(1);
-	nvgResetTransform(_vg);
+	//nvgResetTransform(_vg);
 	while (head){
-		nvgSetTransform(_vg, head->curxform);
-		if (head->isVisible&CLIP)
-			nvgScissor(_vg, 0, 0, head->width, head->height);
-		else
-			nvgResetScissor(_vg);
-		func(head);
+		//nvgSetTransform(_vg, head->curxform);
+		eventFunc(head);
 		head = head->enum_next;
 	}
 	uiDelayDelete(0);
@@ -419,6 +440,10 @@ static void renderWidget(uiWidget * widget)
 	}
 }
 
+static void eventWidget(uiWidget * widget)
+{
+
+}
 /*
  * 渲染对象树结构
  */
@@ -428,7 +453,7 @@ void uiDrawWidget(uiWidget *self)
 		glViewport(0, 0, (int)self->width, (int)self->height);
 		nvgBeginFrame(_vg, (int)self->width, (int)self->height, 1);
 		nvgResetTransform(_vg);
-		uiEnumWidget(_root, renderWidget);
+		uiEnumWidget(_root, renderWidget, eventWidget,(int)self->width, (int)self->height, 1);
 		nvgEndFrame(_vg);
 	}
 }

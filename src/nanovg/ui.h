@@ -13,6 +13,7 @@ extern "C"{
 		EVENT_ZOOM = 8,
 	};
 
+	/* uiWidget isVisible 的可能组合 */
 	enum{
 		INVISIBLE = 0,
 		VISIBLE = 1,
@@ -27,8 +28,11 @@ extern "C"{
 
 	typedef struct uiWidget_t{
 		float width, height;
+		/* 控件的当前变换矩阵 */
 		float xform[6];
+		/* 临时数据在渲染时用 */
 		float curxform[6];
+		/* ox,oy旋转和缩放中心，相对于x,y */
 		float x,y,angle, sx, sy,ox,oy;
 		char isVisible;
 		unsigned char handleEvent;
@@ -72,7 +76,8 @@ extern "C"{
 
 	typedef void(*uiEnumProc)(uiWidget *);
 	void uiEnumWidget(uiWidget *root, uiEnumProc func);
-
+	void clientWidget(uiWidget *self, float x, float y, float w, float h);
+	void enableClipClient(uiWidget *self, int b);
 #ifdef __cplusplus
 }
 #endif
