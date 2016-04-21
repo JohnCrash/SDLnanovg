@@ -8,25 +8,17 @@ local function messagebox(str)
 	local button = ui.createWidget("normal","button")
 	
 	label:setString(str)
-	local w,h = label:getSize()
-	local ww,hh
-	print("label w = "..w..",h="..h)
-
-	ww = w+12
-	hh = h+30+30+6
-	window:setSize( ww,hh )
-	label:setPosition(6,33)
 	button:setTitle("OK")
-	button:setSize(64,30)
-	button:setPosition((ww-64)/2,33+h)
+	button:setSize(60,30)
 	window:addChild(label)
 	window:addChild(button)
 	
-	local root = ui.rootWidget()
-	local sw,sh = root:getSize()
-	x = (sw-ww)/2
-	y = (sh-hh)/2
-	window:setPosition(x,y)
+	window:setPosition(120,100)
+	window:setSize(120,90)
+	local w,h = ui.linearRelayout(
+		ui.rect(0,30,120,60),
+		{label,button},
+		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
 	return window
 end
 
@@ -59,7 +51,7 @@ end
 	--bottom:setPosition(w-100,h-120)
 	bottom:setSize(100,120)	
 --end)
-local box = messagebox("Hello world! \nHello world! Hello world!")
+local box = messagebox("Hello world!")
 root:addChild(box)
 local t = 0
 local angle = 0

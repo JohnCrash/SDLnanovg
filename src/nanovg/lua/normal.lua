@@ -167,7 +167,6 @@ return
 			vg.fontSize(18.0)
 			vg.fontFace("sans")
 			local linewidth,x,y,w,h = vg.textBounds(0,0,str)
-			print(string.format("%d,%d,%d,%d,%d",linewidth,x,y,w,h))
 			self:setSize(w,h-y)
 			vg.restore()
 		end,

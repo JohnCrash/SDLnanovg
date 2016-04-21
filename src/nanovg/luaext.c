@@ -373,6 +373,14 @@ static int lua_screenSize(lua_State *L)
 	lua_pushnumber(L, state->window_h);
 	return 2;
 }
+
+static int lua_isand(lua_State *L)
+{
+	int a = luaL_checkinteger(L, 1);
+	int b = luaL_checkinteger(L, 2);
+	lua_pushboolean(L, a&b);
+	return 1;
+}
 /*
  * ≥ı ºLuaª∑æ≥
  */
@@ -381,6 +389,7 @@ int initLua()
 	int i;
 	const luaL_reg global_functions[] = {
 		{ "print", lua_print },
+		{ "isand", lua_isand },
 		{ "eventFunction", lua_eventFunction },
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },

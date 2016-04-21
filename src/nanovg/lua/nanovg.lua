@@ -1,5 +1,5 @@
 local vg = require "vg"
-
+--init vg
 vg.NVG_SOLID = 1
 vg.NVG_HOLE = 2
 
@@ -63,4 +63,111 @@ end
 
 vg.imagePattern = function(ox,oy,ex,ey,angle,image,alpha)
 	return {type=3,ox=ox,oy=oy,ex=ex,ey=ey,angle=angle,alpha=alpha,image=image}
+end
+
+--init ui
+local ui = require "ui"
+
+ui.ALIGN_LEFT = 1
+ui.ALIGN_CENTER = 2
+ui.ALIGN_RIGHT = 4
+ui.ALIGN_TOP = 8
+ui.ALIGN_MIDDLE = 16
+ui.ALIGN_BOTTOM = 32
+ui.ALIGN_BASELINE = 64
+ui.ALIGN_H = 128 --horizontal
+ui.ALIGN_V = 256 --vertical
+ui.ALIGN_REVERSE = 512 --reverse
+
+ui.rect=function(x,y,width,height)
+	return {x=x,y=y,width=width,height=height}
+end
+
+ui.linearRelayout = function(rect,list,align,space)
+	space = space or 0
+	if isand(align,ui.ALIGN_H) then --horizontal
+		local width = space
+		local height = 0
+		for i,widget in ipairs(list) do
+			local w,h = widget:getSize()
+			width = width + w + space
+			height = math.max(h,height)
+		end
+		local x,y
+		if isand(align,ui.ALIGN_LEFT) then
+			x = space
+		elseif isand(align,ui.ALIGN_CENTER) then
+			x = (rect.width-width)/2
+		elseif isand(align,ui.ALIGN_RIGHT) then
+			x = rect.width-width
+		else
+			x = space
+		end
+		local start,len
+		if isand(align,ui.ALIGN_REVERSE) then
+			len = 1
+			start = #list
+		else
+			len = #list
+			start = 1
+		end
+		for i = start,len do
+			local widget = list[i]
+			local w,h = widget:getSize()
+			if isand(align,ui.ALIGN_TOP) then
+				y = 0
+			elseif isand(align,ui.ALIGN_MIDDLE) then
+				y = (height-h)/2
+			elseif isand(align,ui.ALIGN_BOTTOM) then
+				y = height-h
+			else
+				y = (height-h)/2
+			end
+			widget:setPosition(x,y)
+			x = x + w + space
+		end
+		return width,height
+	else --vertical
+		local width = 0
+		local height = space
+		for i,widget in ipairs(list) do
+			local w,h = widget:getSize()
+			height = height + w + space
+			width = math.max(w,width)
+		end
+		local x,y
+		if isand(align,ui.ALIGN_TOP) then
+			y = space
+		elseif isand(align,ui.ALIGN_MIDDLE) then
+			y = (rect.height-height)/2
+		elseif isand(align,ui.ALIGN_BOTTOM) then
+			y = rect.height-height
+		else
+			y = space
+		end
+		local start,len
+		if isand(align,ui.ALIGN_REVERSE) then
+			len = 1
+			start = #list
+		else
+			len = #list
+			start = 1
+		end
+		for i = start,len do
+			local widget = list[i]
+			local w,h = widget:getSize()
+			if isand(align,ui.ALIGN_LEFT) then
+				x = 0
+			elseif isand(align,ui.ALIGN_CENTER) then
+				x = (width-w)/2
+			elseif isand(align,ui.ALIGN_RIGHT) then
+				x = width-w
+			else
+				x = (width-w)/2
+			end
+			widget:setPosition(x,y)
+			y = y + h + space
+		end	
+		return width,height
+	end
 end
