@@ -97,33 +97,35 @@ ui.linearRelayout = function(rect,list,align,space)
 		if isand(align,ui.ALIGN_LEFT) then
 			x = space
 		elseif isand(align,ui.ALIGN_CENTER) then
-			x = (rect.width-width)/2
+			x = (rect.width-width)/2+space
 		elseif isand(align,ui.ALIGN_RIGHT) then
-			x = rect.width-width
+			x = rect.width-width+space
 		else
 			x = space
 		end
-		local start,len
+		local start,len,step
 		if isand(align,ui.ALIGN_REVERSE) then
 			len = 1
 			start = #list
+			step = -1
 		else
 			len = #list
 			start = 1
+			step = 1
 		end
-		for i = start,len do
+		for i = start,len,step do
 			local widget = list[i]
 			local w,h = widget:getSize()
 			if isand(align,ui.ALIGN_TOP) then
 				y = 0
 			elseif isand(align,ui.ALIGN_MIDDLE) then
-				y = (height-h)/2
+				y = (rect.height-h)/2
 			elseif isand(align,ui.ALIGN_BOTTOM) then
-				y = height-h
+				y = rect.height-h
 			else
-				y = (height-h)/2
+				y = (rect.height-h)/2
 			end
-			widget:setPosition(x,y)
+			widget:setPosition(rect.x+x,rect.y+y)
 			x = x + w + space
 		end
 		return width,height
@@ -132,40 +134,42 @@ ui.linearRelayout = function(rect,list,align,space)
 		local height = space
 		for i,widget in ipairs(list) do
 			local w,h = widget:getSize()
-			height = height + w + space
+			height = height + h + space
 			width = math.max(w,width)
 		end
 		local x,y
 		if isand(align,ui.ALIGN_TOP) then
 			y = space
 		elseif isand(align,ui.ALIGN_MIDDLE) then
-			y = (rect.height-height)/2
+			y = (rect.height-height)/2+space
 		elseif isand(align,ui.ALIGN_BOTTOM) then
-			y = rect.height-height
+			y = rect.height-height+space
 		else
 			y = space
 		end
-		local start,len
+		local start,len,step
 		if isand(align,ui.ALIGN_REVERSE) then
 			len = 1
 			start = #list
+			step = -1
 		else
 			len = #list
 			start = 1
+			step = 1
 		end
-		for i = start,len do
+		for i = start,len,step do
 			local widget = list[i]
 			local w,h = widget:getSize()
 			if isand(align,ui.ALIGN_LEFT) then
 				x = 0
 			elseif isand(align,ui.ALIGN_CENTER) then
-				x = (width-w)/2
+				x = (rect.width-w)/2
 			elseif isand(align,ui.ALIGN_RIGHT) then
-				x = width-w
+				x = rect.width-w
 			else
-				x = (width-w)/2
+				x = (rect.width-w)/2
 			end
-			widget:setPosition(x,y)
+			widget:setPosition(rect.x+x,rect.y+y)
 			y = y + h + space
 		end	
 		return width,height

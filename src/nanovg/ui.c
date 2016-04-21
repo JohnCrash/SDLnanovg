@@ -227,7 +227,77 @@ void uiDeleteWidget(uiWidget *self)
 	}
 }
 
+static uiWidget * getTail(uiWidget *self)
+{
+	uiWidget * tail;
+	if (!self->next)return self;
+
+	tail = self->next;
+	while (tail->next){
+		tail = tail->next;
+	}
+	return tail;
+}
+
+static uiWidget * getHead(uiWidget *self)
+{
+	uiWidget * head;
+	if (!self->prev)return self;
+
+	head = self->prev;
+	while (head->prev){
+		head = head->prev;
+	}
+	return head;
+}
+
+/* 将对象放入显示最上面 */
+void uiBringTop(uiWidget * self)
+{
+	if (self&&self->parent){
+		if (self->parent->child != self){
+			uiWidget * parent = self->parent;
+			uiAddChild(parent, self);
+		}
+	}
+}
+
+/* 将对象放入显示最下面 */
+void uiBringBottom(uiWidget * self)
+{
+	if (self&&self->parent){
+		uiWidget * tail = getTail(self);
+		if (tail != self){
+			uiWidget * parent = self->parent;
+			uiAddChildToTail(parent, self);
+		}
+	}
+}
+
+/*
+ * 将对象插入到队列的开始
+ */
 void uiAddChild(uiWidget *parent, uiWidget *child)
+{
+	if (parent && child){
+		uiRemoveFromParent(child);
+		child->parent = parent;
+		if (parent->child){
+			uiWidget * tail = getTail(parent->child);
+			tail->next = child;
+			child->prev = tail;
+			child->next = NULL;
+		}
+		else{
+			parent->child = child;
+		}
+	}
+}
+
+/*
+* 将对象插入到队列的结尾
+*/
+void uiAddChildToTail(uiWidget *parent, uiWidget *child)
 {
 	if (parent && child){
 		uiRemoveFromParent(child);

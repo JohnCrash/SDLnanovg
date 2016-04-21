@@ -14,11 +14,16 @@ local function messagebox(str)
 	window:addChild(button)
 	
 	window:setPosition(120,100)
-	window:setSize(120,90)
+	window:setSize(240,90)
 	local w,h = ui.linearRelayout(
-		ui.rect(0,30,120,60),
+		ui.rect(0,30,240,60),
 		{label,button},
-		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
+		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)
+	window:setSize(w+48,h+30)
+	ui.linearRelayout(
+		ui.rect(0,30,w+48,h),
+		{label,button},
+		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)	
 	return window
 end
 
@@ -51,7 +56,7 @@ end
 	--bottom:setPosition(w-100,h-120)
 	bottom:setSize(100,120)	
 --end)
-local box = messagebox("Hello world!")
+local box = messagebox("Hello world! http://www.guancha.cn/")
 root:addChild(box)
 local t = 0
 local angle = 0

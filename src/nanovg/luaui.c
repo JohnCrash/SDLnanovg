@@ -97,6 +97,14 @@ int lua_addChild(lua_State *L)
 	return 0;
 }
 
+int lua_addChildTail(lua_State *L)
+{
+	uiWidget *parent = lua_checkWidget(L, 1);
+	uiWidget *child = lua_checkWidget(L, 2);
+	uiAddChildToTail(parent, child);
+	return 0;
+}
+
 int lua_removeFromParent(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
@@ -271,11 +279,53 @@ int lua_themeFunction(lua_State *L)
 	return 1;
 }
 
+int lua_bringTop(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	if (self){
+		uiBringTop(self);
+	}
+	return 0;
+}
+
+int lua_bringBottom(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	if (self){
+		uiBringBottom(self);
+	}
+	return 0;
+}
+
+int lua_childs(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	if (self){
+		int idx = 1;
+		uiWidget * child = self->child;
+		lua_newtable(L);
+		while (child){
+			lua_pushWidget(L, child);
+			/*
+			 * -1 child
+			 * -2 table
+			 */
+			lua_rawseti(L, -2, idx++);
+			child = child->next;
+		}
+	}
+	else{
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
 int lua_widgetFunction(lua_State *L);
 
 static const struct luaL_Reg uimeta_methods_c[] =
 {
 	{ "addChild", lua_addChild },
+	{ "addChildTail", lua_addChildTail },
 	{ "removeFromParent", lua_removeFromParent },
 	{ "getSize", lua_sizeWidget },
 	{ "getPosition", lua_positionWidget },
@@ -289,20 +339,45 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "enableClip", lua_enableClip },
 	{ "widgetFunction", lua_widgetFunction },
 	{ "themeFunction", lua_themeFunction },
+	{ "bringTop", lua_bringTop },
+	{ "bringBottom", lua_bringBottom },
+	{ "childs", lua_childs },
 	{ NULL, NULL },
 };
+
+/*
+ * 根据名称返回函数
+ */
+static lua_CFunction getWidgetCFunction(const char * name)
+{
+	int j;
+	int len = strlen(name);
+	for (int i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg)-1; i++){
+		const char * s = uimeta_methods_c[i].name;
+		/*
+		 * 这里优化strcmp(s,name)==0
+		 */
+		for (j = 0; j < len; j++){
+			if (s[j] && s[j] == name[j]){
+				continue;
+			}
+			else break;
+		}
+		if (j==len)
+			return uimeta_methods_c[i].func;
+	}
+	return NULL;
+}
 
 int lua_widgetFunction(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
 	const char *fname = luaL_checkstring(L, 2);
-	for (int i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg); i++){
-		if (uimeta_methods_c[i].name && strcmp(uimeta_methods_c[i].name, fname) == 0){
-			lua_pushcfunction(L, uimeta_methods_c[i].func);
-			return 1;
-		}
-	}
-	lua_pushnil(L);
+	lua_CFunction func = getWidgetCFunction(fname);
+	if (func)
+		lua_pushcfunction(L, func);
+	else
+		lua_pushnil(L);
 	return 1;
 }
 
@@ -340,11 +415,10 @@ int lua_indexWidget(lua_State *L)
 				lua_pop(L, 3);
 			}
 		}
-		for (int i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg); i++){
-			if (uimeta_methods_c[i].name && strcmp(uimeta_methods_c[i].name, key) == 0){
-				lua_pushcfunction(L, uimeta_methods_c[i].func);
-				return 1;
-			}
+		lua_CFunction func = getWidgetCFunction(key);
+		if (func){
+			lua_pushcfunction(L, func);
+			return 1;
 		}
 	}
 	lua_pushnil(L);

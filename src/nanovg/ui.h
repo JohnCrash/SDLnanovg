@@ -58,7 +58,11 @@ extern "C"{
 	void releaseUI();
 
 	uiWidget * uiRootWidget();
+
+	void uiBringTop(uiWidget * self);
+	void uiBringBottom(uiWidget * self);
 	void uiAddChild(uiWidget *parent, uiWidget *child);
+	void uiAddChildToTail(uiWidget *parent, uiWidget *child);
 	void uiRemoveFromParent(uiWidget *self);
 	void uiSetVisible(uiWidget *self, int b);
 	void uiSetPosition(uiWidget *self, float x, float y);
