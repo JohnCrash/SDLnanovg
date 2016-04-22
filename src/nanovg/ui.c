@@ -875,3 +875,28 @@ void uiDisableEvent(uiWidget *self, int e)
 	if (self)
 		self->handleEvent &= !e;
 }
+
+/*
+ * 将全局坐标转换为widget坐标
+ */
+void uiRootToWidget(uiWidget *self, float *pt, int n)
+{
+
+}
+
+/*
+ * 将widget坐标转换为全局坐标
+ */
+void uiWidgetToRoot(uiWidget *self, float *pt, int n)
+{
+
+}
+
+/*
+ * 在屏幕点x,y处穿透的widget列表，返回有多少个被穿透的widget
+ * widget是一个指针数组空间，n是它的数量。最先穿透的放入0位置
+ */
+int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
+{
+
+}

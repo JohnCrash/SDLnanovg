@@ -81,6 +81,11 @@ extern "C"{
 	void uiSetSize(uiWidget *self, float w, float h);
 	void uiRotate(uiWidget *self, float angle);
 	void uiScale(uiWidget *self, float sx, float sy);
+	
+	void uiRootToWidget(uiWidget *self,float *pt,int n);
+	void uiWidgetToRoot(uiWidget *self, float *pt, int n);
+	int uiWidgetFormPt(float x,float y,uiWidget *widget[],int n);
+
 	uiWidget * uiCreateWidget(const char *themes, const char *name);
 	void uiDeleteWidget(uiWidget *self);
 	void uiLoop();
