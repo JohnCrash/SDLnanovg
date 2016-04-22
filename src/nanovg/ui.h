@@ -11,6 +11,8 @@ extern "C"{
 		EVENT_TOUCHDROP = 2,
 		EVENT_TOUCHUP = 4,
 		EVENT_ZOOM = 8,
+		EVENT_BREAK = 16, //停止继续传递
+		EVENT_EXCLUSIVE = 32, //如果在对象内部就停止传递
 	};
 
 	/* uiWidget isVisible 的可能组合 */
@@ -23,6 +25,7 @@ extern "C"{
 	
 	typedef struct {
 		int type;
+		int inside; /* 事件在对象内部发生 */
 		unsigned int t; /* 发生的时间 SDL_GetTicks */
 		float x, y; /* touch */
 		unsigned int t2; /* 发生的时间 SDL_GetTicks */
@@ -53,6 +56,7 @@ extern "C"{
 		struct uiWidget_t *prev; //兄弟窗口上一个
 		struct uiWidget_t *remove; //将要删除的窗口
 		struct uiWidget_t *enum_next; //正在枚举的窗口
+		struct uiWidget_t *enum_prev;
 	} uiWidget;
 
 	typedef struct ThemesList_t{
@@ -87,8 +91,9 @@ extern "C"{
 	int loadThemes(const char *name, const char *filename);
 	void unloadThemes(const char *name);
 
-	typedef void(*uiEnumProc)(uiWidget *);
-	void uiEnumWidget(uiWidget *root, uiEnumProc func);
+	typedef void (*uiRenderProc)(uiWidget *);
+	typedef int(*uiEventProc)(uiWidget *, uiEvent *);
+
 	void clientWidget(uiWidget *self, float x, float y, float w, float h);
 	void enableClipClient(uiWidget *self, int b);
 

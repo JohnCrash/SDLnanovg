@@ -15,6 +15,7 @@ typedef struct {
 	int haveEventType; /* 在事件列表中存在指定的事件类型 */
 	int isTouchDown;
 	uiEvent lastTouchDown; /* 最近一次按下事件 */
+	uiWidget *lastTouchDownWidget; /* 按下事件的接受对象 */
 	int nEvent;
 	uiEvent events[8];
 } uiEventState;
@@ -68,6 +69,7 @@ int initUI()
 	/* 初始化事件状态 */
 	_eventState.nEvent = 0;
 	_eventState.isTouchDown = 0;
+	_eventState.lastTouchDownWidget = NULL;
 	return 1;
 }
 
@@ -489,7 +491,7 @@ int InWidget(uiWidget *parent, uiWidget *child)
  * 将所有可见的对象都链接在一起，并且返回其头
  * 通过enum_next进行遍历
  */
-static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiEnumProc renderFunc)
+static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderProc renderFunc)
 {
 	uiWidget * child;
 	int isclip = 0;
@@ -513,6 +515,7 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiEnumProc
 		if (child->isVisible&VISIBLE){
 			if (InWidget(root, child)){
 				tail->enum_next = child;
+				child->enum_prev = tail;
 				tail = child;
 				tail->enum_next = NULL;
 				tail = uiEnumWidgetVisible(child, tail, renderFunc);
@@ -617,6 +620,7 @@ static void endUIEvent()
 	 */
 	if (_eventState.isTouchDown && (_eventState.haveEventType&EVENT_TOUCHUP)){
 		_eventState.isTouchDown = 0;
+		_eventState.lastTouchDownWidget = NULL;
 	}
 }
 /*
@@ -627,15 +631,16 @@ static void endUIEvent()
 * 等枚举结束才进行真正的删除。
 */
 void uiEnumWidget(uiWidget *root, 
-	uiEnumProc renderFunc,uiEnumProc eventFunc,
+	uiRenderProc renderFunc, uiEventProc eventFunc,
 	int winWidth, int winHeight, float devicePixelRatio)
 {
-	uiWidget * head,*temp;
+	uiWidget * head,*temp,*tail;
 	head = root;
 	head->enum_next = NULL;
-	uiEnumWidgetVisible(root, head, renderFunc);
+	head->enum_prev = NULL; 
+	tail = uiEnumWidgetVisible(root, head, renderFunc);
 	/*
-	 * 下面分发事件
+	 * 下面准备分发事件
 	 */
 	prepareUIEvent();
 	/* 打开延时删除表 */
@@ -644,10 +649,19 @@ void uiEnumWidget(uiWidget *root,
 	 * 处理事件，先预处理
 	 */
 	if (_eventState.haveEventType){
-		while (head){
-			//nvgSetTransform(_vg, head->curxform);
-			eventFunc(head);
-			head = head->enum_next;
+		temp = tail;
+		for (int i = 0; i < _eventState.nEvent; i++){
+			uiEvent * pev = &(_eventState.events[i]);
+			tail = temp;
+			/*
+			 * 从最上面的对象开始处理事件
+			 */
+			while (tail){
+				/* 如果对象要独占此事件，终止传递 */
+				if (eventFunc(tail,pev))
+					break;
+				tail = tail->enum_prev;
+			}
 		}
 	}
 	uiDelayDelete(0);
@@ -676,7 +690,7 @@ static void renderWidget(uiWidget * widget)
 			lua_pushWidget(L, widget);
 			lua_executeFunction(1);
 			lua_pop(L, 1); //classRef;
-			return;
+			return 0;
 		}
 		else{
 			lua_pop(L, 2);
@@ -697,6 +711,7 @@ static void renderWidget(uiWidget * widget)
 			lua_pop(L, 2);
 		}
 	}
+	return 0;
 }
 
 static void pushUiEventTable(lua_State *L, uiEvent *pev)
@@ -716,6 +731,8 @@ static void pushUiEventTable(lua_State *L, uiEvent *pev)
 	lua_setfield(L, -2, "time");
 	lua_pushnumber(L, pev->t2);
 	lua_setfield(L, -2, "time2");
+	lua_pushboolean(L, pev->inside);
+	lua_setfield(L, -2, "inside");
 }
 /*
 * 调用对象的类方法如:onEvent
@@ -761,43 +778,65 @@ static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *p
 	}
 }
 
-static void eventWidget(uiWidget * widget)
+static int eventWidget(uiWidget * widget,uiEvent *pev)
 {
-	/* 必须有注册事件发生才处理 */
-	if (widget->handleEvent & _eventState.haveEventType){
+	/* 如果窗口含有EVENT_EXCLUSIVE并且事件在对象内部将停止传递 */
+	if ( (widget->handleEvent & pev->type) || 
+		 (widget->handleEvent & EVENT_EXCLUSIVE) ){ 
+		float x, y;
 		float w2o[6];
-		int iscalc = 0;
-		for (int i = 0; i < _eventState.nEvent; i++){
-			/* 改对象处理该种事件 */
-			uiEvent * pev = &(_eventState.events[i]);
-			float x, y;
-			if (widget->handleEvent & pev->type){
-				if (!iscalc){
-					if (nvgTransformInverse(w2o, widget->curxform)){
-						iscalc = 1;
-					}
-					else{
-						SDL_Log("ERROR : eventWidget nvgTransformInverse return 0");
-						return;
-					}
-				}
-				/* 变换屏幕点到对象系 */
-				nvgTransformPoint(&x, &y, w2o, pev->x, pev->y);
-				if (x >= 0 && y >= 0 && x <= widget->width && y <= widget->height){
+		if (nvgTransformInverse(w2o, widget->curxform)){
+			/* 变换屏幕点到对象系 */
+			nvgTransformPoint(&x, &y, w2o, pev->x, pev->y);
+			if (x >= 0 && y >= 0 && x <= widget->width && y <= widget->height){
+				/* 如果窗口仅仅含有EVENT_EXCLUSIVE将不处理 */
+				if (widget->handleEvent & pev->type){
 					/* 投递事件到对象 */
 					uiEvent ev = *pev;
 					ev.x = x;
 					ev.y = y;
+					ev.inside = 1;
 					if (_eventState.isTouchDown&&pev->type == EVENT_TOUCHUP){
 						ev.x2 = _eventState.lastTouchDown.x;
 						ev.y2 = _eventState.lastTouchDown.y;
 						ev.t2 = _eventState.lastTouchDown.t;
 					}
+					else if (!_eventState.lastTouchDownWidget && pev->type == EVENT_TOUCHDOWN){
+						_eventState.lastTouchDownWidget = widget;
+					}
 					callWidgetOnEvent(widget, "onEvent", &ev);
 				}
+				/* 独占数据不继续传递 */
+				if ((widget->handleEvent&EVENT_EXCLUSIVE)||
+					(widget->handleEvent&EVENT_BREAK))
+					return 1;
+			}
+			else if (widget == _eventState.lastTouchDownWidget){
+				/* 第一个接收掉EVENT_TOUCHDOWN的对象将接收直到EVENT_TOUCHEND的所有数据 */
+				uiEvent ev = *pev;
+				ev.x = x;
+				ev.y = y;
+				ev.inside = 0;
+				if (_eventState.isTouchDown&&pev->type == EVENT_TOUCHUP){
+					ev.x2 = _eventState.lastTouchDown.x;
+					ev.y2 = _eventState.lastTouchDown.y;
+					ev.t2 = _eventState.lastTouchDown.t;
+				}
+				callWidgetOnEvent(widget, "onEvent", &ev);
+				if ((widget->handleEvent&EVENT_EXCLUSIVE) ||
+					(widget->handleEvent&EVENT_BREAK))
+					return 1;
 			}
 		}
+		else{
+			SDL_Log("ERROR : eventWidget nvgTransformInverse return 0");
+			return 0;
+		}
 	}
+	/* 终止传递 */
+	if (widget->handleEvent &EVENT_BREAK)
+		return 1;
+	return 0;
 }
 
 /*

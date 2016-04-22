@@ -2,7 +2,7 @@ require "nanovg"
 local vg = require "vg"
 local ui = require "ui"
 
-local function messagebox(str)
+local function messagebox(str,angle)
 	local window = ui.createWidget("normal","window")
 	local label = ui.createWidget("normal","label")
 	local button = ui.createWidget("normal","button")
@@ -24,7 +24,7 @@ local function messagebox(str)
 		ui.rect(0,30,w+48,h),
 		{label,button},
 		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)
-	window:setRotate(vg.degToRad(30),(w+48)/2,(h+30)/2)
+	window:setRotate(vg.degToRad(angle or 30),(w+48)/2,(h+30)/2)
 	return window
 end
 
@@ -59,6 +59,11 @@ end
 --end)
 local box = messagebox("Hello world! http://www.guancha.cn/")
 root:addChild(box)
+box = messagebox("Hello world! http://www.guancha.cn/",0)
+root:addChild(box)
+local x,y = box:getPosition()
+box:setPosition(x+60,y)
+
 local t = 0
 local angle = 0
 local sx,sy = 1,1

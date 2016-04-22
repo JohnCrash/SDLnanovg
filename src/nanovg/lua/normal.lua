@@ -130,6 +130,8 @@ return
 	end,
 	window={
 		onInit=function(self)
+			--self:enableEvent(ui.EVENT_EXCLUSIVE)
+			self:enableEvent(ui.EVENT_BREAK)
 		end,
 		onRelease=function(self)
 		end,
@@ -137,7 +139,7 @@ return
 			local w,h = self:getSize()
 			drawWindow(self._title or "Window",0,0,w,h)
 		end,
-		onEvent=function()
+		onEvent=function(self)
 			print("window onEvent")
 		end,
 		setTitle=function(self,title)
@@ -168,6 +170,9 @@ return
 				self._down = false
 			elseif event.type == ui.EVENT_TOUCHDROP then
 				--print("ui.EVENT_TOUCHDROP")
+				if self._down then
+					self._down = event.inside
+				end
 			end
 			--print("x = "..event.x.." y = "..event.y)
 		end,

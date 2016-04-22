@@ -80,10 +80,12 @@ ui.ALIGN_V = 256 --vertical
 ui.ALIGN_REVERSE = 512 --reverse
 
 ui.EVENT_NONE = 0;
-ui.EVENT_TOUCHDOWN = 1;
-ui.EVENT_TOUCHDROP = 2;
-ui.EVENT_TOUCHUP = 4;
-ui.EVENT_ZOOM = 8;
+ui.EVENT_TOUCHDOWN = 1
+ui.EVENT_TOUCHDROP = 2
+ui.EVENT_TOUCHUP = 4
+ui.EVENT_ZOOM = 8
+ui.EVENT_BREAK = 16
+ui.EVENT_EXCLUSIVE = 32
 
 ui.rect=function(x,y,width,height)
 	return {x=x,y=y,width=width,height=height}
