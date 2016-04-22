@@ -87,7 +87,7 @@ rerun:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		t = SDL_GetTicks();
 		lua_EventLoop((double)(t - t0) / 1000.0);
-		uiDrawWidget(uiRootWidget());
+		uiLoop();
 		t0 = t;
 		SDL_GL_SwapWindow(state->window);
 	}

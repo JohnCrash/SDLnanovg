@@ -319,6 +319,25 @@ int lua_childs(lua_State *L)
 	}
 	return 1;
 }
+int lua_enableEvent(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	int v = luaL_checkinteger(L, 2);
+	if (self){
+		uiEnableEvent(self,v);
+	}
+	return 0;
+}
+
+int lua_disableEvent(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	int v = luaL_checkinteger(L, 2);
+	if (self){
+		uiDisableEvent(self, v);
+	}
+	return 0;
+}
 
 int lua_widgetFunction(lua_State *L);
 
@@ -342,6 +361,8 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "bringTop", lua_bringTop },
 	{ "bringBottom", lua_bringBottom },
 	{ "childs", lua_childs },
+	{ "enableEvent",lua_enableEvent },
+	{ "disableEvent", lua_disableEvent },
 	{ NULL, NULL },
 };
 

@@ -1,4 +1,5 @@
 local vg = require "vg"
+local ui = require "ui"
 
 print("normal themes")
 
@@ -57,13 +58,17 @@ local function drawWindow(title,x,y,w,h)
 	vg.restore()
 end
 
-local function drawButton(preicon, text, x, y, w, h, col)
+local function drawButton(preicon, text, x, y, w, h, col,isdown)
 	local bg
 	local cornerRadius = 4.0
 	local tw = 0
 	local iw = 0
 
-	bg = vg.linearGradient( x,y,x,y+h, vg.rgba(255,255,255,isBlack(col) and 16 or 32), vg.rgba(0,0,0,isBlack(col) and 16 or 32))
+	if isdown then
+		bg = vg.linearGradient( x,y,x,y+h, vg.rgba(0,0,0,isBlack(col) and 16 or 32),vg.rgba(255,255,255,isBlack(col) and 16 or 32))
+	else
+		bg = vg.linearGradient( x,y,x,y+h, vg.rgba(255,255,255,isBlack(col) and 16 or 32), vg.rgba(0,0,0,isBlack(col) and 16 or 32))
+	end
 	vg.beginPath()
 	vg.roundedRect( x+1,y+1, w-2,h-2, cornerRadius-1)
 	if not isBlack(col) then
@@ -99,10 +104,18 @@ local function drawButton(preicon, text, x, y, w, h, col)
 	vg.fontSize( 20.0)
 	vg.fontFace( "sans-bold")
 	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE)
-	vg.fillColor( vg.rgba(0,0,0,160))
-	vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5-1,text)
-	vg.fillColor( vg.rgba(255,255,255,160))
-	vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5,text)
+	
+	if isdown then
+		vg.fillColor( vg.rgba(0,0,0,160))
+		vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5-1+1,text)
+		vg.fillColor( vg.rgba(255,255,255,160))
+		vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5+1,text)	
+	else
+		vg.fillColor( vg.rgba(0,0,0,160))
+		vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5-1,text)
+		vg.fillColor( vg.rgba(255,255,255,160))
+		vg.text( x+w*0.5-tw*0.5+iw*0.25,y+h*0.5,text)
+	end
 end
 
 return
@@ -137,14 +150,26 @@ return
 	button={
 		onInit=function(self)		
 			self._color = vg.rgba(255,0,0,0)
+			self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 		end,
 		onRelease=function(self)
 		end,	
 		onDraw=function(self)
 			local w,h = self:getSize()
-			drawButton(0,self._title or "OK",0,0,w,h,self._color)
+			drawButton(0,self._title or "OK",0,0,w,h,self._color,self._down)
 		end,
-		onEvent=function()
+		onEvent=function(self,event)
+			if event.type == ui.EVENT_TOUCHDOWN then
+				--print("ui.EVENT_TOUCHDOWN")
+				self._down = true
+			elseif event.type == ui.EVENT_TOUCHUP then
+				print("ui.EVENT_TOUCHUP")
+				print("x2 = "..event.x2.." y2 = "..event.y2)
+				self._down = false
+			elseif event.type == ui.EVENT_TOUCHDROP then
+				--print("ui.EVENT_TOUCHDROP")
+			end
+			--print("x = "..event.x.." y = "..event.y)
 		end,
 		setTitle=function(self,title)
 			self._title = title
@@ -159,7 +184,7 @@ return
 			local w,h = self:getSize()
 			drawLabel(self._string or "",0,0,w,h);
 		end,
-		onEvent=function()
+		onEvent=function(self)
 		end,
 		setString=function(self,str)
 			self._string = str
@@ -178,7 +203,7 @@ return
 		end,	
 		onDraw=function(self)
 		end,
-		onEvent=function()
+		onEvent=function(self)
 		end,	
 	},	
 }

@@ -8,8 +8,8 @@ extern "C"{
 	enum{
 		EVENT_NONE = 0,
 		EVENT_TOUCHDOWN = 1,
-		EVENT_TOUCHUP = 2,
-		EVENT_DROP = 4,
+		EVENT_TOUCHDROP = 2,
+		EVENT_TOUCHUP = 4,
 		EVENT_ZOOM = 8,
 	};
 
@@ -21,6 +21,14 @@ extern "C"{
 		CLIP = 4,
 	};
 	
+	typedef struct {
+		int type;
+		unsigned int t; /* 发生的时间 SDL_GetTicks */
+		float x, y; /* touch */
+		unsigned int t2; /* 发生的时间 SDL_GetTicks */
+		float x2, y2; /* zoom */
+	} uiEvent;
+
 	typedef struct {
 		struct uiWidget * widget;
 		int ref;
@@ -71,7 +79,7 @@ extern "C"{
 	void uiScale(uiWidget *self, float sx, float sy);
 	uiWidget * uiCreateWidget(const char *themes, const char *name);
 	void uiDeleteWidget(uiWidget *self);
-	void uiDrawWidget(uiWidget *self);
+	void uiLoop();
 	void uiSendEvent(uiWidget *self);
 	uiWidget * uiFormJson(const char *filename);
 	int InWidget(uiWidget *parent, uiWidget *child);
@@ -83,6 +91,9 @@ extern "C"{
 	void uiEnumWidget(uiWidget *root, uiEnumProc func);
 	void clientWidget(uiWidget *self, float x, float y, float w, float h);
 	void enableClipClient(uiWidget *self, int b);
+
+	void uiEnableEvent(uiWidget *self,int e);
+	void uiDisableEvent(uiWidget *self,int e);
 #ifdef __cplusplus
 }
 #endif

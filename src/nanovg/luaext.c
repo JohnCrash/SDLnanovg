@@ -470,9 +470,10 @@ void lua_EventRelease()
 	lua_executeScriptFile("release.lua");
 }
 
-void lua_EventInput(inputEvent *ie)
+void lua_EventInput()
 {
 	if (lua_pushEventFunction(EVENT_INPUT)){
+		/*
 		lua_pushinteger(_state,ie->type);
 		if (ie->type == MOUSE_MOVE){
 			lua_newtable(_state);
@@ -483,5 +484,6 @@ void lua_EventInput(inputEvent *ie)
 			lua_executeFunction(2);
 		}else
 			lua_executeFunction(1);
+		*/
 	}
 }

@@ -20,7 +20,7 @@ extern "C"{
 	void lua_EventLoop(double dt);
 	void lua_EventInit();
 	void lua_EventRelease();
-	void lua_EventInput(inputEvent *ie);
+	void lua_EventInput();
 
 	void lua_addSearchPath(const char* path);
 	int lua_executeFunction(int numArgs);

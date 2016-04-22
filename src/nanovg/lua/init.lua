@@ -23,7 +23,8 @@ local function messagebox(str)
 	ui.linearRelayout(
 		ui.rect(0,30,w+48,h),
 		{label,button},
-		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)	
+		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)
+	window:setRotate(vg.degToRad(30),(w+48)/2,(h+30)/2)
 	return window
 end
 

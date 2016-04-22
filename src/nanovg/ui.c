@@ -1,4 +1,5 @@
 #include <math.h>
+#include "SDL.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "gles.h"
@@ -9,6 +10,16 @@
 #include "nanovg.h"
 #include "nanovg_sdl.h"
 
+
+typedef struct {
+	int haveEventType; /* 在事件列表中存在指定的事件类型 */
+	int isTouchDown;
+	uiEvent lastTouchDown; /* 最近一次按下事件 */
+	int nEvent;
+	uiEvent events[8];
+} uiEventState;
+
+uiEventState _eventState;
 static uiWidget * _root = NULL;
 static ThemesList * _themes = NULL;
 extern NVGcontext* _vg;
@@ -53,6 +64,10 @@ int initUI()
 	_root->handleEvent = EVENT_NONE;
 	_root->classRef = LUA_REFNIL;
 	_root->selfRef = LUA_REFNIL;
+
+	/* 初始化事件状态 */
+	_eventState.nEvent = 0;
+	_eventState.isTouchDown = 0;
 	return 1;
 }
 
@@ -513,6 +528,98 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiEnumProc
 }
 
 /*
+ * 将SDL_Event转变为uiEvent
+ */
+static void prepareUIEvent()
+{
+	SDL_Event *pevent;
+	uiEvent *pev;
+	int count = getSDLEventCount();
+	_eventState.nEvent = 0;
+	_eventState.haveEventType = 0;
+	for (int i = 0; i < count; i++){
+		if (_eventState.nEvent >= 8){
+			SDL_Log("uiEvent overflow");
+			break;
+		}
+		pevent = getSDLEvent(i);
+		switch (pevent->type){
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP:
+			if (pevent->button.button == SDL_BUTTON_LEFT){
+				pev = &(_eventState.events[_eventState.nEvent++]);
+				pev->t = pevent->button.timestamp;
+				pev->x = pevent->button.x;
+				pev->y = pevent->button.y;
+				if (pevent->type==SDL_MOUSEBUTTONDOWN){
+					_eventState.haveEventType |= EVENT_TOUCHDOWN;
+					pev->type = EVENT_TOUCHDOWN;
+					_eventState.isTouchDown = 1;
+					_eventState.lastTouchDown = *pev;
+				}
+				else{
+					pev->type = EVENT_TOUCHUP;
+					_eventState.haveEventType |= EVENT_TOUCHUP;
+				}
+			}
+			break;
+		case SDL_MOUSEMOTION:
+			if (_eventState.isTouchDown){
+				pev = &(_eventState.events[_eventState.nEvent++]);
+				pev->t = pevent->motion.timestamp;
+				pev->x = pevent->motion.x;
+				pev->y = pevent->motion.y;
+				pev->type = EVENT_TOUCHDROP;
+				_eventState.haveEventType |= EVENT_TOUCHDROP;
+			}
+			break;
+		case SDL_FINGERDOWN:
+			{
+				pev = &(_eventState.events[_eventState.nEvent++]);
+				pev->t = pevent->tfinger.timestamp;
+				pev->x = pevent->tfinger.x;
+				pev->y = pevent->tfinger.y;
+				pev->type = EVENT_TOUCHDOWN;
+				_eventState.haveEventType |= EVENT_TOUCHDOWN;
+				_eventState.isTouchDown = 1;
+				_eventState.lastTouchDown = *pev;
+			}
+			break;
+		case SDL_FINGERUP:
+			{
+				pev = &(_eventState.events[_eventState.nEvent++]);
+				pev->t = pevent->tfinger.timestamp;
+				pev->x = pevent->tfinger.x;
+				pev->y = pevent->tfinger.y;
+				pev->type = EVENT_TOUCHUP;
+				_eventState.haveEventType |= EVENT_TOUCHUP;
+			}
+			break;
+		case SDL_FINGERMOTION:
+			if (_eventState.isTouchDown){
+				pev = &(_eventState.events[_eventState.nEvent++]);
+				pev->t = pevent->tfinger.timestamp;
+				pev->x = pevent->tfinger.x;
+				pev->y = pevent->tfinger.y;
+				pev->type = EVENT_TOUCHDROP;
+				_eventState.haveEventType |= EVENT_TOUCHDROP;
+			}
+			break;
+		}
+	}
+}
+
+/* 在事件处理结束调用 */
+static void endUIEvent()
+{
+	/* 
+	 * 如果有抬起事件就清理isTouchDown 
+	 */
+	if (_eventState.isTouchDown && (_eventState.haveEventType&EVENT_TOUCHUP)){
+		_eventState.isTouchDown = 0;
+	}
+}
+/*
 * 枚举的过程中eventFunc可能改变窗口结构甚至删除窗口
 * 这需要特殊处理，首先将满足调用func的窗口放入一个表中
 * 然后才调用eventFunc函数，如果在func函数中删除了窗口，后面
@@ -530,15 +637,21 @@ void uiEnumWidget(uiWidget *root,
 	/*
 	 * 下面分发事件
 	 */
+	prepareUIEvent();
 	/* 打开延时删除表 */
 	uiDelayDelete(1);
-	//nvgResetTransform(_vg);
-	while (head){
-		//nvgSetTransform(_vg, head->curxform);
-		eventFunc(head);
-		head = head->enum_next;
+	/*
+	 * 处理事件，先预处理
+	 */
+	if (_eventState.haveEventType){
+		while (head){
+			//nvgSetTransform(_vg, head->curxform);
+			eventFunc(head);
+			head = head->enum_next;
+		}
 	}
 	uiDelayDelete(0);
+	endUIEvent();
 	/* 删除延迟表中的对象 */
 	head = _delayList;
 	while (head){
@@ -586,15 +699,113 @@ static void renderWidget(uiWidget * widget)
 	}
 }
 
+static void pushUiEventTable(lua_State *L, uiEvent *pev)
+{
+	lua_newtable(L);
+	lua_pushinteger(L, pev->type);
+	lua_setfield(L, -2, "type");
+	lua_pushnumber(L, pev->x);
+	lua_setfield(L, -2, "x");
+	lua_pushnumber(L, pev->y);
+	lua_setfield(L, -2, "y");
+	lua_pushnumber(L, pev->x2);
+	lua_setfield(L, -2, "x2");
+	lua_pushnumber(L, pev->y2);
+	lua_setfield(L, -2, "y2");
+	lua_pushnumber(L, pev->t);
+	lua_setfield(L, -2, "time");
+	lua_pushnumber(L, pev->t2);
+	lua_setfield(L, -2, "time2");
+}
+/*
+* 调用对象的类方法如:onEvent
+*/
+static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *pev)
+{
+	/* 先找对象的重载方法 */
+	if (widget->selfRef != LUA_REFNIL){
+		lua_State * L = lua_GlobalState();
+		if (L){
+			lua_getref(L, widget->selfRef);
+			lua_getfield(L, -1, strEvent);
+			if (lua_isfunction(L, -1)){
+				//lua_getref(L, widget->selfRef);
+				lua_pushWidget(L, widget);
+				pushUiEventTable(L, pev);
+				lua_executeFunction(2);
+				lua_pop(L, 1); //classRef;
+				return;
+			}
+			else{
+				lua_pop(L, 2);
+			}
+		}
+	}
+	/* 然后访问类方法方法 */
+	if (widget->classRef != LUA_REFNIL){
+		lua_State * L = lua_GlobalState();
+		if (L){
+			lua_getref(L, widget->classRef);
+			lua_getfield(L, -1, strEvent);
+			if (lua_isfunction(L, -1)){
+				//lua_getref(L, widget->selfRef);
+				lua_pushWidget(L, widget);
+				pushUiEventTable(L, pev);
+				lua_executeFunction(2);
+				lua_pop(L, 1); //classRef;
+			}
+			else{
+				lua_pop(L, 2);
+			}
+		}
+	}
+}
+
 static void eventWidget(uiWidget * widget)
 {
-
+	/* 必须有注册事件发生才处理 */
+	if (widget->handleEvent & _eventState.haveEventType){
+		float w2o[6];
+		int iscalc = 0;
+		for (int i = 0; i < _eventState.nEvent; i++){
+			/* 改对象处理该种事件 */
+			uiEvent * pev = &(_eventState.events[i]);
+			float x, y;
+			if (widget->handleEvent & pev->type){
+				if (!iscalc){
+					if (nvgTransformInverse(w2o, widget->curxform)){
+						iscalc = 1;
+					}
+					else{
+						SDL_Log("ERROR : eventWidget nvgTransformInverse return 0");
+						return;
+					}
+				}
+				/* 变换屏幕点到对象系 */
+				nvgTransformPoint(&x, &y, w2o, pev->x, pev->y);
+				if (x >= 0 && y >= 0 && x <= widget->width && y <= widget->height){
+					/* 投递事件到对象 */
+					uiEvent ev = *pev;
+					ev.x = x;
+					ev.y = y;
+					if (_eventState.isTouchDown&&pev->type == EVENT_TOUCHUP){
+						ev.x2 = _eventState.lastTouchDown.x;
+						ev.y2 = _eventState.lastTouchDown.y;
+						ev.t2 = _eventState.lastTouchDown.t;
+					}
+					callWidgetOnEvent(widget, "onEvent", &ev);
+				}
+			}
+		}
+	}
 }
+
 /*
  * 渲染对象树结构
  */
-void uiDrawWidget(uiWidget *self)
+void uiLoop()
 {
+	uiWidget * self = uiRootWidget();
 	if (self && self->isVisible&VISIBLE){
 		glViewport(0, 0, (int)self->width, (int)self->height);
 		nvgBeginFrame(_vg, (int)self->width, (int)self->height, 1);
@@ -612,4 +823,16 @@ void uiSendEvent(uiWidget *self)
 uiWidget * uiFormJson(const char *filename)
 {
 	return NULL;
+}
+
+void uiEnableEvent(uiWidget *self, int e)
+{
+	if (self)
+		self->handleEvent |= e;
+}
+
+void uiDisableEvent(uiWidget *self, int e)
+{
+	if (self)
+		self->handleEvent &= !e;
 }
