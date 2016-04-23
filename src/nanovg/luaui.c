@@ -339,6 +339,63 @@ int lua_disableEvent(lua_State *L)
 	return 0;
 }
 
+int lua_unloadTheme(lua_State *L)
+{
+	const char * name = luaL_checkstring(L, 1);
+	unloadThemes(name);
+	return 0;
+}
+
+int lua_rootToWidget(lua_State *L)
+{
+	uiWidget * widget = lua_checkWidget(L, 1);
+	float pt[2];
+	pt[0] = (float) luaL_checknumber(L, 2);
+	pt[1] = (float)luaL_checknumber(L, 3);
+	if (widget){
+		uiRootToWidget(widget, pt, 2);
+		lua_pushnumber(L, pt[0]);
+		lua_pushnumber(L, pt[1]);
+	}
+	else{
+		lua_pushnumber(L, 0);
+		lua_pushnumber(L, 0);
+	}
+	return 2;
+}
+
+int lua_widgetToRoot(lua_State *L)
+{
+	uiWidget * widget = lua_checkWidget(L, 1);
+	float pt[2];
+	pt[0] = (float)luaL_checknumber(L, 2);
+	pt[1] = (float)luaL_checknumber(L, 3);
+	if (widget){
+		uiWidgetToRoot(widget, pt, 2);
+		lua_pushnumber(L, pt[0]);
+		lua_pushnumber(L, pt[1]);
+	}
+	else{
+		lua_pushnumber(L, 0);
+		lua_pushnumber(L, 0);
+	}
+	return 2;
+}
+
+int lua_widgetFormPt(lua_State *L)
+{
+	float x = (float)luaL_checknumber(L, 1);
+	float y = (float)luaL_checknumber(L, 2);
+	uiWidget * wp[32];
+	int n = uiWidgetFormPt(x, y, wp, 32);
+	lua_newtable(L);
+	for (int i = 0; i < n; i++){
+		lua_pushWidget(L, wp[i]);
+		lua_rawseti(L, -2, i + 1);
+	}
+	return 1;
+}
+
 int lua_widgetFunction(lua_State *L);
 
 static const struct luaL_Reg uimeta_methods_c[] =
@@ -479,6 +536,10 @@ static const struct luaL_Reg nanoui_methods[] =
 	{ "rootWidget", lua_rootWidget },
 	{ "formJson", lua_formJson },
 	{ "loadThemes", lua_loadThemes },
+	{ "unloadTheme", lua_unloadTheme },
+	{ "rootToWidget", lua_rootToWidget },
+	{ "widgetToRoot", lua_widgetToRoot },
+	{ "widgetFormPt", lua_widgetFormPt },
 	{ NULL, NULL },
 };
 

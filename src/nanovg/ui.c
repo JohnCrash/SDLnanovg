@@ -917,11 +917,33 @@ void uiWidgetToRoot(uiWidget *self, float *pt, int n)
 	}
 }
 
+int uiPtInWidget(uiWidget *self, float x, float y)
+{
+
+}
+
+static void donothingFunc(uiWidget *self)
+{}
 /*
  * 在屏幕点x,y处穿透的widget列表，返回有多少个被穿透的widget
  * widget是一个指针数组空间，n是它的数量。最先穿透的放入0位置
  */
 int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
 {
-
+	uiWidget * head, *temp, *tail;
+	int idx = 0;
+	head = _root;
+	head->enum_next = NULL;
+	head->enum_prev = NULL;
+	tail = uiEnumWidgetVisible(_root, head, donothingFunc);
+	while (tail){
+		if (uiPtInWidget(tail, x, y)){
+			if (idx < n)
+				widget[idx++] = tail;
+			else
+				return idx;
+		}
+		tail = tail->enum_prev;
+	}
+	return idx;
 }
