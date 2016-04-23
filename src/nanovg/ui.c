@@ -780,32 +780,27 @@ static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *p
 
 static int eventWidget(uiWidget * widget,uiEvent *pev)
 {
-	/* 如果窗口含有EVENT_EXCLUSIVE并且事件在对象内部将停止传递 */
-	if ( (widget->handleEvent & pev->type) || 
-		 (widget->handleEvent & EVENT_EXCLUSIVE) ){ 
-		float x, y;
-		float w2o[6];
+	float x, y;
+	float w2o[6];
+	if ( widget->handleEvent & pev->type ){ 
 		if (nvgTransformInverse(w2o, widget->curxform)){
 			/* 变换屏幕点到对象系 */
 			nvgTransformPoint(&x, &y, w2o, pev->x, pev->y);
 			if (x >= 0 && y >= 0 && x <= widget->width && y <= widget->height){
-				/* 如果窗口仅仅含有EVENT_EXCLUSIVE将不处理 */
-				if (widget->handleEvent & pev->type){
-					/* 投递事件到对象 */
-					uiEvent ev = *pev;
-					ev.x = x;
-					ev.y = y;
-					ev.inside = 1;
-					if (_eventState.isTouchDown&&pev->type == EVENT_TOUCHUP){
-						ev.x2 = _eventState.lastTouchDown.x;
-						ev.y2 = _eventState.lastTouchDown.y;
-						ev.t2 = _eventState.lastTouchDown.t;
-					}
-					else if (!_eventState.lastTouchDownWidget && pev->type == EVENT_TOUCHDOWN){
-						_eventState.lastTouchDownWidget = widget;
-					}
-					callWidgetOnEvent(widget, "onEvent", &ev);
+				/* 投递事件到对象 */
+				uiEvent ev = *pev;
+				ev.x = x;
+				ev.y = y;
+				ev.inside = 1;
+				if (_eventState.isTouchDown&&pev->type == EVENT_TOUCHUP){
+					ev.x2 = _eventState.lastTouchDown.x;
+					ev.y2 = _eventState.lastTouchDown.y;
+					ev.t2 = _eventState.lastTouchDown.t;
 				}
+				else if (!_eventState.lastTouchDownWidget && pev->type == EVENT_TOUCHDOWN){
+					_eventState.lastTouchDownWidget = widget;
+				}
+				callWidgetOnEvent(widget, "onEvent", &ev);
 				/* 独占数据不继续传递 */
 				if ((widget->handleEvent&EVENT_EXCLUSIVE)||
 					(widget->handleEvent&EVENT_BREAK))
@@ -834,8 +829,25 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 		}
 	}
 	/* 终止传递 */
-	if (widget->handleEvent &EVENT_BREAK)
+	if (widget->handleEvent&EVENT_BREAK || widget->handleEvent&EVENT_EXCLUSIVE){
+		/* 
+		 * 对于EVENT_BREAK对象，当该对象处理一种事件当不在对象内部发生时也传递给对象
+		 * 当到达这里表示已经不在对象内部了。注意：x,y在上面已经计算好了
+		 */
+		if (widget->handleEvent&pev->type){
+			uiEvent ev = *pev;
+			ev.x = x;
+			ev.y = y;
+			ev.inside = 0;
+			if (_eventState.isTouchDown&&pev->type == EVENT_TOUCHUP){
+				ev.x2 = _eventState.lastTouchDown.x;
+				ev.y2 = _eventState.lastTouchDown.y;
+				ev.t2 = _eventState.lastTouchDown.t;
+			}
+			callWidgetOnEvent(widget, "onEvent", &ev);
+		}
 		return 1;
+	}
 	return 0;
 }
 
