@@ -876,12 +876,30 @@ void uiDisableEvent(uiWidget *self, int e)
 		self->handleEvent &= !e;
 }
 
+static void uiWidgetToRootForm(uiWidget *self,float xform[6])
+{
+	nvgTransformIdentity(xform);
+	while (self){
+		nvgTransformMultiply(xform, self->xform);
+		self = self->parent;
+	}
+}
+
 /*
  * 将全局坐标转换为widget坐标
  */
 void uiRootToWidget(uiWidget *self, float *pt, int n)
 {
-
+	float xform[6];
+	float invs[6];
+	float x, y;
+	uiWidgetToRootForm(self, xform);
+	nvgTransformInverse(invs, xform);
+	for (int i = 0; i < n; i++){
+		x = *(pt + 2 * i);
+		y = *(pt + 2 * i+1);
+		nvgTransformPoint((pt + 2 * i), (pt + 2 * i + 1), invs, x, y);
+	}
 }
 
 /*
@@ -889,7 +907,14 @@ void uiRootToWidget(uiWidget *self, float *pt, int n)
  */
 void uiWidgetToRoot(uiWidget *self, float *pt, int n)
 {
-
+	float xform[6];
+	float x, y;
+	uiWidgetToRootForm(self, xform);
+	for (int i = 0; i < n; i++){
+		x = *(pt + 2 * i);
+		y = *(pt + 2 * i + 1);
+		nvgTransformPoint((pt + 2 * i), (pt + 2 * i + 1), xform, x, y);
+	}
 }
 
 /*
