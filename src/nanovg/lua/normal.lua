@@ -16,7 +16,7 @@ local function drawLabel(text, x, y, w, h)
 	vg.text( x,y+h*0.5,text)
 end
 
-local function drawWindow(title,x,y,w,h)
+local function drawWindow(title,x,y,w,h,foucs)
 	local cornerRadius = 3.0;
 	vg.save()
 	
@@ -31,7 +31,11 @@ local function drawWindow(title,x,y,w,h)
 	vg.rect(x-10,y-10,w+20,h+30)
 	vg.roundedRect(x,y,w,h,cornerRadius)
 	vg.pathWinding(vg.NVG_HOLE)
-	vg.fillPaint(vg.boxGradient(x,y+2, w,h, cornerRadius*2, 10, vg.rgba(0,0,0,128), vg.rgba(0,0,0,0)))
+	if foucs then
+		vg.fillPaint(vg.boxGradient(x,y+2, w,h, cornerRadius*2, 10, vg.rgba(128,128,128,128), vg.rgba(0,0,0,0)))
+	else
+		vg.fillPaint(vg.boxGradient(x,y+2, w,h, cornerRadius*2, 10, vg.rgba(0,0,0,128), vg.rgba(0,0,0,0)))
+	end
 	vg.fill()
 	
 	--header
@@ -131,16 +135,26 @@ return
 	window={
 		onInit=function(self)
 			--self:enableEvent(ui.EVENT_EXCLUSIVE)
-			self:enableEvent(ui.EVENT_BREAK)
+			self:enableEvent(ui.EVENT_BREAK+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDOWN)
 		end,
 		onRelease=function(self)
 		end,
 		onDraw=function(self)
 			local w,h = self:getSize()
-			drawWindow(self._title or "Window",0,0,w,h)
+			drawWindow(self._title or "Window",0,0,w,h,self._foucs)
 		end,
-		onEvent=function(self)
-			print("window onEvent")
+		onEvent=function(self,event)
+			--print("self:"..tostring(self).." inside:"..tostring(event.inside))
+			if not event.inside then
+				if event.type==ui.EVENT_TOUCHDOWN then
+					print( "down")
+					self._foucs = true
+				elseif event.type==ui.EVENT_TOUCHUP then
+					self._foucs = false
+					print( "up")
+				end
+			end
+			--print("window onEvent")
 		end,
 		setTitle=function(self,title)
 			self._title = title
