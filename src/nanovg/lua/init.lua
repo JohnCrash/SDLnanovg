@@ -57,13 +57,28 @@ end
 	--bottom:setPosition(w-100,h-120)
 	bottom:setSize(100,120)	
 --end)
-local box = messagebox("Hello world! http://www.guancha.cn/")
+--[[
+local box = messagebox("Hello world! http://www.guancha.cn/",30)
 root:addChild(box)
-box = messagebox("Hello world! http://www.guancha.cn/",0)
+box = messagebox("Hello world! http://www.guancha.cn/",60)
 root:addChild(box)
 local x,y = box:getPosition()
-box:setPosition(x+60,y)
+box:setPosition(x+60,y+60)
+--]]
 
+local function six()
+	local x,y,r
+	r = 200
+	local du = 60
+	for i=1,360/du do
+		local box = messagebox("Hello world! "..i,i*du)
+		x = r*math.sin(vg.degToRad(-i*du))+w/2
+		y = r*math.cos(vg.degToRad(-i*du))+h/2
+		box:setPosition(x,y)
+		root:addChild(box)
+	end
+end
+six()
 local t = 0
 local angle = 0
 local sx,sy = 1,1

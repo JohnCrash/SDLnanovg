@@ -147,11 +147,11 @@ return
 			--print("self:"..tostring(self).." inside:"..tostring(event.inside))
 			if not event.inside then
 				if event.type==ui.EVENT_TOUCHDOWN then
-					print( "down")
+					--print( "down")
 					self._foucs = true
 				elseif event.type==ui.EVENT_TOUCHUP then
 					self._foucs = false
-					print( "up")
+					--print( "up")
 				end
 			end
 			--print("window onEvent")
