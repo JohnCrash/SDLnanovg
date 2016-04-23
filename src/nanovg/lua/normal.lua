@@ -1,7 +1,6 @@
 local vg = require "vg"
 local ui = require "ui"
 
-print("normal themes")
 
 local function isBlack(col)
 	return col
@@ -134,7 +133,6 @@ return
 	end,
 	window={
 		onInit=function(self)
-			--self:enableEvent(ui.EVENT_EXCLUSIVE)
 			self:enableEvent(ui.EVENT_BREAK+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDOWN)
 		end,
 		onRelease=function(self)
@@ -144,17 +142,13 @@ return
 			drawWindow(self._title or "Window",0,0,w,h,self._foucs)
 		end,
 		onEvent=function(self,event)
-			--print("self:"..tostring(self).." inside:"..tostring(event.inside))
 			if not event.inside then
 				if event.type==ui.EVENT_TOUCHDOWN then
-					print( "down")
 					self._foucs = true
 				elseif event.type==ui.EVENT_TOUCHUP then
 					self._foucs = false
-					print( "up")
 				end
 			end
-			--print("window onEvent")
 		end,
 		setTitle=function(self,title)
 			self._title = title
@@ -176,19 +170,14 @@ return
 		end,
 		onEvent=function(self,event)
 			if event.type == ui.EVENT_TOUCHDOWN then
-				--print("ui.EVENT_TOUCHDOWN")
 				self._down = true
 			elseif event.type == ui.EVENT_TOUCHUP then
-				print("ui.EVENT_TOUCHUP")
-				print("x2 = "..event.x2.." y2 = "..event.y2)
 				self._down = false
 			elseif event.type == ui.EVENT_TOUCHDROP then
-				--print("ui.EVENT_TOUCHDROP")
 				if self._down then
 					self._down = event.inside
 				end
 			end
-			--print("x = "..event.x.." y = "..event.y)
 		end,
 		setTitle=function(self,title)
 			self._title = title
