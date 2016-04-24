@@ -182,7 +182,7 @@ return
 		setTitle=function(self,title)
 			self._title = title
 		end,		
-	},	
+	},
 	label={
 		onInit=function(self)		
 		end,
@@ -196,6 +196,7 @@ return
 		end,
 		setString=function(self,str)
 			self._string = str
+			
 			vg.save()
 			vg.fontSize(18.0)
 			vg.fontFace("sans")

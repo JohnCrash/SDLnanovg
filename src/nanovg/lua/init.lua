@@ -29,7 +29,7 @@ local function messagebox(str,angle)
 end
 
 --eventFunction("init",function()
-	ui.loadThemes("normal","normal")
+	ui.loadThemes("normal","themes/default")
 
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
@@ -71,7 +71,7 @@ local function six()
 	r = 200
 	local du = 60
 	for i=1,360/du do
-		local box = messagebox("Hello world! "..i,i*du)
+		local box = messagebox("Hello world! \nhttp://www.nanovg.org"..i,i*du)
 		x = r*math.sin(vg.degToRad(-i*du))+w/2
 		y = r*math.cos(vg.degToRad(-i*du))+h/2
 		box:setPosition(x,y)
