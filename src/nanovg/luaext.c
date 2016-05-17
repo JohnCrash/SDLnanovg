@@ -1,4 +1,4 @@
-#include <string.h>
+ï»¿#include <string.h>
 #include "SDL.h"
 #include "luananovg.h"
 #include "luaui.h"
@@ -15,7 +15,7 @@ lua_State * lua_GlobalState()
 	return _state;
 }
 /*
- * ×Ô¶¯Ôö³¤µÄÖ¸Õë
+ * è‡ªåŠ¨å¢é•¿çš„æŒ‡é’ˆ
  */
 static void addstring( char **t,const char *s,int *len,int *cur)
 {
@@ -85,7 +85,7 @@ static int lua_print(lua_State * luastate)
 	return 0;
 }
 /*
- * ÏÂÃæµÄ´úÂë½è¼øÁËcocos2dµÄ¼ÓÔØÆ÷´úÂë
+ * ä¸‹é¢çš„ä»£ç å€Ÿé‰´äº†cocos2dçš„åŠ è½½å™¨ä»£ç 
  */
 static void initLuaLoader(lua_CFunction func)
 {
@@ -115,7 +115,7 @@ static void initLuaLoader(lua_CFunction func)
 static int luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, const char *chunkName)
 {
 	int r = 0;
-	//Èç¹û±ØÒª¿ÉÒÔ¶ÔchunkÖĞµÄÊı¾İ½øĞĞ½âÂë£¬ÕâÑù¿ÉÒÔÖ§³Ö¶ÔluaÎÄ¼ş½øĞĞ¼ÓÃÜ¡£
+	//å¦‚æœå¿…è¦å¯ä»¥å¯¹chunkä¸­çš„æ•°æ®è¿›è¡Œè§£ç ï¼Œè¿™æ ·å¯ä»¥æ”¯æŒå¯¹luaæ–‡ä»¶è¿›è¡ŒåŠ å¯†ã€‚
 	r = luaL_loadbuffer(L, chunk, chunkSize, chunkName);
 	if (r){
 		switch (r){
@@ -126,7 +126,7 @@ static int luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, const c
 		case LUA_ERRMEM:
 			SDL_Log("[LUA ERROR] load \"%s\", error: memory allocation error.", chunkName);
 			break;
-			/* Î´¶¨Òå
+			/* æœªå®šä¹‰
 		case LUA_ERRFILE:
 			SDL_Log("[LUA ERROR] load \"%s\", error: cannot open/read file.", chunkName);
 			break;
@@ -139,7 +139,7 @@ static int luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, const c
 }
 
 /*
- *ÔÚluaµÄËÑË÷Â·¾¶ÖĞÕÒµ½Ö¸¶¨µÄÎÄ¼ş²¢¼ÓÔØ,ÕâÊÇlua¼ÓÔØ»úÖÆµÄÒ»²¿·Ö
+ *åœ¨luaçš„æœç´¢è·¯å¾„ä¸­æ‰¾åˆ°æŒ‡å®šçš„æ–‡ä»¶å¹¶åŠ è½½,è¿™æ˜¯luaåŠ è½½æœºåˆ¶çš„ä¸€éƒ¨åˆ†
  */
 static int lua_loader(lua_State *L)
 {
@@ -152,7 +152,7 @@ static int lua_loader(lua_State *L)
 	unsigned char * data;
 
 	filename = luaL_checkstring(L, 1);
-	//È¥µôºó×º.lua
+	//å»æ‰åç¼€.lua
 	strcpy(fn, filename);
 	i = strlen(fn);
 	if (fn[i - 1] == 'a'&&fn[i - 2] == 'u'&&fn[i - 3] == 'l'&&
@@ -196,7 +196,7 @@ static int lua_loader(lua_State *L)
 		}
 		SDL_RWread(fp, data,1, len);
 		SDL_RWclose(fp);
-		//×°Èëlua½Å±¾
+		//è£…å…¥luaè„šæœ¬
 		luaLoadBuffer(_state,data,len,f);
 		free(data);
 		return 1;
@@ -318,7 +318,7 @@ int _eventRef[EVENT_COUNT];
 static void registerEventFunction(lua_State *L, int nfunction, int eventid)
 {
 	if (_eventRef[eventid] != LUA_REFNIL){
-		lua_getref(L, _eventRef[eventid]); //·µ»ØÀÏµÄÊÂ¼şº¯Êı¸øµ÷ÓÃÕß
+		lua_getref(L, _eventRef[eventid]); //è¿”å›è€çš„äº‹ä»¶å‡½æ•°ç»™è°ƒç”¨è€…
 		lua_unref(L, _eventRef[eventid]);
 		_eventRef[eventid] = LUA_REFNIL;
 	}
@@ -340,7 +340,7 @@ static int lua_pushEventFunction(int n)
 	return 0;
 }
 /*
- * ÏòÏµÍ³×¢²áÊÂ¼ş
+ * å‘ç³»ç»Ÿæ³¨å†Œäº‹ä»¶
  */
 static int lua_eventFunction(lua_State *L)
 {
@@ -382,7 +382,7 @@ static int lua_isand(lua_State *L)
 	return 1;
 }
 /*
- * ³õÊ¼Lua»·¾³
+ * åˆå§‹Luaç¯å¢ƒ
  */
 int initLua()
 {
@@ -409,12 +409,12 @@ int initLua()
 	}
 	luaL_openlibs(_state);
 
-	/* ×é³ÉÈ«¾Öº¯Êı */
+	/* ç»„æˆå…¨å±€å‡½æ•° */
 	for (i = 0; i < EVENT_COUNT; i++)
 		_eventRef[i] = LUA_REFNIL;
 	luaL_register(_state, "_G", global_functions);
 	
-	/* À©Õ¹¿â */
+	/* æ‰©å±•åº“ */
 	lua_getglobal(_state, "package");
 	lua_getfield(_state, -1, "preload");
 	for (; lib->func; lib++)
@@ -424,7 +424,7 @@ int initLua()
 	}
 	lua_pop(_state, 2);
 
-	/* ³õÊ¼»¯½Å±¾×°ÔØÆ÷ */
+	/* åˆå§‹åŒ–è„šæœ¬è£…è½½å™¨ */
 	initLuaLoader(lua_loader);
 	return 1;
 }
@@ -453,7 +453,7 @@ void lua_EventLoop(double dt)
 
 void lua_EventInit()
 {
-	/* Ö´ĞĞ³õÊ¼»¯´úÂë */
+	/* æ‰§è¡Œåˆå§‹åŒ–ä»£ç  */
 	lua_executeScriptFile("init.lua");
 
 	if (lua_pushEventFunction(EVENT_INIT)){
@@ -466,7 +466,7 @@ void lua_EventRelease()
 	if (lua_pushEventFunction(EVENT_RELEASE)){
 		lua_executeFunction(0);
 	}
-	/* Ö´ĞĞÍË³ö½Å±¾ */
+	/* æ‰§è¡Œé€€å‡ºè„šæœ¬ */
 	lua_executeScriptFile("release.lua");
 }
 

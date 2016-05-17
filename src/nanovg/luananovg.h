@@ -1,4 +1,4 @@
-#ifndef _LUANANOVG_H_
+﻿#ifndef _LUANANOVG_H_
 #define _LUANANOVG_H_
 
 #include "lua.h"

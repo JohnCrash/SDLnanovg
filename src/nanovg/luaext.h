@@ -1,4 +1,4 @@
-#ifndef _LUAEXT_H_
+﻿#ifndef _LUAEXT_H_
 #define _LUAEXT_H_
 
 #include "lua.h"

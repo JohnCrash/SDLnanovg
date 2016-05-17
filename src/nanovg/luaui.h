@@ -1,4 +1,4 @@
-#ifndef _LUAUI_H_
+﻿#ifndef _LUAUI_H_
 #define _LUAUI_H_
 
 #include "lua.h"

@@ -1,4 +1,4 @@
-#include <math.h>
+ï»¿#include <math.h>
 #include "SDL.h"
 #include "lua.h"
 #include "lauxlib.h"
@@ -12,10 +12,10 @@
 
 
 typedef struct {
-	int haveEventType; /* ÔÚÊÂ¼şÁĞ±íÖĞ´æÔÚÖ¸¶¨µÄÊÂ¼şÀàĞÍ */
+	int haveEventType; /* åœ¨äº‹ä»¶åˆ—è¡¨ä¸­å­˜åœ¨æŒ‡å®šçš„äº‹ä»¶ç±»å‹ */
 	int isTouchDown;
-	uiEvent lastTouchDown; /* ×î½üÒ»´Î°´ÏÂÊÂ¼ş */
-	uiWidget *lastTouchDownWidget; /* °´ÏÂÊÂ¼şµÄ½ÓÊÜ¶ÔÏó */
+	uiEvent lastTouchDown; /* æœ€è¿‘ä¸€æ¬¡æŒ‰ä¸‹äº‹ä»¶ */
+	uiWidget *lastTouchDownWidget; /* æŒ‰ä¸‹äº‹ä»¶çš„æ¥å—å¯¹è±¡ */
 	int nEvent;
 	uiEvent events[8];
 } uiEventState;
@@ -31,7 +31,7 @@ uiWidget * uiRootWidget()
 }
 
 /*
- * Í¨¹ısx,sy,angle¼ÆËã³ö¾ØÕóµÄĞı×ª²¿·ÖºÍËõ·Å²¿·Ö£¬ÕâÀïÉáÆúÁËÇĞ±ä»»
+ * é€šè¿‡sx,sy,angleè®¡ç®—å‡ºçŸ©é˜µçš„æ—‹è½¬éƒ¨åˆ†å’Œç¼©æ”¾éƒ¨åˆ†ï¼Œè¿™é‡Œèˆå¼ƒäº†åˆ‡å˜æ¢
  */
 static void calcXForm(uiWidget *self)
 {
@@ -66,22 +66,22 @@ int initUI()
 	_root->classRef = LUA_REFNIL;
 	_root->selfRef = LUA_REFNIL;
 
-	/* ³õÊ¼»¯ÊÂ¼ş×´Ì¬ */
+	/* åˆå§‹åŒ–äº‹ä»¶çŠ¶æ€ */
 	_eventState.nEvent = 0;
 	_eventState.isTouchDown = 0;
 	_eventState.lastTouchDownWidget = NULL;
 	return 1;
 }
 
-/* luaui.c ÖĞµÄ·½·¨ */
+/* luaui.c ä¸­çš„æ–¹æ³• */
 extern void lua_pushWidget(lua_State *L, uiWidget * widget);
 
 /*
- * µ÷ÓÃ¶ÔÏóµÄÀà·½·¨Èç:onInit,onRelease
+ * è°ƒç”¨å¯¹è±¡çš„ç±»æ–¹æ³•å¦‚:onInit,onRelease
  */
 static void callWidgetEvent(uiWidget * widget, const char *strEvent)
 {
-	/* ÏÈÕÒ¶ÔÏóµÄÖØÔØ·½·¨ */
+	/* å…ˆæ‰¾å¯¹è±¡çš„é‡è½½æ–¹æ³• */
 	if (widget->selfRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		if (L){
@@ -99,7 +99,7 @@ static void callWidgetEvent(uiWidget * widget, const char *strEvent)
 			}
 		}
 	}
-	/* È»ºó·ÃÎÊÀà·½·¨·½·¨ */
+	/* ç„¶åè®¿é—®ç±»æ–¹æ³•æ–¹æ³• */
 	if (widget->classRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		if (L){
@@ -121,8 +121,8 @@ static void callWidgetEvent(uiWidget * widget, const char *strEvent)
 static uiWidget * _delayList = NULL;
 static int _delayEnable = 0;
 /*
- * ´ò¿ª¹Ø±ÕÑÓÊ±É¾³ı¹¦ÄÜ£¬µ±¿ªÆôÑÓÊ±É¾³ıÊ±¡£
- * ÒªÉ¾³ıµÄ¶ÔÏó¶¼±»Á´½ÓÆğÀ´ÉÔºó¼¯ÖĞÉ¾³ı¡£
+ * æ‰“å¼€å…³é—­å»¶æ—¶åˆ é™¤åŠŸèƒ½ï¼Œå½“å¼€å¯å»¶æ—¶åˆ é™¤æ—¶ã€‚
+ * è¦åˆ é™¤çš„å¯¹è±¡éƒ½è¢«é“¾æ¥èµ·æ¥ç¨åé›†ä¸­åˆ é™¤ã€‚
  */
 static void uiDelayDelete(int b)
 {
@@ -134,12 +134,12 @@ static void uiDeleteWidgetSelf(uiWidget *self)
 	if (self){
 		uiRemoveFromParent(self);
 		if (_delayEnable){
-			/* ·ÅÈëÑÓÊ±É¾³ı±í */
+			/* æ”¾å…¥å»¶æ—¶åˆ é™¤è¡¨ */
 			self->remove = _delayList;
 			_delayList = self;
 		}
 		else{
-			/* Á¢¿ÌÉ¾³ı¶ÔÏó */
+			/* ç«‹åˆ»åˆ é™¤å¯¹è±¡ */
 			lua_State * L = lua_GlobalState();
 			callWidgetEvent(self, "onRelease");
 			if (L && self->selfRef != LUA_REFNIL){
@@ -157,10 +157,10 @@ static void uiDeleteWidgetSelf(uiWidget *self)
 void releaseUI()
 {
 	lua_State * L = lua_GlobalState();
-	/* É¾³ı¸ù½Úµã */
+	/* åˆ é™¤æ ¹èŠ‚ç‚¹ */
 	uiDeleteWidget(_root);
 	uiDeleteWidgetSelf(_root);
-	/* É¾³ıÑùÊ½±í */
+	/* åˆ é™¤æ ·å¼è¡¨ */
 	while(_themes){
 		ThemesList * ptemp = _themes;
 		_themes = ptemp->next;
@@ -188,7 +188,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 	ThemesList * themes = _themes;
 	lua_State * L = lua_GlobalState();
 	while (themes){
-		/* ÏÈÔÚÑùÊ½±íÖĞ²éÕÒ¶ÔÓ¦µÄÑùÊ½ */
+		/* å…ˆåœ¨æ ·å¼è¡¨ä¸­æŸ¥æ‰¾å¯¹åº”çš„æ ·å¼ */
 		if (strcmp(themes_name, themes->name) == 0 && themes->themeRef!=LUA_REFNIL){
 			lua_getref(L, themes->themeRef);
 			lua_getfield(L, -1, widget_name);
@@ -198,7 +198,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 			 */
 			if (lua_istable(L, -1)){
 				/*
-				 * ³É¹¦ÕÒµ½ÑùÊ½±íÖĞµÄ¿Ø¼şÔ­ĞÍ±í
+				 * æˆåŠŸæ‰¾åˆ°æ ·å¼è¡¨ä¸­çš„æ§ä»¶åŸå‹è¡¨
 				 */
 				uiWidget * self = (uiWidget*)malloc(sizeof(uiWidget));
 				if (!self)return NULL;
@@ -225,7 +225,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 }
 
 /*
- * ½«×Ó½Úµã¶¼É¾³ı£¬Èç¹û×Ô¼º²»ÊÇrootÒ²½«×Ô¼ºÉ¾³ı
+ * å°†å­èŠ‚ç‚¹éƒ½åˆ é™¤ï¼Œå¦‚æœè‡ªå·±ä¸æ˜¯rootä¹Ÿå°†è‡ªå·±åˆ é™¤
  */
 void uiDeleteWidget(uiWidget *self)
 {
@@ -268,7 +268,7 @@ static uiWidget * getHead(uiWidget *self)
 	return head;
 }
 
-/* ½«¶ÔÏó·ÅÈëÏÔÊ¾×îÉÏÃæ */
+/* å°†å¯¹è±¡æ”¾å…¥æ˜¾ç¤ºæœ€ä¸Šé¢ */
 void uiBringTop(uiWidget * self)
 {
 	if (self&&self->parent){
@@ -279,7 +279,7 @@ void uiBringTop(uiWidget * self)
 	}
 }
 
-/* ½«¶ÔÏó·ÅÈëÏÔÊ¾×îÏÂÃæ */
+/* å°†å¯¹è±¡æ”¾å…¥æ˜¾ç¤ºæœ€ä¸‹é¢ */
 void uiBringBottom(uiWidget * self)
 {
 	if (self&&self->parent){
@@ -292,7 +292,7 @@ void uiBringBottom(uiWidget * self)
 }
 
 /*
- * ½«¶ÔÏó²åÈëµ½¶ÓÁĞµÄ¿ªÊ¼
+ * å°†å¯¹è±¡æ’å…¥åˆ°é˜Ÿåˆ—çš„å¼€å§‹
  */
 void uiAddChild(uiWidget *parent, uiWidget *child)
 {
@@ -312,7 +312,7 @@ void uiAddChild(uiWidget *parent, uiWidget *child)
 }
 
 /*
-* ½«¶ÔÏó²åÈëµ½¶ÓÁĞµÄ½áÎ²
+* å°†å¯¹è±¡æ’å…¥åˆ°é˜Ÿåˆ—çš„ç»“å°¾
 */
 void uiAddChildToTail(uiWidget *parent, uiWidget *child)
 {
@@ -370,7 +370,7 @@ int loadThemes(const char *name, const char *filename)
 			ptl->next = _themes;
 			_themes = ptl;
 			/*
-			 * µ÷ÓÃÑùÊ½³õÊ¼»¯
+			 * è°ƒç”¨æ ·å¼åˆå§‹åŒ–
 			 */
 			lua_getfield(L, -1, "onInit");
 			/*
@@ -412,7 +412,7 @@ void unloadThemes(const char *name)
 				_themes = theme->next;
 			}
 			/*
-			 * µ÷ÓÃÊÍ·Åº¯Êı
+			 * è°ƒç”¨é‡Šæ”¾å‡½æ•°
 			 */
 			lua_State *L = lua_GlobalState();
 			if (L&&theme->themeRef != LUA_REFNIL){
@@ -488,8 +488,8 @@ int InWidget(uiWidget *parent, uiWidget *child)
 }
 
 /*
- * ½«ËùÓĞ¿É¼ûµÄ¶ÔÏó¶¼Á´½ÓÔÚÒ»Æğ£¬²¢ÇÒ·µ»ØÆäÍ·
- * Í¨¹ıenum_next½øĞĞ±éÀú
+ * å°†æ‰€æœ‰å¯è§çš„å¯¹è±¡éƒ½é“¾æ¥åœ¨ä¸€èµ·ï¼Œå¹¶ä¸”è¿”å›å…¶å¤´
+ * é€šè¿‡enum_nextè¿›è¡Œéå†
  */
 static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderProc renderFunc)
 {
@@ -504,7 +504,7 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 	}
 	nvgSetTransform(_vg, root->curxform);
 	renderFunc(root);
-	/* ¶Ô×Ó´°¿ÚÉèÖÃ¼ôÇĞÇøÓò */
+	/* å¯¹å­çª—å£è®¾ç½®å‰ªåˆ‡åŒºåŸŸ */
 	if (root->isVisible&CLIP){
 		nvgSave(_vg);
 		nvgScissor(_vg, 0, 0, root->width, root->height);
@@ -531,7 +531,7 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 }
 
 /*
- * ½«SDL_Event×ª±äÎªuiEvent
+ * å°†SDL_Eventè½¬å˜ä¸ºuiEvent
  */
 static void prepareUIEvent()
 {
@@ -612,11 +612,11 @@ static void prepareUIEvent()
 	}
 }
 
-/* ÔÚÊÂ¼ş´¦Àí½áÊøµ÷ÓÃ */
+/* åœ¨äº‹ä»¶å¤„ç†ç»“æŸè°ƒç”¨ */
 static void endUIEvent()
 {
 	/* 
-	 * Èç¹ûÓĞÌ§ÆğÊÂ¼ş¾ÍÇåÀíisTouchDown 
+	 * å¦‚æœæœ‰æŠ¬èµ·äº‹ä»¶å°±æ¸…ç†isTouchDown 
 	 */
 	if (_eventState.isTouchDown && (_eventState.haveEventType&EVENT_TOUCHUP)){
 		_eventState.isTouchDown = 0;
@@ -624,11 +624,11 @@ static void endUIEvent()
 	}
 }
 /*
-* Ã¶¾ÙµÄ¹ı³ÌÖĞeventFunc¿ÉÄÜ¸Ä±ä´°¿Ú½á¹¹ÉõÖÁÉ¾³ı´°¿Ú
-* ÕâĞèÒªÌØÊâ´¦Àí£¬Ê×ÏÈ½«Âú×ãµ÷ÓÃfuncµÄ´°¿Ú·ÅÈëÒ»¸ö±íÖĞ
-* È»ºó²Åµ÷ÓÃeventFuncº¯Êı£¬Èç¹ûÔÚfuncº¯ÊıÖĞÉ¾³ıÁË´°¿Ú£¬ºóÃæ
-* µÄµ÷ÓÃ»á·ÃÎÊ·Ç·¨Ö¸Õë£¬Òò´ËeventFuncÖĞ½«ÒªÉ¾³ıµÄ´°¿Ú±ê¼Ç£¬
-* µÈÃ¶¾Ù½áÊø²Å½øĞĞÕæÕıµÄÉ¾³ı¡£
+* æšä¸¾çš„è¿‡ç¨‹ä¸­eventFuncå¯èƒ½æ”¹å˜çª—å£ç»“æ„ç”šè‡³åˆ é™¤çª—å£
+* è¿™éœ€è¦ç‰¹æ®Šå¤„ç†ï¼Œé¦–å…ˆå°†æ»¡è¶³è°ƒç”¨funcçš„çª—å£æ”¾å…¥ä¸€ä¸ªè¡¨ä¸­
+* ç„¶åæ‰è°ƒç”¨eventFuncå‡½æ•°ï¼Œå¦‚æœåœ¨funcå‡½æ•°ä¸­åˆ é™¤äº†çª—å£ï¼Œåé¢
+* çš„è°ƒç”¨ä¼šè®¿é—®éæ³•æŒ‡é’ˆï¼Œå› æ­¤eventFuncä¸­å°†è¦åˆ é™¤çš„çª—å£æ ‡è®°ï¼Œ
+* ç­‰æšä¸¾ç»“æŸæ‰è¿›è¡ŒçœŸæ­£çš„åˆ é™¤ã€‚
 */
 void uiEnumWidget(uiWidget *root, 
 	uiRenderProc renderFunc, uiEventProc eventFunc,
@@ -640,13 +640,13 @@ void uiEnumWidget(uiWidget *root,
 	head->enum_prev = NULL; 
 	tail = uiEnumWidgetVisible(root, head, renderFunc);
 	/*
-	 * ÏÂÃæ×¼±¸·Ö·¢ÊÂ¼ş
+	 * ä¸‹é¢å‡†å¤‡åˆ†å‘äº‹ä»¶
 	 */
 	prepareUIEvent();
-	/* ´ò¿ªÑÓÊ±É¾³ı±í */
+	/* æ‰“å¼€å»¶æ—¶åˆ é™¤è¡¨ */
 	uiDelayDelete(1);
 	/*
-	 * ´¦ÀíÊÂ¼ş£¬ÏÈÔ¤´¦Àí
+	 * å¤„ç†äº‹ä»¶ï¼Œå…ˆé¢„å¤„ç†
 	 */
 	if (_eventState.haveEventType){
 		temp = tail;
@@ -654,10 +654,10 @@ void uiEnumWidget(uiWidget *root,
 			uiEvent * pev = &(_eventState.events[i]);
 			tail = temp;
 			/*
-			 * ´Ó×îÉÏÃæµÄ¶ÔÏó¿ªÊ¼´¦ÀíÊÂ¼ş
+			 * ä»æœ€ä¸Šé¢çš„å¯¹è±¡å¼€å§‹å¤„ç†äº‹ä»¶
 			 */
 			while (tail){
-				/* Èç¹û¶ÔÏóÒª¶ÀÕ¼´ËÊÂ¼ş£¬ÖÕÖ¹´«µİ */
+				/* å¦‚æœå¯¹è±¡è¦ç‹¬å æ­¤äº‹ä»¶ï¼Œç»ˆæ­¢ä¼ é€’ */
 				if (eventFunc(tail,pev))
 					break;
 				tail = tail->enum_prev;
@@ -666,7 +666,7 @@ void uiEnumWidget(uiWidget *root,
 	}
 	uiDelayDelete(0);
 	endUIEvent();
-	/* É¾³ıÑÓ³Ù±íÖĞµÄ¶ÔÏó */
+	/* åˆ é™¤å»¶è¿Ÿè¡¨ä¸­çš„å¯¹è±¡ */
 	head = _delayList;
 	while (head){
 		temp = head->remove;
@@ -676,11 +676,11 @@ void uiEnumWidget(uiWidget *root,
 }
 
 /*
- * µ÷ÓÃ¶ÔÏóµÄäÖÈ¾·½·¨onDraw,ÔÊĞí¶ÔÏóÖØÔØ
+ * è°ƒç”¨å¯¹è±¡çš„æ¸²æŸ“æ–¹æ³•onDraw,å…è®¸å¯¹è±¡é‡è½½
  */
 static void renderWidget(uiWidget * widget)
 {
-	/* Ê×ÏÈËÑË÷¶ÔÏóµÄonDraw·½·¨ */
+	/* é¦–å…ˆæœç´¢å¯¹è±¡çš„onDrawæ–¹æ³• */
 	if (widget->selfRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		lua_getref(L, widget->selfRef);
@@ -696,7 +696,7 @@ static void renderWidget(uiWidget * widget)
 			lua_pop(L, 2);
 		}
 	}
-	/* ÔÚËÑË÷Àà·½·¨ */
+	/* åœ¨æœç´¢ç±»æ–¹æ³• */
 	if (widget->classRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		lua_getref(L, widget->classRef);
@@ -735,11 +735,11 @@ static void pushUiEventTable(lua_State *L, uiEvent *pev)
 	lua_setfield(L, -2, "inside");
 }
 /*
-* µ÷ÓÃ¶ÔÏóµÄÀà·½·¨Èç:onEvent
+* è°ƒç”¨å¯¹è±¡çš„ç±»æ–¹æ³•å¦‚:onEvent
 */
 static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *pev)
 {
-	/* ÏÈÕÒ¶ÔÏóµÄÖØÔØ·½·¨ */
+	/* å…ˆæ‰¾å¯¹è±¡çš„é‡è½½æ–¹æ³• */
 	if (widget->selfRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		if (L){
@@ -758,7 +758,7 @@ static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *p
 			}
 		}
 	}
-	/* È»ºó·ÃÎÊÀà·½·¨·½·¨ */
+	/* ç„¶åè®¿é—®ç±»æ–¹æ³•æ–¹æ³• */
 	if (widget->classRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
 		if (L){
@@ -784,10 +784,10 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 	float w2o[6];
 	if ( widget->handleEvent & pev->type ){ 
 		if (nvgTransformInverse(w2o, widget->curxform)){
-			/* ±ä»»ÆÁÄ»µãµ½¶ÔÏóÏµ */
+			/* å˜æ¢å±å¹•ç‚¹åˆ°å¯¹è±¡ç³» */
 			nvgTransformPoint(&x, &y, w2o, pev->x, pev->y);
 			if (x >= 0 && y >= 0 && x <= widget->width && y <= widget->height){
-				/* Í¶µİÊÂ¼şµ½¶ÔÏó */
+				/* æŠ•é€’äº‹ä»¶åˆ°å¯¹è±¡ */
 				uiEvent ev = *pev;
 				ev.x = x;
 				ev.y = y;
@@ -801,13 +801,13 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 					_eventState.lastTouchDownWidget = widget;
 				}
 				callWidgetOnEvent(widget, "onEvent", &ev);
-				/* ¶ÀÕ¼Êı¾İ²»¼ÌĞø´«µİ */
+				/* ç‹¬å æ•°æ®ä¸ç»§ç»­ä¼ é€’ */
 				if ((widget->handleEvent&EVENT_EXCLUSIVE)||
 					(widget->handleEvent&EVENT_BREAK))
 					return 1;
 			}
 			else if (widget == _eventState.lastTouchDownWidget){
-				/* µÚÒ»¸ö½ÓÊÕµôEVENT_TOUCHDOWNµÄ¶ÔÏó½«½ÓÊÕÖ±µ½EVENT_TOUCHENDµÄËùÓĞÊı¾İ */
+				/* ç¬¬ä¸€ä¸ªæ¥æ”¶æ‰EVENT_TOUCHDOWNçš„å¯¹è±¡å°†æ¥æ”¶ç›´åˆ°EVENT_TOUCHENDçš„æ‰€æœ‰æ•°æ® */
 				uiEvent ev = *pev;
 				ev.x = x;
 				ev.y = y;
@@ -828,11 +828,11 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 			return 0;
 		}
 	}
-	/* ÖÕÖ¹´«µİ */
+	/* ç»ˆæ­¢ä¼ é€’ */
 	if (widget->handleEvent&EVENT_BREAK || widget->handleEvent&EVENT_EXCLUSIVE){
 		/* 
-		 * ¶ÔÓÚEVENT_BREAK¶ÔÏó£¬µ±¸Ã¶ÔÏó´¦ÀíÒ»ÖÖÊÂ¼şµ±²»ÔÚ¶ÔÏóÄÚ²¿·¢ÉúÊ±Ò²´«µİ¸ø¶ÔÏó
-		 * µ±µ½´ïÕâÀï±íÊ¾ÒÑ¾­²»ÔÚ¶ÔÏóÄÚ²¿ÁË¡£×¢Òâ£ºx,yÔÚÉÏÃæÒÑ¾­¼ÆËãºÃÁË
+		 * å¯¹äºEVENT_BREAKå¯¹è±¡ï¼Œå½“è¯¥å¯¹è±¡å¤„ç†ä¸€ç§äº‹ä»¶å½“ä¸åœ¨å¯¹è±¡å†…éƒ¨å‘ç”Ÿæ—¶ä¹Ÿä¼ é€’ç»™å¯¹è±¡
+		 * å½“åˆ°è¾¾è¿™é‡Œè¡¨ç¤ºå·²ç»ä¸åœ¨å¯¹è±¡å†…éƒ¨äº†ã€‚æ³¨æ„ï¼šx,yåœ¨ä¸Šé¢å·²ç»è®¡ç®—å¥½äº†
 		 */
 		if (widget->handleEvent&pev->type){
 			uiEvent ev = *pev;
@@ -852,7 +852,7 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 }
 
 /*
- * äÖÈ¾¶ÔÏóÊ÷½á¹¹
+ * æ¸²æŸ“å¯¹è±¡æ ‘ç»“æ„
  */
 void uiLoop()
 {
@@ -898,7 +898,7 @@ static void uiWidgetToRootForm(uiWidget *self,float xform[6])
 }
 
 /*
- * ½«È«¾Ö×ø±ê×ª»»Îªwidget×ø±ê
+ * å°†å…¨å±€åæ ‡è½¬æ¢ä¸ºwidgetåæ ‡
  */
 void uiRootToWidget(uiWidget *self, float *pt, int n)
 {
@@ -915,7 +915,7 @@ void uiRootToWidget(uiWidget *self, float *pt, int n)
 }
 
 /*
- * ½«widget×ø±ê×ª»»ÎªÈ«¾Ö×ø±ê
+ * å°†widgetåæ ‡è½¬æ¢ä¸ºå…¨å±€åæ ‡
  */
 void uiWidgetToRoot(uiWidget *self, float *pt, int n)
 {
@@ -937,8 +937,8 @@ int uiPtInWidget(uiWidget *self, float x, float y)
 static void donothingFunc(uiWidget *self)
 {}
 /*
- * ÔÚÆÁÄ»µãx,y´¦´©Í¸µÄwidgetÁĞ±í£¬·µ»ØÓĞ¶àÉÙ¸ö±»´©Í¸µÄwidget
- * widgetÊÇÒ»¸öÖ¸ÕëÊı×é¿Õ¼ä£¬nÊÇËüµÄÊıÁ¿¡£×îÏÈ´©Í¸µÄ·ÅÈë0Î»ÖÃ
+ * åœ¨å±å¹•ç‚¹x,yå¤„ç©¿é€çš„widgetåˆ—è¡¨ï¼Œè¿”å›æœ‰å¤šå°‘ä¸ªè¢«ç©¿é€çš„widget
+ * widgetæ˜¯ä¸€ä¸ªæŒ‡é’ˆæ•°ç»„ç©ºé—´ï¼Œnæ˜¯å®ƒçš„æ•°é‡ã€‚æœ€å…ˆç©¿é€çš„æ”¾å…¥0ä½ç½®
  */
 int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
 {

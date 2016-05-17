@@ -1,4 +1,4 @@
-#include "luananovg.h"
+﻿#include "luananovg.h"
 #include "SDL.h"
 #include "gles.h"
 #include "nanovg.h"
@@ -6,12 +6,20 @@
 #include "sdlmain.h"
 #include "eventhandler.h"
 
+/**
+ * \addtogroup VG
+ * \brief lua 矢量绘制函数
+ *
+ * 这些函数都是在lua环境中调用的绘制函数。lua中的函数名称就是C函数名去掉lua_前缀。
+ * 例如函数lua_beginNanoVG，的lua函数名称为beginNanoVG。
+ * @{
+ */
 #if LUA_VERSION_NUM < 502
 #  define luaL_newlib(L,l) (lua_newtable(L), luaL_register(L,NULL,l))
 #endif
 
 extern NVGcontext* _vg;
-/*
+/**
  * 
  */
 static int nanovgRenderTable(lua_State *L, int n)
@@ -19,12 +27,12 @@ static int nanovgRenderTable(lua_State *L, int n)
 	return 0;
 }
 /*
- * ʹ��nanovg��Ⱦ
+ * 使用nanovg渲染
  * {
  *		{ fill,stroke,text,trasform,}
   * }
  */
-int lua_nanovgRender(lua_State *L)
+static int lua_nanovgRender(lua_State *L)
 {
 	int fbWidth, fbHeight;
 	int winWidth, winHeight;
@@ -45,7 +53,12 @@ int lua_nanovgRender(lua_State *L)
 	return 0;
 }
 
-int lua_beginNanoVG(lua_State *L)
+/**
+ * \brief 设置渲染区域的宽度和高度
+ * \param width 渲染Viewport的宽度
+ * \param height 渲染Viewport的高度 
+ */
+static int lua_beginNanoVG(lua_State *L)
 {
 	int fbWidth, fbHeight;
 	fbWidth = (int)luaL_checknumber(L, 1);
@@ -62,9 +75,10 @@ static float lua_tableNumber(lua_State *L, int n, const char *key)
 	lua_pop(L, 1);
 	return r;
 }
-/*
- * nλ�õ�ֵ��һ����{r,g,b,a}��û������0����
- * ���nλ�ò���һ��������0,���򷵻�1
+
+/**
+ * n位置的值是一个表{r,g,b,a}，没填充的用0补充
+ * 如果n位置不是一个表返回0,否则返回1
  */
 static int lua_toNVGcolor(lua_State *L, int n,NVGcolor *c)
 {
@@ -81,14 +95,14 @@ static int lua_toNVGcolor(lua_State *L, int n,NVGcolor *c)
 	return 0;
 }
 
-/*
- * NVGpaint�ֳ�4������
- * LinearGradient
- * BoxGradient
- * RadialGradient
- * ImagePattern
+/**
+ * NVGpaint分成4种类型
+ * - LinearGradient
+ * - BoxGradient
+ * - RadialGradient
+ * - ImagePattern
  */
-int lua_toNVGpaint(lua_State *L, int n, NVGpaint *p)
+static int lua_toNVGpaint(lua_State *L, int n, NVGpaint *p)
 {
 	if (lua_istable(L, n)){
 		lua_getfield(L, n, "type");
@@ -170,24 +184,36 @@ int lua_toNVGpaint(lua_State *L, int n, NVGpaint *p)
 	return 0;
 }
 
+/**
+ * \brief 存储绘制状态，稍后可以使用restore恢复之前的绘制状态。
+ */
 static int lua_save(lua_State *L)
 {
 	nvgSave(_vg);
 	return 0;
 }
 
+/**
+ * \brief 恢复之前save的绘制状态。
+ */
 static int lua_restore(lua_State *L)
 {
 	nvgRestore(_vg);
 	return 0;
 }
 
+/**
+ * \brief 重置绘制状态。
+ */
 static int lua_reset(lua_State *L)
 {
 	nvgReset(_vg);
 	return 0;
 }
 
+/**
+ * \brief 设置边框的颜色。
+ */
 static int lua_strokeColor(lua_State *L)
 {
 	NVGcolor c;
@@ -196,6 +222,9 @@ static int lua_strokeColor(lua_State *L)
 	return 0;
 }
 
+/**
+ * \brief 设置填充颜色。
+ */
 static int lua_fillColor(lua_State *L)
 {
 	NVGcolor c;
@@ -256,7 +285,7 @@ int lua_resetTransform(lua_State *L)
 	return 0;
 }
 
-int lua_transform(lua_State *L)
+static int lua_transform(lua_State *L)
 {
 	float a, b, c, d, e, f;
 	a = (float)luaL_checknumber(L, 1);
@@ -269,7 +298,7 @@ int lua_transform(lua_State *L)
 	return 0;
 }
 
-int lua_currentTransform(lua_State *L)
+static int lua_currentTransform(lua_State *L)
 {
 	float form[6];
 	nvgCurrentTransform(_vg, form);
@@ -278,7 +307,7 @@ int lua_currentTransform(lua_State *L)
 	return 6;
 }
 
-int lua_translate(lua_State *L)
+static int lua_translate(lua_State *L)
 {
 	float x, y;
 	x = (float)luaL_checknumber(L, 1);
@@ -287,25 +316,28 @@ int lua_translate(lua_State *L)
 	return 0;
 }
 
-int lua_rotate(lua_State *L)
+static int lua_rotate(lua_State *L)
 {
 	float angle = (float)luaL_checknumber(L, 1);
 	nvgRotate(_vg,angle);
 	return 0;
 }
-int lua_skewX(lua_State *L)
+
+static int lua_skewX(lua_State *L)
 {
 	float angle = (float)luaL_checknumber(L, 1);
 	nvgSkewX(_vg, angle);
 	return 0;
 }
-int lua_skewY(lua_State *L)
+
+static int lua_skewY(lua_State *L)
 {
 	float angle = (float)luaL_checknumber(L, 1);
 	nvgSkewY(_vg, angle);
 	return 0;
 }
-int lua_scale(lua_State *L)
+
+static int lua_scale(lua_State *L)
 {
 	float x, y;
 	x = (float)luaL_checknumber(L, 1);
@@ -314,7 +346,7 @@ int lua_scale(lua_State *L)
 	return 0;
 }
 
-int lua_createImage(lua_State *L)
+static int lua_createImage(lua_State *L)
 {
 	const char *filename = luaL_checkstring(L, 1);
 	int imageFlags = 0;
@@ -324,7 +356,7 @@ int lua_createImage(lua_State *L)
 	return 1;
 }
 
-int lua_imageSize(lua_State *L)
+static int lua_imageSize(lua_State *L)
 {
 	int image,w, h;
 	w = h = 0;
@@ -335,13 +367,13 @@ int lua_imageSize(lua_State *L)
 	return 2;
 }
 
-int lua_deleteImage(lua_State *L)
+static int lua_deleteImage(lua_State *L)
 {
 	nvgDeleteImage(_vg, (int)luaL_checknumber(L, 1));
 	return 0;
 }
 
-int lua_scissor(lua_State *L)
+static int lua_scissor(lua_State *L)
 {
 	float x, y, w, h;
 	x = (float)luaL_checknumber(L, 1);
@@ -352,7 +384,7 @@ int lua_scissor(lua_State *L)
 	return 0;
 }
 
-int lua_intersectScissor(lua_State *L)
+static int lua_intersectScissor(lua_State *L)
 {
 	float x, y, w, h;
 	x = (float)luaL_checknumber(L, 1);
@@ -363,13 +395,13 @@ int lua_intersectScissor(lua_State *L)
 	return 0;
 }
 
-int lua_resetScissor(lua_State *L)
+static int lua_resetScissor(lua_State *L)
 {
 	nvgResetScissor(_vg);
 	return 0;
 }
 
-int lua_arc(lua_State *L)
+static int lua_arc(lua_State *L)
 {
 	float cx, cy, r, a0, a1;
 	int dir;
@@ -384,7 +416,7 @@ int lua_arc(lua_State *L)
 }
 
 
-int lua_rect(lua_State *L)
+static int lua_rect(lua_State *L)
 {
 	float x, y, w, h;
 	x = (float)luaL_checknumber(L, 1);
@@ -396,7 +428,7 @@ int lua_rect(lua_State *L)
 }
 
 
-int lua_roundedRect(lua_State *L)
+static int lua_roundedRect(lua_State *L)
 {
 	float x, y, w, h,r;
 	x = (float)luaL_checknumber(L, 1);
@@ -408,7 +440,7 @@ int lua_roundedRect(lua_State *L)
 	return 0;
 }
 
-int lua_ellipse(lua_State *L)
+static int lua_ellipse(lua_State *L)
 {
 	float cx,cy,rx,ry;
 	cx = (float)luaL_checknumber(L, 1);
@@ -419,7 +451,7 @@ int lua_ellipse(lua_State *L)
 	return 0;
 }
 
-int lua_circle(lua_State *L)
+static int lua_circle(lua_State *L)
 {
 	float cx, cy, r;
 	cx = (float)luaL_checknumber(L, 1);
@@ -429,7 +461,7 @@ int lua_circle(lua_State *L)
 	return 0;
 }
 
-int lua_beginPath(lua_State *L)
+static int lua_beginPath(lua_State *L)
 {
 	nvgBeginPath(_vg);
 	return 0;
@@ -476,7 +508,7 @@ static int pathN(float p)
 /*
  * MOVETO(1),LINETO(2),BEZIERTO(3),QUADTO(4),ARCTO(5),CLOSE(6),END
  */
-int lua_path(lua_State *L)
+static int lua_path(lua_State *L)
 {
 	if (lua_istable(L, 1)){
 		int i = 1;
@@ -514,25 +546,25 @@ int lua_path(lua_State *L)
 	return 0;
 }
 
-int lua_pathWinding(lua_State *L)
+static int lua_pathWinding(lua_State *L)
 {
 	nvgPathWinding(_vg, (int)luaL_checknumber(L, 1));
 	return 0;
 }
 
-int lua_fill(lua_State *L)
+static int lua_fill(lua_State *L)
 {
 	nvgFill(_vg);
 	return 0;
 }
 
-int lua_stroke(lua_State *L)
+static int lua_stroke(lua_State *L)
 {
 	nvgStroke(_vg);
 	return 0;
 }
 
-int lua_beginFrame(lua_State *L)
+static int lua_beginFrame(lua_State *L)
 {
 	int windowWidth, windowHeight;
 	float devicePixelRatio;
@@ -543,19 +575,19 @@ int lua_beginFrame(lua_State *L)
 	return 0;
 }
 
-int lua_cancelFrame(lua_State *L)
+static int lua_cancelFrame(lua_State *L)
 {
 	nvgCancelFrame(_vg);
 	return 0;
 }
 
-int lua_endFrame(lua_State *L)
+static int lua_endFrame(lua_State *L)
 {
 	nvgEndFrame(_vg);
 	return 0;
 }
 
-int lua_createFont(lua_State *L)
+static int lua_createFont(lua_State *L)
 {
 	const char *name = luaL_checkstring(L, 1);
 	const char *filename = luaL_checkstring(L,2);
@@ -563,55 +595,55 @@ int lua_createFont(lua_State *L)
 	return 1;
 }
 
-int lua_findFont(lua_State *L)
+static int lua_findFont(lua_State *L)
 {
 	lua_pushinteger(L, nvgFindFont(_vg, luaL_checkstring(L, 1)));
 	return 1;
 }
 
-int lua_fontSize(lua_State *L)
+static int lua_fontSize(lua_State *L)
 {
 	nvgFontSize(_vg, (float)luaL_checknumber(L, 1));
 	return 0;
 }
 
-int lua_fontBlur(lua_State *L)
+static int lua_fontBlur(lua_State *L)
 {
 	nvgFontBlur(_vg, (float)luaL_checknumber(L, 1));
 	return 0;
 }
 
-int lua_textLetterSpacing(lua_State *L)
+static int lua_textLetterSpacing(lua_State *L)
 {
 	nvgTextLetterSpacing(_vg, (float)luaL_checknumber(L, 1));
 	return 0;
 }
 
-int lua_textLineHeight(lua_State *L)
+static int lua_textLineHeight(lua_State *L)
 {
 	nvgTextLineHeight(_vg, (float)luaL_checknumber(L, 1));
 	return 0;
 }
 
-int lua_textAlign(lua_State *L)
+static int lua_textAlign(lua_State *L)
 {
 	nvgTextAlign(_vg, (int)luaL_checkinteger(L, 1));
 	return 0;
 }
 
-int lua_fontFace(lua_State *L)
+static int lua_fontFace(lua_State *L)
 {
 	nvgFontFace(_vg, luaL_checkstring(L, 1));
 	return 0;
 }
 
-int lua_fontFaceId(lua_State *L)
+static int lua_fontFaceId(lua_State *L)
 {
 	nvgFontFaceId(_vg, (int)luaL_checkinteger(L, 1));
 	return 0;
 }
 
-int lua_text(lua_State *L)
+static int lua_text(lua_State *L)
 {
 	float x, y;
 	size_t len;
@@ -624,9 +656,9 @@ int lua_text(lua_State *L)
 }
 
 /*
- * ���ƿ������ƶ����ı�
+ * 绘制宽度限制多行文本
  */
-int lua_textBox(lua_State *L)
+static int lua_textBox(lua_State *L)
 {
 	float x, y, breakRowWidth;
 	size_t len;
@@ -640,9 +672,9 @@ int lua_textBox(lua_State *L)
 }
 
 /*
- * ȡ�ı��ڵ�ǰ�����µķ�Χ
+ * 取文本在当前字体下的范围
  */
-int lua_textBounds(lua_State *L)
+static int lua_textBounds(lua_State *L)
 {
 	float x, y;
 	const char * string;
@@ -659,9 +691,9 @@ int lua_textBounds(lua_State *L)
 }
 
 /*
- * ȡ�����ı��ķ�Χ
+ * 取折行文本的范围
  */
-int lua_textBoxBounds(lua_State *L)
+static int lua_textBoxBounds(lua_State *L)
 {
 	float x, y,breakRowWidth;
 	float bounds[4];
@@ -678,9 +710,9 @@ int lua_textBoxBounds(lua_State *L)
 }
 
 /*
- * ��Χÿ���ַ����Ƶ�λ���Լ�ռ�ݵĿ��ȷ�Χ
+ * 范围每个字符绘制的位置以及占据的宽度范围
  */
-int lua_textGlyphPositions(lua_State *L)
+static int lua_textGlyphPositions(lua_State *L)
 {
 	float x, y;
 	const char * string;
@@ -712,7 +744,7 @@ int lua_textGlyphPositions(lua_State *L)
 	return 0;
 }
 
-int lua_textMetrics(lua_State *L)
+static int lua_textMetrics(lua_State *L)
 {
 	float ascender, descender, lineh;
 	nvgTextMetrics(_vg, &ascender, &descender, &lineh);
@@ -722,7 +754,7 @@ int lua_textMetrics(lua_State *L)
 	return 3;
 }
 
-int lua_textBreakLines(lua_State *L)
+static int lua_textBreakLines(lua_State *L)
 {
 	const char *string = luaL_checkstring(L, 1);
 	float breakRowWidth = (float)luaL_checknumber(L, 2);
@@ -754,13 +786,13 @@ int lua_textBreakLines(lua_State *L)
 	return 0;
 }
 
-int lua_closePath(lua_State *L)
+static int lua_closePath(lua_State *L)
 {
 	nvgClosePath(_vg);
 	return 0;
 }
 
-int lua_HSLA(lua_State *L)
+static int lua_HSLA(lua_State *L)
 {
 	float h, s, l,a;
 	h = (float)luaL_checknumber(L, 1);
@@ -775,7 +807,7 @@ int lua_HSLA(lua_State *L)
 	return 4;
 }
 
-int lua_degToRad(lua_State *L)
+static int lua_degToRad(lua_State *L)
 {
 	lua_pushnumber(L, nvgDegToRad((float)luaL_checknumber(L, 1)));
 	return 1;
@@ -802,7 +834,7 @@ static char* cpToUTF8(int cp, char* str)
 	return str;
 }
 
-int lua_cpToUTF8(lua_State *L)
+static int lua_cpToUTF8(lua_State *L)
 {
 	char str[8];
 	cpToUTF8(luaL_checkinteger(L, 1), str);
@@ -904,3 +936,7 @@ int luaopen_nanovg(lua_State *L)
 	set_info(L);
 	return 1;
 }
+
+/**
+ * @}
+ */

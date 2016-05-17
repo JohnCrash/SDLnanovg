@@ -1,4 +1,4 @@
-#include "luaui.h"
+ï»¿#include "luaui.h"
 #include "ui.h"
 
 #if LUA_VERSION_NUM < 502
@@ -8,8 +8,8 @@
 #define LUA_UI_HANDLE "lua_nanoui_t"
 
 /*
- * Èç¹ûÃ»ÓĞ¶ÔÓ¦µÄluaWidget¶ÔÏó£¬¾Í´´½¨Ò»¸öluaWidget¶ÔÏó¡£
- * ²¢½«ÆäÑ¹Èëµ½lua¶ÑÕ»£¬·ñÔò½«ÒıÓÃµÄluaWidgetÑ¹Èëµ½¶ÑÕ»¡£
+ * å¦‚æœæ²¡æœ‰å¯¹åº”çš„luaWidgetå¯¹è±¡ï¼Œå°±åˆ›å»ºä¸€ä¸ªluaWidgetå¯¹è±¡ã€‚
+ * å¹¶å°†å…¶å‹å…¥åˆ°luaå †æ ˆï¼Œå¦åˆ™å°†å¼•ç”¨çš„luaWidgetå‹å…¥åˆ°å †æ ˆã€‚
  */
 void lua_pushWidget(lua_State *L, uiWidget * widget)
 {
@@ -79,10 +79,10 @@ int lua_rootWidget(lua_State *L)
 }
 
 /*
- * Èç¹û×Ô¼º¶Ô×Ô¼ºÓĞÒıÓÃ£¬c¶ÔÏó´æÔÚÄÇÃ´lua¶ÔÏó¾Í´æÔÚ
- * Ö»ÓĞÔÚc¶ÔÏóÊÍ·Å£¬¶Ï¿ªÒıÓÃ¹ØÏµ£¬²Å»á×ßµ½lua_gcWidget
- * ²¢ÇÒÕâÊ±ºòluaWidgetÖĞµÄwidget=NULL,ref=LUA_REFNIL
- * Òò´Ë²»ĞèÒª×öÈÎºÎ´¦Àí¡£
+ * å¦‚æœè‡ªå·±å¯¹è‡ªå·±æœ‰å¼•ç”¨ï¼Œcå¯¹è±¡å­˜åœ¨é‚£ä¹ˆluaå¯¹è±¡å°±å­˜åœ¨
+ * åªæœ‰åœ¨cå¯¹è±¡é‡Šæ”¾ï¼Œæ–­å¼€å¼•ç”¨å…³ç³»ï¼Œæ‰ä¼šèµ°åˆ°lua_gcWidget
+ * å¹¶ä¸”è¿™æ—¶å€™luaWidgetä¸­çš„widget=NULL,ref=LUA_REFNIL
+ * å› æ­¤ä¸éœ€è¦åšä»»ä½•å¤„ç†ã€‚
  */
 int lua_gcWidget(lua_State *L)
 {
@@ -191,7 +191,7 @@ int lua_setScale(lua_State *L)
 	float sx = luaL_checknumber(L, 2);
 	float sy = luaL_checknumber(L, 3);
 	if (self){
-		/* ÉèÖÃËõ·ÅÖĞĞÄµã */
+		/* è®¾ç½®ç¼©æ”¾ä¸­å¿ƒç‚¹ */
 		if (lua_isnumber(L, 4) && lua_isnumber(L, 5)){
 			float ox = luaL_checknumber(L, 4);
 			float oy = luaL_checknumber(L, 5);
@@ -220,7 +220,7 @@ int lua_setRotate(lua_State *L)
 	uiWidget *self = lua_checkWidget(L, 1);
 	float angle = luaL_checknumber(L, 2);
 	if (self){
-		/* ÉèÖÃĞı×ªÖĞĞÄµã */
+		/* è®¾ç½®æ—‹è½¬ä¸­å¿ƒç‚¹ */
 		if (lua_isnumber(L, 3) && lua_isnumber(L, 4)){
 			float ox = luaL_checknumber(L, 3);
 			float oy = luaL_checknumber(L, 4);
@@ -262,7 +262,7 @@ int lua_themeFunction(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
 	const char *fname = luaL_checkstring(L, 2);
-	/* ÔÚÀà±íÖĞÕÒ¶ÔÓ¦µÄÔªËØ */
+	/* åœ¨ç±»è¡¨ä¸­æ‰¾å¯¹åº”çš„å…ƒç´  */
 	if (self->classRef != LUA_REFNIL){
 		lua_getref(L, self->classRef);
 		lua_getfield(L, -1, fname);
@@ -424,7 +424,7 @@ static const struct luaL_Reg uimeta_methods_c[] =
 };
 
 /*
- * ¸ù¾İÃû³Æ·µ»Øº¯Êı
+ * æ ¹æ®åç§°è¿”å›å‡½æ•°
  */
 static lua_CFunction getWidgetCFunction(const char * name)
 {
@@ -433,7 +433,7 @@ static lua_CFunction getWidgetCFunction(const char * name)
 	for (int i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg)-1; i++){
 		const char * s = uimeta_methods_c[i].name;
 		/*
-		 * ÕâÀïÓÅ»¯strcmp(s,name)==0
+		 * è¿™é‡Œä¼˜åŒ–strcmp(s,name)==0
 		 */
 		for (j = 0; j < len; j++){
 			if (s[j] && s[j] == name[j]){
@@ -460,14 +460,14 @@ int lua_widgetFunction(lua_State *L)
 }
 
 /*
- * È¡Ò»¸ö¶ÔÏóµÄÔªËØË³ĞòÊÇÏÈ¶ÔÏó±í£¬È»ºóÀà±í£¬È»ºó²ÅÊÇcÌá¹©µÄÄ¬ÈÏ·½·¨
+ * å–ä¸€ä¸ªå¯¹è±¡çš„å…ƒç´ é¡ºåºæ˜¯å…ˆå¯¹è±¡è¡¨ï¼Œç„¶åç±»è¡¨ï¼Œç„¶åæ‰æ˜¯cæä¾›çš„é»˜è®¤æ–¹æ³•
  */
 int lua_indexWidget(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
 	const char * key = luaL_checkstring(L, 2);
 	if (self){
-		/* ÔÚ¶ÔÏó±íÖĞÕÒ¶ÔÓ¦µÄÔªËØ */
+		/* åœ¨å¯¹è±¡è¡¨ä¸­æ‰¾å¯¹åº”çš„å…ƒç´  */
 		if (self->selfRef != LUA_REFNIL){
 			lua_getref(L, self->selfRef);
 			lua_getfield(L, -1, key);
@@ -480,7 +480,7 @@ int lua_indexWidget(lua_State *L)
 				lua_pop(L, 3);
 			}
 		}
-		/* ÔÚÀà±íÖĞÕÒ¶ÔÓ¦µÄÔªËØ */
+		/* åœ¨ç±»è¡¨ä¸­æ‰¾å¯¹åº”çš„å…ƒç´  */
 		if (self->classRef!=LUA_REFNIL){
 			lua_getref(L, self->classRef);
 			lua_getfield(L, -1, key);
@@ -504,7 +504,7 @@ int lua_indexWidget(lua_State *L)
 }
 
 /*
- * ½«ĞÂ¼ÓµÄË÷ÒıÏî¶¼¼ÓÈëµ½selfRef±íÖĞ
+ * å°†æ–°åŠ çš„ç´¢å¼•é¡¹éƒ½åŠ å…¥åˆ°selfRefè¡¨ä¸­
  */
 int lua_newindexWidget(lua_State *L)
 {
