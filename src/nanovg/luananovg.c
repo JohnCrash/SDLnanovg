@@ -7,7 +7,7 @@
 #include "eventhandler.h"
 
 /**
- * \addtogroup VG
+ * \addtogroup VG lua vg
  * \brief lua 矢量绘制函数
  *
  * 这些函数都是在lua环境中调用的绘制函数。lua中的函数名称就是C函数名去掉lua_前缀。
@@ -1176,6 +1176,10 @@ static int lua_cpToUTF8(lua_State *L)
 	return 1;
 }
 
+/**
+ * @}
+ */
+ 
 static const struct luaL_Reg nanovg_methods[] =
 {
 	{ "beginNanoVG", lua_beginNanoVG },
@@ -1270,7 +1274,3 @@ int luaopen_nanovg(lua_State *L)
 	set_info(L);
 	return 1;
 }
-
-/**
- * @}
- */
