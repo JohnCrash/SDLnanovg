@@ -1,5 +1,7 @@
 local vg = require "vg"
 --init vg
+vg.FONS_INVALID = -1
+
 vg.NVG_SOLID = 1
 vg.NVG_HOLE = 2
 
