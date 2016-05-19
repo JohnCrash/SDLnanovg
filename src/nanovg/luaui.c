@@ -357,7 +357,9 @@ static int lua_enableClip(lua_State *L)
 }
 
 /**
- * \brief 返回
+ * \brief 返回样式表中的给定函数,ui.themeFunction(func)
+ * \param func 函数名称
+ * \return 成功返回一个函数，失败返回nil
  */
 static int lua_themeFunction(lua_State *L)
 {
@@ -381,7 +383,7 @@ static int lua_themeFunction(lua_State *L)
 }
 
 /**
- *
+ * \brief 将给定的控件放到屏幕最上面,self:bringTop()
  */
 static int lua_bringTop(lua_State *L)
 {
@@ -393,7 +395,7 @@ static int lua_bringTop(lua_State *L)
 }
 
 /**
- *
+ * \brief 将给定的控件放到屏幕最下面,self:bringBottom()
  */
 static int lua_bringBottom(lua_State *L)
 {
@@ -405,7 +407,8 @@ static int lua_bringBottom(lua_State *L)
 }
 
 /**
- *
+ * \brief 返回控件的子节点,self:childs()
+ * \return 成功返回一个子节点表，失败返回nil
  */
 static int lua_childs(lua_State *L)
 {
@@ -431,7 +434,15 @@ static int lua_childs(lua_State *L)
 }
 
 /**
- *
+ * \brief 打开控件的事件处理，self:enableEvent(e)
+ * \param e 接收的事件以及处理事件的方式，可以是下面的一个和多个值的组合
+ *	- ui. #EVENT_NONE
+ *	- ui. #EVENT_TOUCHDOWN
+ *	- ui. #EVENT_TOUCHDROP
+ *	- ui. #EVENT_TOUCHUP
+ *	- ui. #EVENT_ZOOM
+ *	- ui. #EVENT_BREAK
+ *	- ui. #EVENT_EXCLUSIVE
  */
 static int lua_enableEvent(lua_State *L)
 {
@@ -444,7 +455,15 @@ static int lua_enableEvent(lua_State *L)
 }
 
 /**
- *
+ * \brief 关闭控件的指定事件.self:disableEvent(e)
+ * \param e 关闭控件的指定事件以及处理事件的方式，可以是下面的一个和多个值的组合
+ *	- ui. #EVENT_NONE
+ *	- ui. #EVENT_TOUCHDOWN
+ *	- ui. #EVENT_TOUCHDROP
+ *	- ui. #EVENT_TOUCHUP
+ *	- ui. #EVENT_ZOOM
+ *	- ui. #EVENT_BREAK
+ *	- ui. #EVENT_EXCLUSIVE 
  */
 static int lua_disableEvent(lua_State *L)
 {
@@ -457,7 +476,8 @@ static int lua_disableEvent(lua_State *L)
 }
 
 /**
- *
+ * \brief 卸载掉给定名称的样式表,ui.unloadTheme(name)
+ * \param name 样式表名称
  */
 static int lua_unloadTheme(lua_State *L)
 {
@@ -467,7 +487,11 @@ static int lua_unloadTheme(lua_State *L)
 }
 
 /**
- *
+ * \brief 将根节点坐标向控件坐标转换,self:rootToWidget(x,y)
+ * \param x 要转换点的x坐标 
+ * \param y 要转换点的y坐标
+ * \retval x 转换完成的x坐标
+ * \retval y 转换完成的y坐标
  */
 static int lua_rootToWidget(lua_State *L)
 {
@@ -488,7 +512,11 @@ static int lua_rootToWidget(lua_State *L)
 }
 
 /**
- *
+ * \brief 将控件坐标向根节点坐标转换,self:widgetToRoot(x,y)
+ * \param x 要转换点的x坐标 
+ * \param y 要转换点的y坐标
+ * \retval x 转换完成的x坐标
+ * \retval y 转换完成的y坐标
  */
 static int lua_widgetToRoot(lua_State *L)
 {
@@ -509,7 +537,10 @@ static int lua_widgetToRoot(lua_State *L)
 }
 
 /**
- *
+ * \brief 返回在给定屏幕点处的全部控件,ui.widgetFormPt(x,y)
+ * \param x 点的x坐标
+ * \param y 点的y坐标
+ * \return 返回一个被x,y点穿透的控件表。
  */
 static int lua_widgetFormPt(lua_State *L)
 {
@@ -525,7 +556,7 @@ static int lua_widgetFormPt(lua_State *L)
 	return 1;
 }
 
-int lua_widgetFunction(lua_State *L);
+static int lua_widgetFunction(lua_State *L);
 
 static const struct luaL_Reg uimeta_methods_c[] =
 {
@@ -553,7 +584,9 @@ static const struct luaL_Reg uimeta_methods_c[] =
 };
 
 /**
- * 根据名称返回函数
+ * **根据名称返回函数**
+ * 
+ * 函数在查找名称的时候做了速度优化。
  */
 static lua_CFunction getWidgetCFunction(const char * name)
 {
@@ -576,6 +609,11 @@ static lua_CFunction getWidgetCFunction(const char * name)
 	return NULL;
 }
 
+/**
+ * \brief 取得对象的C函数,self:widgetFunction(func)
+ * \param func 函数名称
+ * \return 成功返回一个成员函数，失败返回nil
+ */
 static int lua_widgetFunction(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
@@ -590,6 +628,7 @@ static int lua_widgetFunction(lua_State *L)
 
 /**
  * 取一个对象的元素顺序是先对象表，然后类表，然后才是c提供的默认方法
+ * \note 这个顺序允许在不同层上重载控件行为
  */
 static int lua_indexWidget(lua_State *L)
 {
