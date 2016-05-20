@@ -10,6 +10,9 @@
  * \addtogroup VG lua vg
  * \brief lua 矢量绘制函数
  *
+ * 这些函数都是在lua环境中调用的绘制函数。lua中的函数名称就是C函数名去掉lua_前缀。
+ * 例如函数lua_beginNanoVG，的lua函数名称为beginNanoVG。
+ *
  * ## 描述
  *
  * ## 坐标系与坐标变换
@@ -22,18 +25,43 @@
  * ```
  * 上面的矩形，先做缩放变换然后在进行平移。
  *
- * ## 绘制与填充
- *
- * ## 图片与剪切
- *
- * 这些函数都是在lua环境中调用的绘制函数。lua中的函数名称就是C函数名去掉lua_前缀。
- * 例如函数lua_beginNanoVG，的lua函数名称为beginNanoVG。
+ * ## 绘制与填充模式
+ * vg拥有4钟 \ref lua_toNVGpaint "绘制模式" 
+ * 下面的代码绘制一个linearGradient填充的矩形
+ * ```lua
+ * 	vg.beginPath()
+ *	vg.rect(x,y,100,100)
+ *	vg.fillPaint(vg.linearGradient(x,y,x,y+100, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255)))
+ *	vg.fill()
+ * ```
+ * 下面的代码绘制一个boxGradient填充的矩形
+ * ```lua
+ * 	vg.beginPath()
+ *	vg.rect(x,y,120,120)
+ *	vg.fillPaint(vg.boxGradient(x+10,y+10, 100,100, 24, 20, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255)))
+ *	vg.fill()
+ * ```
+ * 下面的代码绘制一个radialGradient填充的矩形
+ * ```lua
+ * 	vg.beginPath()
+ *	vg.rect(x,y,100,100)
+ *	vg.fillPaint(vg.radialGradient(x+50,y+50, 10,50, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255)))
+ *	vg.fill()
+ * ```
+ * 下面的代码绘制一个imagePattern填充的六角形
+ * ```lua
+ *	vg.fillPaint(vg.imagePattern(0,0, 133,100, 0, data.images[0],1))
+ * ``` 
+ * \image html mode.png
+ * \note 图像在加载的时候可以设置一些参数，这些参数可以控制imagePattern的表现。
+ *	默认是图像边缘颜色拉伸，如果设置 #NVG_IMAGE_REPEATX 将在x方向上重复图像。设置
+ * #NVG_IMAGE_REPEATY 可以在y方向重复图像，也可以组合使用。见 #lua_createImage
  *
  * ## 文本绘制text
  * - vg.text(x,y,str) 绘制文本，x,y是基线的起点(蓝色的线)
  * - vg.textBounds 返回的红色线表示的包围盒
  * - ascender,descender,lineh = vg.textMetrics()
- * - vg.textAlign(ag) 图中清楚的暂时了几种对齐方式对绘制文本的影响
+ * - vg.textAlign(ag) 图中清楚的展示了几种对齐方式对绘制文本的影响
  * - vg.textLetterSpacing(s) 用来设置字符间距,默认是0
  * \image html text.png
  *
@@ -155,7 +183,7 @@ static int lua_toNVGcolor(lua_State *L, int n,NVGcolor *c)
  *		+ angle旋转角度
  *		+ alpha透明度
  *		+ image图像 #lua_createImage
- *		+ 在lua中可以使用vg.ImagePattern(ox,oy,ex,ey,angle,alpha,image)来产生该表。
+ *		+ 在lua中可以使用vg.ImagePattern(ox,oy,ex,ey,angle,image,alpha)来产生该表。
  * 4. BoxGradient
  *		+ 其他元素x,y,w,h,r,f,ico1,ico2
  *		+ 在lua中可以使用vg.BoxGradient(x,y,w,h,r,f,ico1,ico2)来产生该表。
