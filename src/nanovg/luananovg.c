@@ -10,8 +10,46 @@
  * \addtogroup VG lua vg
  * \brief lua 矢量绘制函数
  *
+ * ## 描述
+ *
+ * ## 坐标系与坐标变换
+ * vg使用的坐标系的原点在屏幕的左上角。x轴向右延伸，y轴向下延伸。变换从最靠近绘制
+ * 函数的变换开始。例如：
+ * ```lua
+ *	vg.translate(x,y)
+ *	vg.scale(sx,sy)
+ *	vg.rect(x0,y0,w,h)
+ * ```
+ * 上面的矩形，先做缩放变换然后在进行平移。
+ *
+ * ## 绘制与填充
+ *
+ * ## 图片与剪切
+ *
  * 这些函数都是在lua环境中调用的绘制函数。lua中的函数名称就是C函数名去掉lua_前缀。
  * 例如函数lua_beginNanoVG，的lua函数名称为beginNanoVG。
+ *
+ * ## 文本绘制text
+ * - vg.text(x,y,str) 绘制文本，x,y是基线的起点(蓝色的线)
+ * - vg.textBounds 返回的红色线表示的包围盒
+ * - ascender,descender,lineh = vg.textMetrics()
+ * - vg.textAlign(ag) 图中清楚的暂时了几种对齐方式对绘制文本的影响
+ * - vg.textLetterSpacing(s) 用来设置字符间距,默认是0
+ * \image html text.png
+ *
+ * ## 文本绘制textBox
+ * - vg.textBox(x,y,breakLine,str) ,str = "Hello world , this is textbox function test  .\n   new line "
+ * - 蓝色的线是基线，蓝线的起始点是x,y点。
+ * - vg.textBoxBounds返回textBox的包围盒。
+ * - 下图中使用的对齐方式依次是
+ *		+ vg.NVG_ALIGN_LEFT
+ *		+ vg.NVG_ALIGN_CENTER
+ *		+ vg.NVG_ALIGN_RIGHT,
+ *		+ vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_TOP
+ *		+ vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE
+ *		+ vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_BOTTOM,
+ *		+ vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_BASELINE
+ * \image html textbox.png 
  * @{
  */
 #if LUA_VERSION_NUM < 502
@@ -32,7 +70,7 @@ static int nanovgRenderTable(lua_State *L, int n)
  *		{ fill,stroke,text,trasform,}
   * }
  */
-static int lua_nanovgRender(lua_State *L)
+int lua_nanovgRender(lua_State *L)
 {
 	int fbWidth, fbHeight;
 	int winWidth, winHeight;
@@ -402,7 +440,7 @@ static int lua_translate(lua_State *L)
 }
 
 /**
- * \brief 旋转变换。
+ * \brief 旋转变换,围绕0,0旋转。
  * \param angle 旋转一个角度(弧度)
  */
 static int lua_rotate(lua_State *L)
@@ -435,7 +473,7 @@ static int lua_skewY(lua_State *L)
 }
 
 /**
- * \brief 缩放变换。
+ * \brief 缩放变换,相对于0,0做缩放。
  * \param sx 在x方向上的缩放比例
  * \param sy 在y方向上的缩放比例
  */
@@ -443,7 +481,7 @@ static int lua_scale(lua_State *L)
 {
 	float x, y;
 	x = (float)luaL_checknumber(L, 1);
-	y = (float)luaL_checknumber(L, 1);
+	y = (float)luaL_checknumber(L, 2);
 	nvgScale(_vg,x,y);
 	return 0;
 }
@@ -856,8 +894,8 @@ static int lua_textLetterSpacing(lua_State *L)
 }
 
 /**
- * \brief 设置行高
- * \param height 行高
+ * \brief 设置行高，此函数影响textBox,不影响text
+ * \param height 行高的比例缩放，如：1不变,2高度加倍
  */
 static int lua_textLineHeight(lua_State *L)
 {
@@ -898,8 +936,8 @@ static int lua_fontFace(lua_State *L)
  */
 static int lua_fontFaceId(lua_State *L)
 {
-	lua_pushinteger(nvgFontFaceId(_vg, (int)luaL_checkinteger(L, 1)));
-	return 1;
+	nvgFontFaceId(_vg, (int)luaL_checkinteger(L, 1));
+	return 0;
 }
 
 /**
@@ -1041,7 +1079,6 @@ static int lua_textGlyphPositions(lua_State *L)
 
 /**
  * \brief 返回当前字体下文本的几个参数。
- * \image html 361px-Typography_Line_Terms.svg.png
  * \retval ascender 字母顶部距基线的距离
  * \retval descender 字母底部距基线的距离 
  * \retval lineh 行的高度

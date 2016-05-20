@@ -2,119 +2,64 @@ require "nanovg"
 local vg = require "vg"
 local ui = require "ui"
 
-local function messagebox(str,angle)
-	local window = ui.createWidget("normal","window")
-	local label = ui.createWidget("normal","label")
-	local button = ui.createWidget("normal","button")
-	
-	label:setString(str)
-	button:setTitle("OK")
-	button:setSize(60,30)
-	window:addChild(label)
-	window:addChild(button)
-	
-	window:setPosition(120,100)
-	window:setSize(240,90)
-	local w,h = ui.linearRelayout(
-		ui.rect(0,30,240,60),
-		{label,button},
-		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)
-	window:setSize(w+48,h+30)
-	ui.linearRelayout(
-		ui.rect(0,30,w+48,h),
-		{label,button},
-		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)
-	window:setRotate(vg.degToRad(angle or 30),(w+48)/2,(h+30)/2)
-	return window
-end
+local data = {images={}}
 
---eventFunction("init",function()
-	ui.loadThemes("normal","themes/default")
-
-	local root = ui.rootWidget()
-	local w,h = root:getSize()
-	local window = ui.createWidget("normal","window")
-	--root:addChild(window)
-	window:setSize(w/2,h/2)
-	window:enableClip(true)
-	window:setPosition(0,0)
-	local window2 = ui.createWidget("normal","window")
-	--root:addChild(window2)
-	window2:setSize(w/2,h/2)	
-	window2:setPosition(w/2,h/2)	
-	window2:enableClip(true)
-	print( string.format("%d %d",w,h) )
-	local top = ui.createWidget("normal","button")
-	window:addChild(top)
-	top:setTitle("top")
-	local ww,hh = window:getSize()
-	top:setPosition(ww-100,hh-120)
-	top:setSize(100,120)
-	local bottom = ui.createWidget("normal","button")
-	window2:addChild(bottom)
-	bottom:setTitle("bottom")
-	--bottom:setPosition(0,0)
-	--bottom:setPosition(w-100,h-120)
-	bottom:setSize(100,120)	
---end)
---[[
-local box = messagebox("Hello world! http://www.guancha.cn/",30)
-root:addChild(box)
-box = messagebox("Hello world! http://www.guancha.cn/",60)
-root:addChild(box)
-local x,y = box:getPosition()
-box:setPosition(x+60,y+60)
---]]
-
-local function six()
-	local x,y,r
-	r = 200
-	local du = 60
-	for i=1,360/du do
-		local box = messagebox("Hello world! \nhttp://www.nanovg.org"..i,i*du)
-		x = r*math.sin(vg.degToRad(-i*du))+w/2
-		y = r*math.cos(vg.degToRad(-i*du))+h/2
-		box:setPosition(x,y)
-		root:addChild(box)
-	end
-end
-six()
-local t = 0
-local angle = 0
-local sx,sy = 1,1
-
-local fps_count = 0
-local fps_acc = 0
-local fps = 0
-local t2 = 0
----[[
-eventFunction("loop",function(dt)
-	if fps_count < 300 then
-		fps_acc = fps_acc+dt
-		fps_count = fps_count+1
-	else
-		fps = math.floor(fps_count/(fps_acc+dt))
-		fps_count = 0
-		fps_acc = 0
-	end
-	vg.beginNanoVG(w,h)
-	vg.beginFrame(w,h,1)
-	vg.fontSize(32)
-	vg.fontFace("sans")
-	vg.fillColor(vg.rgbaf(1,1,1,1))
-	vg.text(32,32,tostring(fps))
-	vg.endFrame()
-	if t > 0.01 then
-		--root:setRotate(vg.degToRad(angle),w/2,h/2)
-		--root:setScale(sx,sy)
-		top:setRotate(vg.degToRad(angle),50,60)
-		bottom:setRotate(vg.degToRad(angle),50,60)
-		sx = 2+math.sin(vg.degToRad(angle))
-		sy = 2+math.sin(vg.degToRad(angle))
-		angle = angle + 1
-		t = 0
-	else
-		t = t + dt
+eventFunction("init",function()
+	print("init..")
+	fontIcons = vg.createFont("icons","fonts/entypo.ttf")
+	fontNormal = vg.createFont("sans","fonts/Roboto-Regular.ttf")
+	fontBold = vg.createFont("sans-bold","fonts/Roboto-Bold.ttf")
+	for i=0,12-1 do
+		local file = string.format("images/image%d.jpg",i+1)
+		data.images[i] = vg.createImage(file, 0)
+		if data.images[i] == 0 then
+			print(string.format("Could not load %s.\n", file))
+			return -1
+		end
 	end
 end)
+
+eventFunction("release",function()
+	print("release")
+end)
+
+eventFunction("input",function(e,pt)
+end)
+
+--[[
+	text
 --]]
+local d = 0
+eventFunction("loop",function(dt)
+	local x,y = 100,50
+	local cornerRadius = 12
+	vg.fontSize( 18.0)
+	vg.fontFace( "sans")
+	
+	vg.beginPath()
+	vg.rect(x,y,100,100)
+	vg.fillPaint(vg.linearGradient(x,y,x,y+100, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255)))
+	vg.fill()
+--	vg.fillColor(vg.rgba(255,255,255,255))
+--	vg.text(x,y-32,"vg.linearGradient")
+--	vg.text(x,y-10,"(x,y,x,y+100, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255))")
+	
+	vg.beginPath()
+	vg.translate(200,0)
+	vg.rect(x,y,120,120)
+	vg.fillPaint(vg.boxGradient(x+10,y+10, 100,100, cornerRadius*2, 20, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255)))
+	vg.fill()	
+	
+	vg.beginPath()
+	vg.translate(200,0)
+	vg.rect(x,y,100,100)
+	vg.fillPaint(vg.radialGradient(x+50,y+50, 10,50, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255)))
+	vg.fill()	
+
+	vg.beginPath()
+	vg.translate(200,0)
+	vg.path{vg.MOVETO,x,y,vg.LINETO,}
+	vg.fillPaint(vg.boxGradient(x,y+5, 100,100, cornerRadius*2, 10, vg.rgba(255,0,0,255), vg.rgba(0,0,0,255)))
+	vg.fill()		
+	
+end)
