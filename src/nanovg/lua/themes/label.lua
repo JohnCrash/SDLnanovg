@@ -1,9 +1,10 @@
 vg = require "vg"
 ui = require "ui"
 
-local label = {
-	FIXED_SIZE = 1,
-	FIT_TEXT = 2,
+label = {
+	ALIGN_LEFT = 1,
+	ALIGN_CENTER = 2,
+	ALIGN_RIGHT = 4,
 }
 
 function label:onInit()
@@ -12,7 +13,8 @@ function label:onInit()
 	self._font = 'default'
 	self._text = ''
 	self._breakWidth = 1280
-	self._style = label.FIT_TEXT
+	self._align = self.ALIGN_LEFT
+	self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE
 end
 
 function label:onRelease()
@@ -23,33 +25,44 @@ function label:onDraw()
 	vg.fontSize(self._fontSize)
 	vg.fontFace(self._font)
 	vg.fillColor(self._color)
-	vg.textAlign(vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_TOP)
+	vg.textAlign(self._nanoAlign)
 	vg.textBox(0,0,math.min(self._breakWidth,w),self._text)
 end
 
-function label:setStyle(style)
-	self._style = style
+function label:setAlign(align)
+	self._align = align
 end
 
 function label:setColor(c)
 	self._color = c
 end
 
+function label:setFont( name )
+	self._font = name
+	self:reCalcSize()
+end
+
+function label:setFontSize( size )
+	self._fontSize = size
+	self:reCalcSize()
+end
+
 function label:setBreakWidth(bw)
 	self._breakWidth = bw
+	self:reCalcSize()
+end
+
+function label:reCalcSize()
+	vg.save()
+	vg.fontSize(self._fontSize)
+	vg.fontFace(self._font)
+	local x1,y1,x2,y2 = vg.textBoxBounds(0,0,self._text)
+	self:setSize(x2-x1,y2-y1)
+	vg.restore()
 end
 
 function label:setString(s)
 	self._text = s
-	if self._style==label.FIT_TEXT then
-		vg.save()
-		vg.fontSize(self._fontSize)
-		vg.fontFace(self._font)
-		local linewidth,x,y,x2,y2 = vg.textBounds(0,0,self._text)
-		print("w="..(x2-x).." h="..(y2-y))
-		self:setSize(x2-x,y2-y)
-		vg.restore()
-	end
 end
 
 function label:getString()
