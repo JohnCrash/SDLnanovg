@@ -3,10 +3,10 @@ local ui = require "ui"
 
 return {
 	_round = 5,
-	onInit=function(self)
+	onInit=function(self,themes)
 		self:setSize(80,20)
-		self._color = vg.rgba(255,255,255,255)
-		self._colorBG = vg.rgba(0,128,168,255)
+		self._color = themes.color
+		self._colorBG = themes.colorBG
 		self._progress = 0
 	end,
 	onRelease=function(self)

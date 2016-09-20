@@ -7,8 +7,8 @@ label = {
 	ALIGN_RIGHT = 4,
 }
 
-function label:onInit()
-	self._color = vg.rgba(255,255,255,128)
+function label:onInit(themes)
+	self._color = themes.color
 	self._fontSize = 18
 	self._font = 'default'
 	self._text = ''

@@ -1,6 +1,11 @@
 local vg = require "vg"
 
 return {
+	name = 'default',
+	version = 1,
+	color = vg.rgba(255,255,255,255),
+	colorBG = vg.rgba(0,128,168,255),
+	
 	onInit=function()
 		vg.createFont("default","fonts/Roboto-Regular.ttf")
 		vg.createFont("default-bold","fonts/Roboto-Bold.ttf")	
