@@ -8,11 +8,9 @@ eventFunction("init",function()
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
 	
-	local switch = ui.createWidget("normal","switch")
-	switch.onSwitch = function(on)
-		print( "switch : "..tostring(on) )
-	end
-	root:addChild(switch)
+	local seekbar = ui.createWidget("normal","seekbar")
+	seekbar:setPosition(100,100)
+	root:addChild(seekbar)
 end)
 
 ---[[

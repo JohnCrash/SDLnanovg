@@ -23,6 +23,9 @@ return {
 		end
 	end,
 	load=function(self,imageFile)
+		if self._image~=0 then
+			vg.deleteImage(self._image)
+		end
 		self._image = vg.createImage(imageFile)
 		if self._image ~= 0 then
 			self:setSize(vg.imageSize(self._image))

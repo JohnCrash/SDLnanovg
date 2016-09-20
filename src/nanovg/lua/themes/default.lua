@@ -10,10 +10,9 @@ return {
 	label = require "themes/label",
 	image = require "themes/image",
 	switch = require "themes/switch",
-	--[[
 	progress = require "themes/progress",
 	seekbar = require "themes/seekbar",
-	switch = require "themes/switch",
+	--[[
 	tab = require "themes/tab",
 	list = require "themes/list",
 	]]
