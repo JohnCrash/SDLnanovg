@@ -81,6 +81,9 @@ return {
 				self._down = true
 			elseif event.type == ui.EVENT_TOUCHUP then
 				self._down = false
+				if self.onClick and event.inside then
+					self.onClick()
+				end
 			elseif event.type == ui.EVENT_TOUCHDROP then
 				if self._down then
 					self._down = event.inside

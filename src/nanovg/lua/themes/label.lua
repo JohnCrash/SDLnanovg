@@ -1,5 +1,5 @@
-vg = require "vg"
-ui = require "ui"
+local vg = require "vg"
+local ui = require "ui"
 
 label = {
 	ALIGN_LEFT = 1,
@@ -14,7 +14,7 @@ function label:onInit()
 	self._text = ''
 	self._breakWidth = 1280
 	self._align = self.ALIGN_LEFT
-	self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_MIDDLE
+	self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_TOP
 end
 
 function label:onRelease()
@@ -56,13 +56,14 @@ function label:reCalcSize()
 	vg.save()
 	vg.fontSize(self._fontSize)
 	vg.fontFace(self._font)
-	local x1,y1,x2,y2 = vg.textBoxBounds(0,0,self._text)
+	local x1,y1,x2,y2 = vg.textBoxBounds(0,0,self._breakWidth,self._text)
 	self:setSize(x2-x1,y2-y1)
 	vg.restore()
 end
 
 function label:setString(s)
 	self._text = s
+	self:reCalcSize()
 end
 
 function label:getString()

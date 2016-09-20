@@ -523,6 +523,7 @@ static int lua_scale(lua_State *L)
  *		- NVG_IMAGE_REPEATY				在Y方向上重复
  *		- NVG_IMAGE_FLIPY				沿Y轴翻转
  *		- NVG_IMAGE_PREMULTIPLIED		图像有alpha值
+ * \return 返回图像的id值，失败返回0
  */
 static int lua_createImage(lua_State *L)
 {

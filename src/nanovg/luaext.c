@@ -443,8 +443,15 @@ void releaseLua()
 	}
 }
 
+static double _loopInterval = 0;
+double getLoopInterval()
+{
+	return _loopInterval;
+}
+
 void lua_EventLoop(double dt)
 {
+	_loopInterval = dt;
 	if (lua_pushEventFunction(EVENT_LOOP)){
 		lua_pushnumber(_state, dt);
 		lua_executeFunction(1);

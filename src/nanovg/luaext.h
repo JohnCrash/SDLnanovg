@@ -18,6 +18,7 @@ extern "C"{
 	int initLua();
 	void releaseLua();
 	void lua_EventLoop(double dt);
+	double getLoopInterval();
 	void lua_EventInit();
 	void lua_EventRelease();
 	void lua_EventInput();

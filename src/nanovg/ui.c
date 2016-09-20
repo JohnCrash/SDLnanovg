@@ -487,21 +487,23 @@ int InWidget(uiWidget *parent, uiWidget *child)
 	return 1;
 }
 
-/*
- * 将所有可见的对象都链接在一起，并且返回其头
- * 通过enum_next进行遍历
+/**
+ * \brief 将所有可见的对象都链接在一起，并且返回其头，通过enum_next进行遍历
+ * \param root 遍历的根节点
+ * \param tail 将遍历的全部节点顺序连接，通过uiWidget的enum_next,enum_prev
+ * \param renderFunc 对每个遍历到的uiWidget调用renderFunc(uiWidget*)
+ * \return 返回tail
  */
 static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderProc renderFunc)
 {
 	uiWidget * child;
 	int isclip = 0;
-	if (root->parent){
-		memcpy(root->curxform, root->xform, sizeof(float)* 6);
+
+	memcpy(root->curxform, root->xform, sizeof(float) * 6);
+	/* 如果有父控件将父控件的当前矩阵应用到变换中 */
+	if (root->parent)
 		nvgTransformMultiply(root->curxform, root->parent->curxform);
-	}
-	else{
-		memcpy(root->curxform,root->xform,sizeof(float)*6);
-	}
+
 	nvgSetTransform(_vg, root->curxform);
 	renderFunc(root);
 	/* 对子窗口设置剪切区域 */
@@ -623,12 +625,19 @@ static void endUIEvent()
 		_eventState.lastTouchDownWidget = NULL;
 	}
 }
-/*
-* 枚举的过程中eventFunc可能改变窗口结构甚至删除窗口
+
+/**
+* \brief 枚举的过程中eventFunc可能改变窗口结构甚至删除窗口
 * 这需要特殊处理，首先将满足调用func的窗口放入一个表中
 * 然后才调用eventFunc函数，如果在func函数中删除了窗口，后面
 * 的调用会访问非法指针，因此eventFunc中将要删除的窗口标记，
 * 等枚举结束才进行真正的删除。
+* \param root 要枚举的根节点
+* \param renderFunc 
+* \param eventFunc
+* \param winWidth
+* \param winHeight
+* \param devicePixelRatio
 */
 void uiEnumWidget(uiWidget *root, 
 	uiRenderProc renderFunc, uiEventProc eventFunc,
@@ -688,7 +697,8 @@ static void renderWidget(uiWidget * widget)
 		if (lua_isfunction(L, -1)){
 			//lua_getref(L, widget->selfRef);
 			lua_pushWidget(L, widget);
-			lua_executeFunction(1);
+			lua_pushnumber(L, getLoopInterval());
+			lua_executeFunction(2);
 			lua_pop(L, 1); //classRef;
 			return 0;
 		}
@@ -704,7 +714,8 @@ static void renderWidget(uiWidget * widget)
 		if (lua_isfunction(L, -1)){
 			//lua_getref(L, widget->selfRef);
 			lua_pushWidget(L, widget);
-			lua_executeFunction(1);
+			lua_pushnumber(L, getLoopInterval());
+			lua_executeFunction(2);
 			lua_pop(L, 1); //classRef;
 		}
 		else{
@@ -778,10 +789,15 @@ static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *p
 	}
 }
 
+/*
+ * 返回1终止事件继续传递，0可以继续传递事件
+ */
 static int eventWidget(uiWidget * widget,uiEvent *pev)
 {
 	float x, y;
 	float w2o[6];
+
+	/* 首先判断控件是否处理该事件 */
 	if ( widget->handleEvent & pev->type ){ 
 		if (nvgTransformInverse(w2o, widget->curxform)){
 			/* 变换屏幕点到对象系 */
@@ -929,16 +945,24 @@ void uiWidgetToRoot(uiWidget *self, float *pt, int n)
 	}
 }
 
+/**
+ * 未实现
+ */
 int uiPtInWidget(uiWidget *self, float x, float y)
 {
-
+	return 0;
 }
 
 static void donothingFunc(uiWidget *self)
 {}
-/*
- * 在屏幕点x,y处穿透的widget列表，返回有多少个被穿透的widget
+
+/**
+ * /brief 在屏幕点x,y处穿透的widget列表，返回有多少个被穿透的widget
  * widget是一个指针数组空间，n是它的数量。最先穿透的放入0位置
+ * /param x,y 穿透位置
+ * /param widget[] 提供一个uiWidget指针表，记录穿透的uiWidget指针
+ * /param n widget的个数
+ * /return 返回穿透的数量
  */
 int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
 {

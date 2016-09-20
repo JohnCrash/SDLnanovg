@@ -25,6 +25,9 @@ local function messagebox(str,angle)
 		{label,button},
 		ui.ALIGN_V+ui.ALIGN_CENTER+ui.ALIGN_MIDDLE,0)
 	window:setRotate(vg.degToRad(angle or 30),(w+48)/2,(h+30)/2)
+	button.onClick = function()
+		print("onClick OK")
+	end
 	return window
 end
 
@@ -34,12 +37,12 @@ end
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
 	local window = ui.createWidget("normal","window")
-	--root:addChild(window)
+	root:addChild(window)
 	window:setSize(w/2,h/2)
 	window:enableClip(true)
 	window:setPosition(0,0)
 	local window2 = ui.createWidget("normal","window")
-	--root:addChild(window2)
+	root:addChild(window2)
 	window2:setSize(w/2,h/2)	
 	window2:setPosition(w/2,h/2)	
 	window2:enableClip(true)
@@ -56,6 +59,11 @@ end
 	--bottom:setPosition(0,0)
 	--bottom:setPosition(w-100,h-120)
 	bottom:setSize(100,120)	
+	
+	local img1 = ui.createWidget("normal","image")
+	img1:load("images/image1.jpg")
+	img1:setPosition(0,0)
+	root:addChild(img1)
 --end)
 --[[
 local box = messagebox("Hello world! http://www.guancha.cn/",30)
@@ -100,7 +108,7 @@ eventFunction("loop",function(dt)
 	vg.beginNanoVG(w,h)
 	vg.beginFrame(w,h,1)
 	vg.fontSize(32)
-	vg.fontFace("sans")
+	vg.fontFace("default")
 	vg.fillColor(vg.rgbaf(1,1,1,1))
 	vg.text(32,32,tostring(fps))
 	vg.endFrame()
