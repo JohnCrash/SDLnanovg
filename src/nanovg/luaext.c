@@ -476,11 +476,11 @@ static int lua_removeSchedule(lua_State *L)
 
 static int _inputRef = LUA_REFNIL;
 
-static void lua_callKeyboardFunc(lua_State *L,const char *event)
+void lua_callKeyboardFunc(const char *event)
 {
 	if (_inputRef!=LUA_REFNIL){
-		lua_getref(L, _inputRef);
-		lua_pushstring(L, event);
+		lua_getref(_state, _inputRef);
+		lua_pushstring(_state, event);
 		lua_executeFunction(2);
 	}
 }
@@ -508,7 +508,7 @@ static int lua_enableSoftkeyboard(lua_State *L)
 	if (lua_isboolean(L, 1)){
 		int h = luaL_checkinteger(L, 2);
 		/* 通知上一个结束输入 */
-		lua_callKeyboardFunc(L, "detach");
+		lua_callKeyboardFunc("detach");
 		if (_inputRef != LUA_REFNIL){
 			lua_unref(L, _inputRef);
 			_inputRef = LUA_REFNIL;
@@ -519,13 +519,13 @@ static int lua_enableSoftkeyboard(lua_State *L)
 		}
 		if (lua_toboolean(L, 1)){
 			/* 打开软键盘 */
-			//..
+			SDL_StartTextInput();
 			/* 通知当前输入准备输入 */
-			lua_callKeyboardFunc(L, "attach");
+			lua_callKeyboardFunc("attach");
 		}
 		else{
 			/* 关闭软键盘 */
-			//..
+			SDL_StopTextInput();
 		}
 	}
 	return 0;

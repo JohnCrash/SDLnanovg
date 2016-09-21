@@ -37,8 +37,6 @@ int eventLoop(SDLState *state)
 	clearSDLEvent();
 	while (SDL_PollEvent(&event))
 	{
-		if (!addSDLEvent(&event))
-			return 0;
 		switch (event.type){
 		case SDL_WINDOWEVENT:
 			if (event.window.event == SDL_WINDOWEVENT_CLOSE){
@@ -57,7 +55,17 @@ int eventLoop(SDLState *state)
 				lua_EventWindow("foreground");
 			}
 			break;
+		case SDL_TEXTEDITING:
+			printf("EDITING start: %d,'%s' %d\n",
+				event.edit.start,event.edit.text,event.edit.length);
+			break;
+		case SDL_TEXTINPUT:
+			printf("TEXTINPUT: %s\n",event.text.text);
+			lua_callKeyboardFunc(event.text.text);
+			break;
 		}
+		if (!addSDLEvent(&event))
+			return 0;
 	}
 	return 0;
 }
