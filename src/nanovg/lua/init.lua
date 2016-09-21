@@ -9,6 +9,10 @@ eventFunction("init",function()
 	local w,h = root:getSize()
 	
 	local seekbar = ui.createWidget("normal","seekbar")
+	seekbar:setRange(0,100,1)
+	seekbar.onSeeking = function(pos)
+		print("seek : "..pos)
+	end
 	seekbar:setPosition(100,100)
 	root:addChild(seekbar)
 end)

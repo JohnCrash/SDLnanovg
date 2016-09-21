@@ -9,6 +9,8 @@ return {
 		self._color = vg.rgba(255,255,255,255)
 		self._colorBG = vg.rgba(0,128,168,255)
 		self._pos = 0.5
+		self._r0 = 0
+		self._r1 = 1
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 	end,
 	onRelease=function(self)
@@ -52,9 +54,28 @@ return {
 				elseif self._pos < 0 then
 					self._pos = 0
 				end
+				if self.onSeeking then
+					self.onSeeking(self:getSeekPos())
+				end
 			end
 		end	
 	end,
-	setSeekRang=function(self,r0,r1,n)
+	setRange=function(self,r0,r1,n)
+		self._r0 = r0
+		self._r1 = r1
+		self._n = n
+	end,
+	getSeekPos=function(self)
+		if self._r0 and self._r1 then
+			if self._n then
+				return self._r0 + (self._r1-self._r0)*self._pos
+			else
+				return self._r0 + (self._r1-self._r0)*self._pos
+			end
+		else
+			return self._pos
+		end
+	end,
+	setSeekPos=function(self,pos)
 	end,
 }
