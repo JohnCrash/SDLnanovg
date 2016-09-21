@@ -399,10 +399,10 @@ static int lua_isand(lua_State *L)
 }
 
 /**
- * /brief 设置一个定时器
- * /param dt 每隔dt时间就调用函数func
- * /param func 回调函数，当回调函数返回nil or false下一个周期将不调用回调。
- * /return 成功返回一个id,失败返回-1
+ * \brief 设置一个定时器
+ * \param dt 每隔dt时间就调用函数func
+ * \param func 回调函数，当回调函数返回nil or false下一个周期将不调用回调。
+ * \return 成功返回一个id,失败返回-1
  */
 static int lua_schedule(lua_State *L)
 {
@@ -440,9 +440,9 @@ static int lua_schedule(lua_State *L)
 }
 
 /**
- * /brief 删除一个定时器
- * /param id 传入一个定时器id，schedule的返回值
- * /return 成功删除返回true,失败返回false
+ * \brief 删除一个定时器
+ * \param id 传入一个定时器id，schedule的返回值
+ * \return 成功删除返回true,失败返回false
  */
 static int lua_removeSchedule(lua_State *L)
 {
@@ -474,6 +474,44 @@ static int lua_removeSchedule(lua_State *L)
 	return 1;
 }
 
+static int _inputRef = LUA_REFNIL;
+/**
+ * \brief 打开或者关闭软键盘
+ * \param b true打开软键盘，false关闭软件盘
+ * \param h 控件在屏幕上的高度，如果有必要屏幕将向上推起
+ * \param func 软键盘处理函数
+ * \return 成功返回true,失败返回false
+ * \note 软键盘处理函数原型func(event,param),event可以是下面的值
+ *	- 'attach'	键盘附属，准备开始输入。
+ *	- 'detach'	键盘分离，结束输入。
+ *	- 'insert'	插入utf8字符串param。
+ *	- 'delete'	后向删除。
+ *	- 'backspace'	前向删除。
+ *	- 'home'	按下home键，跳到行开始。
+ *	- 'end'		按下end键，跳到行尾。
+ *	- 'left'	左移光标。
+ *	- 'right'	右移光标。
+ *	- 'up'		上移光标。
+ *	- 'down'	下移光标。
+ */
+static int lua_enableSoftkeyboard(lua_State *L)
+{
+	if (lua_isboolean(L, 1)){
+		if (lua_toboolean(L, 1)){
+			/* 打开软键盘 */
+			if (_inputRef != LUA_REFNIL){
+				/* 通知上一个结束输入 */
+
+			}
+			/* 通知当前输入准备输入 */
+
+		}
+		else{
+		}
+	}
+	return 0;
+}
+
 /*
  * 初始Lua环境
  */
@@ -488,6 +526,7 @@ int initLua()
 		{ "screenSize",lua_screenSize },
 		{ "schedule", lua_schedule },
 		{ "removeSchedule", lua_removeSchedule },
+		{ "softKeyboard",lua_enableSoftkeyboard },
 		{ NULL, NULL }
 	};
 	const luaL_reg luax_exts[] = {
@@ -617,8 +656,8 @@ void lua_EventRelease()
 }
 
 /**
- * /brief 将屏幕变化后的尺寸通知lua事件函数
- * /param w,h 屏幕的宽高
+ * \brief 将屏幕变化后的尺寸通知lua事件函数
+ * \param w,h 屏幕的宽高
  */
 void lua_EventChangeSize(int w,int h)
 {

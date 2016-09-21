@@ -979,12 +979,12 @@ static void donothingFunc(uiWidget *self)
 {}
 
 /**
- * /brief 在屏幕点x,y处穿透的widget列表，返回有多少个被穿透的widget
+ * \brief 在屏幕点x,y处穿透的widget列表，返回有多少个被穿透的widget
  * widget是一个指针数组空间，n是它的数量。最先穿透的放入0位置
- * /param x,y 穿透位置
- * /param widget[] 提供一个uiWidget指针表，记录穿透的uiWidget指针
- * /param n widget的个数
- * /return 返回穿透的数量
+ * \param x,y 穿透位置
+ * \param widget[] 提供一个uiWidget指针表，记录穿透的uiWidget指针
+ * \param n widget的个数
+ * \return 返回穿透的数量
  */
 int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
 {
