@@ -41,8 +41,21 @@ int eventLoop(SDLState *state)
 			return 0;
 		switch (event.type){
 		case SDL_WINDOWEVENT:
-			if (event.window.event == SDL_WINDOWEVENT_CLOSE)
+			if (event.window.event == SDL_WINDOWEVENT_CLOSE){
+				lua_EventWindowClose();
 				return 1;
+			}
+			else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
+				state->window_w = event.window.data1;
+				state->window_h = event.window.data2;
+				lua_EventChangeSize(state->window_w, state->window_h);
+			}
+			else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST){
+				lua_EventWindow("background");
+			}
+			else if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED){
+				lua_EventWindow("foreground");
+			}
 			break;
 		}
 	}

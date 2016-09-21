@@ -89,6 +89,7 @@ return {
 					self._down = event.inside
 				end
 			end
+			return true
 		end,
 		setTitle=function(self,title)
 			self._title = title

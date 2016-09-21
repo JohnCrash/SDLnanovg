@@ -59,6 +59,7 @@ return {
 				self._down = event.inside
 			end
 		end	
+		return true
 	end,
 	switch=function(self,on)
 		self._on = on

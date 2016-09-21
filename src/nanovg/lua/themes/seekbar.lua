@@ -54,21 +54,26 @@ return {
 				elseif self._pos < 0 then
 					self._pos = 0
 				end
+				local pos = self:getSeekPos()
 				if self.onSeeking then
-					self.onSeeking(self:getSeekPos())
+					self.onSeeking(pos)
+				end
+				if self._r0 and self._r1 and self._r1-self._r0>0 then
+					self._pos = pos/(self._r1-self._r0)
 				end
 			end
-		end	
+		end
+		return true
 	end,
-	setRange=function(self,r0,r1,n)
+	setRange=function(self,r0,r1,step)
 		self._r0 = r0
 		self._r1 = r1
-		self._n = n
+		self._n = step
 	end,
 	getSeekPos=function(self)
 		if self._r0 and self._r1 then
-			if self._n then
-				return self._r0 + (self._r1-self._r0)*self._pos
+			if self._n and self._n~=0 then
+				return self._r0 + math.floor(((self._r1-self._r0)*self._pos)/self._n)*self._n
 			else
 				return self._r0 + (self._r1-self._r0)*self._pos
 			end

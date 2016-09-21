@@ -635,6 +635,33 @@ static void endUIEvent()
 	}
 }
 
+static void pushUiEventTable(lua_State *L, uiEvent *pev)
+{
+	lua_newtable(L);
+	lua_pushinteger(L, pev->type);
+	lua_setfield(L, -2, "type");
+	lua_pushnumber(L, pev->x);
+	lua_setfield(L, -2, "x");
+	lua_pushnumber(L, pev->y);
+	lua_setfield(L, -2, "y");
+	lua_pushnumber(L, pev->x2);
+	lua_setfield(L, -2, "x2");
+	lua_pushnumber(L, pev->y2);
+	lua_setfield(L, -2, "y2");
+	lua_pushnumber(L, pev->t);
+	lua_setfield(L, -2, "time");
+	lua_pushnumber(L, pev->t2);
+	lua_setfield(L, -2, "time2");
+	lua_pushboolean(L, pev->inside);
+	lua_setfield(L, -2, "inside");
+}
+
+static void lua_EventInput(uiEvent * pev)
+{
+	lua_pushEventFunction(EVENT_INPUT);
+	pushUiEventTable(lua_GlobalState(), pev);
+	lua_executeFunction(1);
+}
 /**
 * \brief 枚举的过程中eventFunc可能改变窗口结构甚至删除窗口
 * 这需要特殊处理，首先将满足调用func的窗口放入一个表中
@@ -674,12 +701,16 @@ void uiEnumWidget(uiWidget *root,
 			/*
 			 * 从最上面的对象开始处理事件
 			 */
+			int b = 1;
 			while (tail){
 				/* 如果对象要独占此事件，终止传递 */
-				if (eventFunc(tail,pev))
+				if (eventFunc(tail, pev)){
+					b = 0;
 					break;
+				}
 				tail = tail->enum_prev;
 			}
+			if (b) lua_EventInput(pev);
 		}
 	}
 	uiDelayDelete(0);
@@ -734,31 +765,12 @@ static void renderWidget(uiWidget * widget)
 	return 0;
 }
 
-static void pushUiEventTable(lua_State *L, uiEvent *pev)
+/**
+ * 调用对象的类方法如:onEvent
+ */
+static int callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *pev)
 {
-	lua_newtable(L);
-	lua_pushinteger(L, pev->type);
-	lua_setfield(L, -2, "type");
-	lua_pushnumber(L, pev->x);
-	lua_setfield(L, -2, "x");
-	lua_pushnumber(L, pev->y);
-	lua_setfield(L, -2, "y");
-	lua_pushnumber(L, pev->x2);
-	lua_setfield(L, -2, "x2");
-	lua_pushnumber(L, pev->y2);
-	lua_setfield(L, -2, "y2");
-	lua_pushnumber(L, pev->t);
-	lua_setfield(L, -2, "time");
-	lua_pushnumber(L, pev->t2);
-	lua_setfield(L, -2, "time2");
-	lua_pushboolean(L, pev->inside);
-	lua_setfield(L, -2, "inside");
-}
-/*
-* 调用对象的类方法如:onEvent
-*/
-static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *pev)
-{
+	int result = 0;
 	/* 先找对象的重载方法 */
 	if (widget->selfRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
@@ -769,9 +781,8 @@ static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *p
 				//lua_getref(L, widget->selfRef);
 				lua_pushWidget(L, widget);
 				pushUiEventTable(L, pev);
-				lua_executeFunction(2);
+				result = lua_executeFunction(2);
 				lua_pop(L, 1); //classRef;
-				return;
 			}
 			else{
 				lua_pop(L, 2);
@@ -788,7 +799,7 @@ static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *p
 				//lua_getref(L, widget->selfRef);
 				lua_pushWidget(L, widget);
 				pushUiEventTable(L, pev);
-				lua_executeFunction(2);
+				result = lua_executeFunction(2);
 				lua_pop(L, 1); //classRef;
 			}
 			else{
@@ -796,6 +807,7 @@ static void callWidgetOnEvent(uiWidget * widget, const char *strEvent,uiEvent *p
 			}
 		}
 	}
+	return result;
 }
 
 /*
@@ -825,7 +837,8 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 				else if (!_eventState.lastTouchDownWidget && pev->type == EVENT_TOUCHDOWN){
 					_eventState.lastTouchDownWidget = widget;
 				}
-				callWidgetOnEvent(widget, "onEvent", &ev);
+				if (callWidgetOnEvent(widget, "onEvent", &ev))
+					return 1; /* 如果事件被处理停止传递 */
 				/* 独占数据不继续传递 */
 				if ((widget->handleEvent&EVENT_EXCLUSIVE)||
 					(widget->handleEvent&EVENT_BREAK))
@@ -842,7 +855,8 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 					ev.y2 = _eventState.lastTouchDown.y;
 					ev.t2 = _eventState.lastTouchDown.t;
 				}
-				callWidgetOnEvent(widget, "onEvent", &ev);
+				if (callWidgetOnEvent(widget, "onEvent", &ev))
+					return 1; /* 如果事件被处理停止传递 */
 				if ((widget->handleEvent&EVENT_EXCLUSIVE) ||
 					(widget->handleEvent&EVENT_BREAK))
 					return 1;
@@ -883,7 +897,6 @@ void uiLoop()
 {
 	uiWidget * self = uiRootWidget();
 	if (self && self->isVisible&VISIBLE){
-		glViewport(0, 0, (int)self->width, (int)self->height);
 		nvgBeginFrame(_vg, (int)self->width, (int)self->height, 1);
 		nvgResetTransform(_vg);
 		uiEnumWidget(_root, renderWidget, eventWidget,(int)self->width, (int)self->height, 1);

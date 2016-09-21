@@ -5,10 +5,23 @@
 #include "sdlmain.h"
 #include "eventhandler.h"
 #include "luaext.h"
+#include "ui.h"
 
 static lua_State * _state = NULL;
 static int _callFromLua = 0;
 #define MAX_PATH 256
+
+struct schedule{
+	double t;
+	double interval;
+	int	ref;
+	unsigned int id;
+	struct schedule * prev;
+	struct schedule * next;
+};
+
+static unsigned int _scheduleID = 0;
+static struct schedule * _schedule = NULL;
 
 lua_State * lua_GlobalState()
 {
@@ -331,7 +344,7 @@ static void registerEventFunction(lua_State *L, int nfunction, int eventid)
 	}
 }
 
-static int lua_pushEventFunction(int n)
+int lua_pushEventFunction(int n)
 {
 	if (n>=0&&n < EVENT_COUNT&&_eventRef[n] != LUA_REFNIL){
 		lua_getref(_state,_eventRef[n]);
@@ -358,6 +371,9 @@ static int lua_eventFunction(lua_State *L)
 		else if (strcmp(ev, "input") == 0){
 			registerEventFunction(L, 2, EVENT_INPUT);
 		}
+		else if (strcmp(ev, "window") == 0){
+			registerEventFunction(L, 2, EVENT_WINDOW);
+		}
 		else
 			lua_pushnil(L);
 	}
@@ -381,6 +397,83 @@ static int lua_isand(lua_State *L)
 	lua_pushboolean(L, a&b);
 	return 1;
 }
+
+/**
+ * /brief 设置一个定时器
+ * /param dt 每隔dt时间就调用函数func
+ * /param func 回调函数，当回调函数返回nil or false下一个周期将不调用回调。
+ * /return 成功返回一个id,失败返回-1
+ */
+static int lua_schedule(lua_State *L)
+{
+	int ref;
+	double dt = luaL_checknumber(L, 1);
+	if (lua_isfunction(L, 2)){
+		struct schedule * psch;
+
+		psch = (struct schedule *)malloc(sizeof(struct schedule));
+		if (psch){
+			psch->t = 0;
+			psch->interval = dt;
+			lua_pushvalue(L, 2);
+			psch->ref = lua_ref(L, 1);
+			/* fixme:如果_scheduleID循环将发生重复 */
+			psch->id = _scheduleID++;
+			if (_schedule){
+				psch->prev = NULL;
+				psch->next = _schedule;
+				_schedule->prev = psch;
+				_schedule = psch;
+			}
+			else{
+				psch->next = NULL;
+				psch->prev = NULL;
+				_schedule = psch;
+			}
+			lua_pushnumber(L, (lua_Number)psch->id);
+			return 1;
+		}
+	}
+
+	lua_pushnumber(L, -1);
+	return 1;
+}
+
+/**
+ * /brief 删除一个定时器
+ * /param id 传入一个定时器id，schedule的返回值
+ * /return 成功删除返回true,失败返回false
+ */
+static int lua_removeSchedule(lua_State *L)
+{
+	unsigned int id = (unsigned int)luaL_checknumber(L, 1);
+	struct schedule * next = _schedule;
+	struct schedule * temp;
+
+	while (next){
+		if (next->id == id){
+			/* 清除此定时器 */
+			temp = next->prev;
+			if (temp){
+				temp->next = next->next;
+				next->prev = temp;
+			}
+			else{
+				_schedule = next->next;
+				if (_schedule)
+					_schedule->prev = NULL;
+			}
+			lua_unref(_state, next->ref);
+			free(next);
+			lua_pushboolean(L, 1);
+			return 1;
+		}
+		next = next->next;
+	}
+	lua_pushboolean(L, 0);
+	return 1;
+}
+
 /*
  * 初始Lua环境
  */
@@ -393,6 +486,8 @@ int initLua()
 		{ "eventFunction", lua_eventFunction },
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },
+		{ "schedule", lua_schedule },
+		{ "removeSchedule", lua_removeSchedule },
 		{ NULL, NULL }
 	};
 	const luaL_reg luax_exts[] = {
@@ -451,10 +546,43 @@ double getLoopInterval()
 
 void lua_EventLoop(double dt)
 {
+	struct schedule * next = _schedule;
+	struct schedule * temp;
+
 	_loopInterval = dt;
 	if (lua_pushEventFunction(EVENT_LOOP)){
 		lua_pushnumber(_state, dt);
 		lua_executeFunction(1);
+	}
+
+	/* 定时器循环 */
+	while (next){
+		next->t += dt;
+		if (next->t >= next->interval){
+			lua_getref(_state, next->ref);
+			lua_pushnumber(_state, next->t);
+			next->t = 0;
+			if (!lua_executeFunction(1)){
+				/* 清除此定时器 */
+				temp = next->prev;
+				if (temp){
+					temp->next = next->next;
+					next->prev = temp;
+					temp = next->next;
+				}
+				else{
+					_schedule = next->next;
+					if (_schedule)
+						_schedule->prev = NULL;
+					temp = _schedule;
+				}
+				lua_unref(_state, next->ref);
+				free(next);
+				next = temp;
+				continue;
+			}
+		}
+		next = next->next;
 	}
 }
 
@@ -470,6 +598,17 @@ void lua_EventInit()
 
 void lua_EventRelease()
 {
+	struct schedule * next = _schedule;
+	struct schedule * temp;
+	/* 清理全部定时器 */
+	while (next){
+		temp = next;
+		next = next->next;
+		lua_unref(_state, temp->ref);
+		free(temp);
+	}
+	_schedule = NULL;
+
 	if (lua_pushEventFunction(EVENT_RELEASE)){
 		lua_executeFunction(0);
 	}
@@ -477,20 +616,42 @@ void lua_EventRelease()
 	lua_executeScriptFile("release.lua");
 }
 
-void lua_EventInput()
+/**
+ * /brief 将屏幕变化后的尺寸通知lua事件函数
+ * /param w,h 屏幕的宽高
+ */
+void lua_EventChangeSize(int w,int h)
 {
-	if (lua_pushEventFunction(EVENT_INPUT)){
-		/*
-		lua_pushinteger(_state,ie->type);
-		if (ie->type == MOUSE_MOVE){
-			lua_newtable(_state);
-			lua_pushnumber(_state, ie->x);
-			lua_setfield(_state, -2, "x");
-			lua_pushnumber(_state, ie->y);
-			lua_setfield(_state, -2, "y");
-			lua_executeFunction(2);
-		}else
-			lua_executeFunction(1);
-		*/
+	uiWidget * root;
+
+	root = uiRootWidget();
+	if (root){
+		root->width = w;
+		root->height = h;
+	}
+	if (lua_pushEventFunction(EVENT_WINDOW)){
+		lua_pushstring(_state, "sizeChanged");
+		lua_pushinteger(_state, w);
+		lua_pushinteger(_state, h);
+		lua_executeFunction(3);
+	}
+}
+
+void lua_EventWindowClose()
+{
+	if (lua_pushEventFunction(EVENT_WINDOW)){
+		lua_pushstring(_state, "close");
+		lua_executeFunction(1);
+	}
+}
+
+/*
+ * 向lua发送一个无参数的window事件
+ */
+void lua_EventWindow(const char * eventName)
+{
+	if (lua_pushEventFunction(EVENT_WINDOW)){
+		lua_pushstring(_state, eventName);
+		lua_executeFunction(1);
 	}
 }
