@@ -79,8 +79,9 @@ extern void lua_pushWidget(lua_State *L, uiWidget * widget);
 /*
  * 调用对象的类方法如:onInit,onRelease
  */
-static void callWidgetEvent(uiWidget * widget, const char *strEvent)
+static void callWidgetEvent(uiWidget * widget, int themeRef,const char *strEvent)
 {
+	int nArg = 1;
 	/* 先找对象的重载方法 */
 	if (widget->selfRef != LUA_REFNIL){
 		lua_State * L = lua_GlobalState();
@@ -90,7 +91,11 @@ static void callWidgetEvent(uiWidget * widget, const char *strEvent)
 			if (lua_isfunction(L, -1)){
 				//lua_getref(L, widget->selfRef);
 				lua_pushWidget(L, widget);
-				lua_executeFunction(1);
+				if (themeRef != LUA_REFNIL){
+					nArg = 2;
+					lua_getref(L, themeRef);
+				}
+				lua_executeFunction(nArg);
 				lua_pop(L, 1); //classRef;
 				return;
 			}
@@ -108,7 +113,11 @@ static void callWidgetEvent(uiWidget * widget, const char *strEvent)
 			if (lua_isfunction(L, -1)){
 				//lua_getref(L, widget->selfRef);
 				lua_pushWidget(L, widget);
-				lua_executeFunction(1);
+				if (themeRef != LUA_REFNIL ){
+					nArg = 2;
+					lua_getref(L, themeRef);
+				}
+				lua_executeFunction(nArg);
 				lua_pop(L, 1); //classRef;
 			}
 			else{
@@ -141,7 +150,7 @@ static void uiDeleteWidgetSelf(uiWidget *self)
 		else{
 			/* 立刻删除对象 */
 			lua_State * L = lua_GlobalState();
-			callWidgetEvent(self, "onRelease");
+			callWidgetEvent(self, LUA_REFNIL,"onRelease");
 			if (L && self->selfRef != LUA_REFNIL){
 				lua_unref(L, self->selfRef);
 			}
@@ -212,7 +221,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 				calcXForm(self);
 				self->isVisible = VISIBLE;
 				self->handleEvent = EVENT_NONE;
-				callWidgetEvent(self, "onInit");
+				callWidgetEvent(self,themes->themeRef,"onInit");
 				return self;
 			}
 			else{

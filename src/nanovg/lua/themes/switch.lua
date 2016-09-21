@@ -3,11 +3,11 @@ local ui = require "ui"
 
 return {
 	_animationSpeed = 0.1,
-	onInit=function(self)
+	onInit=function(self,themes)
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 		self:setSize(40,20)
-		self._color = vg.rgba(255,255,255,255)
-		self._colorBG = vg.rgba(0,128,168,255)
+		self._color = themes.color
+		self._colorBG = themes.colorBG
 		self._on = false
 		self._switchRate = 0
 		self._animationDelay = 0

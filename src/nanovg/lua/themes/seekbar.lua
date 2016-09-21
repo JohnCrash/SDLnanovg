@@ -4,10 +4,10 @@ local ui = require "ui"
 return {
 	_lineWidth = 1,
 	_radius = 7,
-	onInit=function(self)
+	onInit=function(self,themes)
 		self:setSize(160,20)
-		self._color = vg.rgba(255,255,255,255)
-		self._colorBG = vg.rgba(0,128,168,255)
+		self._color = themes.color
+		self._colorBG = themes.colorBG
 		self._pos = 0.5
 		self._r0 = 0
 		self._r1 = 1

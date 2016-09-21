@@ -66,7 +66,7 @@ local function drawButton(preicon, text, x, y, w, h, col,isdown)
 end
 
 return {
-		onInit=function(self)		
+		onInit=function(self,themes)		
 			self._color = vg.rgba(255,0,0,0)
 			self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 		end,
