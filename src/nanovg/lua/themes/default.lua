@@ -17,6 +17,7 @@ return {
 	switch = require "themes/switch",
 	progress = require "themes/progress",
 	seekbar = require "themes/seekbar",
+	edit = require "themes/edit",
 	--[[
 	tab = require "themes/tab",
 	list = require "themes/list",

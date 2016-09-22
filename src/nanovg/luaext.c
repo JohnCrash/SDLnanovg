@@ -502,6 +502,7 @@ void lua_callKeyboardFunc(const char *event)
  *	- 'right'	右移光标。
  *	- 'up'		上移光标。
  *	- 'down'	下移光标。
+ *	- 'tab'
  */
 static int lua_enableSoftkeyboard(lua_State *L)
 {

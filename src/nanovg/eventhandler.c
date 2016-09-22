@@ -63,6 +63,43 @@ int eventLoop(SDLState *state)
 			printf("TEXTINPUT: %s\n",event.text.text);
 			lua_callKeyboardFunc(event.text.text);
 			break;
+		case SDL_KEYDOWN:
+			{
+				const char * key = NULL;
+				switch (event.key.keysym.scancode){
+				case SDL_SCANCODE_HOME:
+					key = "home";
+					break;
+				case SDL_SCANCODE_DELETE:
+					key = "delete";
+					break;
+				case SDL_SCANCODE_BACKSPACE:
+					key = "backspace";
+					break;
+				case SDL_SCANCODE_END:
+					key = "end";
+					break;
+				case SDL_SCANCODE_LEFT:
+					key = "left";
+					break;
+				case SDL_SCANCODE_RIGHT:
+					key = "right";
+					break;
+				case SDL_SCANCODE_DOWN:
+					key = "down";
+					break;
+				case SDL_SCANCODE_UP:
+					key = "up";
+					break;
+				case SDL_SCANCODE_TAB:
+					key = "tab";
+					break;
+				}
+				if (key) lua_callKeyboardFunc(key);
+			}
+			break;
+		case SDL_KEYUP:
+			break;
 		}
 		if (!addSDLEvent(&event))
 			return 0;
