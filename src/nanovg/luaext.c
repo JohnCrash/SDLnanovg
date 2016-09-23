@@ -648,6 +648,7 @@ void lua_EventLoop(double dt)
 void lua_EventInit()
 {
 	/* 执行初始化代码 */
+	lua_executeScriptFile("nanovg.lua");
 	lua_executeScriptFile("init.lua");
 
 	if (lua_pushEventFunction(EVENT_INIT)){

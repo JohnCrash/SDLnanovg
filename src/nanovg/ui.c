@@ -658,9 +658,10 @@ static void pushUiEventTable(lua_State *L, uiEvent *pev)
 
 static void lua_EventInput(uiEvent * pev)
 {
-	lua_pushEventFunction(EVENT_INPUT);
-	pushUiEventTable(lua_GlobalState(), pev);
-	lua_executeFunction(1);
+	if (lua_pushEventFunction(EVENT_INPUT)){
+		pushUiEventTable(lua_GlobalState(), pev);
+		lua_executeFunction(1);
+	}
 }
 /**
 * \brief 枚举的过程中eventFunc可能改变窗口结构甚至删除窗口
