@@ -517,7 +517,7 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 	renderFunc(root);
 	/* 对子窗口设置剪切区域 */
 	if (root->isVisible&CLIP){
-		nvgSave(_vg);
+	//	nvgSave(_vg);
 		nvgScissor(_vg, 0, 0, root->width, root->height);
 		isclip = 1;
 	}
@@ -536,7 +536,7 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 	}
 
 	if (isclip){
-		nvgRestore(_vg);
+	//	nvgRestore(_vg);
 	}
 	return tail;
 }
@@ -824,7 +824,9 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 		if (nvgTransformInverse(w2o, widget->curxform)){
 			/* 变换屏幕点到对象系 */
 			nvgTransformPoint(&x, &y, w2o, pev->x, pev->y);
-			if (x >= 0 && y >= 0 && x <= widget->width && y <= widget->height){
+			/* 如果有无界标记就直接传递 */
+			if ((widget->handleEvent & EVENT_UNBOUNDED) ||
+				(x >= 0 && y >= 0 && x <= widget->width && y <= widget->height)){
 				/* 投递事件到对象 */
 				uiEvent ev = *pev;
 				ev.x = x;
@@ -915,16 +917,17 @@ uiWidget * uiFormJson(const char *filename)
 	return NULL;
 }
 
-void uiEnableEvent(uiWidget *self, int e)
+void uiEnableEvent(uiWidget *self, unsigned int e)
 {
 	if (self)
 		self->handleEvent |= e;
 }
 
-void uiDisableEvent(uiWidget *self, int e)
+void uiDisableEvent(uiWidget *self, unsigned int e)
 {
-	if (self)
-		self->handleEvent &= !e;
+	if (self){
+		self->handleEvent &= ~e;
+	}
 }
 
 static void uiWidgetToRootForm(uiWidget *self,float xform[6])

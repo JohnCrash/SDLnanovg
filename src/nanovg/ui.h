@@ -22,6 +22,7 @@ extern "C"{
 		EVENT_ZOOM = 8, /**<触摸屏两手指拖动操作*/
 		EVENT_BREAK = 16, /**<停止将事件传递到此 ::uiWidget_t Z轴下的uiWidget_t对象*/
 		EVENT_EXCLUSIVE = 32, /**<如果事件在对象内部发生就停止传递*/
+		EVENT_UNBOUNDED = 64, /**<不考虑节点的尺寸直接将事件传递给该节点*/
 	};
 
 	/**
@@ -272,13 +273,13 @@ extern "C"{
 	 * \brief 打开一个事件设置，e可以是 #EVENT_TOUCHDOWN #EVENT_TOUCHDROP ... 
 	 * 中的一个或者组合。
 	 */
-	void uiEnableEvent(uiWidget *self,int e);
+	void uiEnableEvent(uiWidget *self, unsigned int e);
 	
 	/**
 	 * \brief 关闭一个事件设置，e可以是 #EVENT_TOUCHDOWN #EVENT_TOUCHDROP ... 
 	 * 中的一个或者组合。
 	 */	
-	void uiDisableEvent(uiWidget *self,int e);
+	void uiDisableEvent(uiWidget *self, unsigned int e);
 	
 	 /** @} */
 #ifdef __cplusplus
