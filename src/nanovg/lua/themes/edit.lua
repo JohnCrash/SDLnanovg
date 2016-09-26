@@ -62,11 +62,7 @@ return {
 		end
 	end,
 	onEvent=function(self,event)
-		if event.type == ui.EVENT_TOUCHDOWN then
-			local w,h = self:getSize()
-			local rr
-			
-			if self._isSeekbar then
+				if self._isSeekbar then
 				print("x = "..event.x)
 				print("y = "..event.y)
 				print("BX = "..self._seekBarX)
@@ -76,7 +72,14 @@ return {
 				print("rr = "..rr)
 				print("RR = "..self._seekRadius*self._seekRadius)
 			end
+
+		if event.type == ui.EVENT_TOUCHDOWN then
+			print("EVENT_TOUCHDOWN")
+			local w,h = self:getSize()
+			local rr
+			
 			if ptInRect(event.x,event.y,w,h) then
+			print("enable")
 				self._forcs = 1
 				self._flash = 0
 				self._isSeekbar = 1
@@ -92,6 +95,7 @@ return {
 				self:disableEvent(ui.EVENT_UNBOUNDED)
 			end
 		elseif event.type == ui.EVENT_TOUCHUP then
+		print("EVENT_TOUCHUP")
 			if self._seekDown then
 				self._seekDown = nil
 				self:ptCorsorPos(event.x,event.y)
