@@ -30,11 +30,14 @@ SDL_Event * getSDLEvent(int n)
 	return &(_eventBuffer.events[n]);
 }
 
+static int _background = 0;
+
 int eventLoop(SDLState *state)
 {
 	SDL_Event event;
 
 	clearSDLEvent();
+_continue:
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type){
@@ -49,9 +52,11 @@ int eventLoop(SDLState *state)
 				lua_EventChangeSize(state->window_w, state->window_h);
 			}
 			else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST){
+				_background = 1;
 				lua_EventWindow("background");
 			}
 			else if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED){
+				_background = 0;
 				lua_EventWindow("foreground");
 			}
 			break;
@@ -103,6 +108,10 @@ int eventLoop(SDLState *state)
 		}
 		if (!addSDLEvent(&event))
 			return 0;
+	}
+	if (_background && getSDLEventCount()==0){
+		SDL_Delay(100);
+		goto _continue;
 	}
 	return 0;
 }
