@@ -10,6 +10,7 @@ return {
 		self._color = themes.color
 		self._colorBG = themes.colorBG
 		self._lineColor = vg.rgba(0,0,0,255)
+		self._colorSelect = vg.rgbaf(self._colorBG.r,self._colorBG.g,self._colorBG.b,0.2)
 		self._cornerRadius = 3
 		self._forcs = nil
 		self._cursorPos = self._cornerRadius
@@ -140,8 +141,12 @@ return {
 				self._forcs = 1
 				self._flash = 0
 				self._isSeekbar = 1
+				self._seekDown = 1
 				self:enableEvent(ui.EVENT_UNBOUNDED)
 				self:ptCorsorPos(event.x,event.y)
+				self._select = {}
+				self._select.start = self._pos
+				self._select.corsorStart = self._cursorPos
 				softKeyboard(true,0,function(event,str)
 					self._flash = 0
 					if event=='attach' then
@@ -173,23 +178,27 @@ return {
 					elseif event=='left' then
 						if self._pos > 0 then
 							self._pos = self._pos - 1
-						end					
+						end
+						self._select = nil
 						self:reCorsorPos()
 					elseif event=='right' then
 						if self._pos < string.len(self._text) then
 							self._pos = self._pos + 1
-						end										
+						end
+						self._select = nil						
 						self:reCorsorPos()
 					elseif event=='home' then
 						self._pos = 0
+						self._select = nil
 						self:reCorsorPos()
 					elseif event=='end' then
+						self._select = nil
 						self._pos = string.len(self._text)
 						self:reCorsorPos()					
 					end
 				end)
 			elseif rr and rr <= self._seekRadius*self._seekRadius then
-				self._seekDown = 1
+				self._seekDown = 2
 			elseif not ptInRect(event.x,event.y,w,h) then
 				self._forcs =  nil
 				self._isSeekbar = nil
@@ -201,8 +210,16 @@ return {
 				self._seekDown = nil
 				self:ptCorsorPos(event.x,event.y)
 			end
+			if self._select and not self._select.en then
+				self._select = nil
+			end
 		elseif event.type == ui.EVENT_TOUCHDROP then
-			if self._seekDown then
+			if self._seekDown==1 then
+				self._flash = 0
+				self:ptCorsorPos(event.x,event.y)
+				self._select.corsorEnd = self._cursorPos
+				self._select.en = self._pos
+			elseif self._seekDown==2 then
 				self._flash = 0
 				self:ptCorsorPos(event.x,event.y)
 			end
@@ -238,7 +255,13 @@ return {
 			vg.fill()
 		end
 		
-		if self._isSeekbar then
+		if self._select and self._select.en then
+			vg.beginPath()
+			vg.rect(self._horzPos+self._select.corsorStart,self._cornerRadius,
+			self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius)
+			vg.fillColor(self._colorSelect)
+			vg.fill()
+		elseif self._isSeekbar then
 			self._seekBarX = self._horzPos+self._cursorPos
 			self._seekBarY = self._cornerRadius+h-2*self._cornerRadius+self._seekRadius
 			vg.beginPath()

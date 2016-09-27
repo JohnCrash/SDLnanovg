@@ -110,7 +110,8 @@ _continue:
 			return 0;
 	}
 	if (_background && getSDLEventCount()==0){
-		SDL_Delay(100);
+		//SDL_Delay(100);
+		SDL_WaitEvent(NULL);
 		goto _continue;
 	}
 	return 0;

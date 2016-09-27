@@ -344,8 +344,16 @@ int lua_pushEventFunction(int n)
 	}
 	return 0;
 }
-/*
- * 向系统注册事件
+/**
+ * \brief 注册触发事件或者取消注册
+ * \param event 事件名称,可以是下面的值
+ *	- init	在主循环开始前调用一次
+ *	- release	在主循环退出时调用一次
+ *	- loop	主循环，在程序运行期间不停调用
+ *	- input	全局输入事件，在发送给具体的控件前发送
+ *	- window 程序进入前台或后台，尺寸发送改变等事件
+ * \param func 事件函数
+ * \return 成功返回true,失败返回nil
  */
 static int lua_eventFunction(lua_State *L)
 {
@@ -594,6 +602,74 @@ static int lua_enableSoftkeyboard(lua_State *L)
 	return 0;
 }
 
+/**
+ * \brief 返回建的状态
+ * \param k 要查询的扫描键表,如果要查询{SCANCODE_A,SCANCODE_LEFT}
+ * \return 返回一个表如果k中的扫描键被按下表的对应值1，否则为0
+ */
+int lua_keyboardState(lua_State *L)
+{
+	int len;
+	Uint8 * kbs = SDL_GetKeyboardState(&len);
+	return 1;
+}
+
+/**
+ * \brief 将字符串拷贝到剪接板
+ * \param str 要放入剪接板的字符串
+ * \return 无返回值
+ */
+int lua_clipbaordCopy(lua_State *L)
+{
+	const char * str = luaL_checkstring(L, 1);
+	SDL_SetClipboardText(str);
+	return 0;
+}
+
+/**
+ * \brief 从剪接板读取字符串
+ * \return 返回剪切板字符串，没有数据返回一个空串
+ */
+int lua_clipbaordPast(lua_State *L)
+{
+	char * str = SDL_GetClipboardText();
+	if (str)
+		lua_pushstring(L,str);
+	else
+		lua_pushstring(L, "");
+	return 1;
+}
+
+/**
+ * \brief 返回该版本是不是一个调试版本
+ * \return 如果是调试版本返回true,不是返回nil
+ */
+int lua_isDebug(lua_State *L)
+{
+#ifdef _DEBUG
+	lua_pushboolean(L,1);
+#else
+	lua_pushnil(L);
+#endif
+	return 1;
+}
+
+/**
+ * \brief 返回平台名称
+ * \return 返回平台名称，可以是下面的值"windows","android","ios"
+ */
+int lua_getPlatform(lua_State *L)
+{
+#if defined(_WIN32)
+	const char * platform = "windows";
+#elif defined(__ANDROID__)
+	const char * platform = "android";
+#elif defined(__APPLE__)
+	const char * platform = "ios";
+#endif
+	lua_pushstring(L, platform);
+	return 1;
+}
 /*
  * 初始Lua环境
  */
@@ -609,6 +685,11 @@ int initLua()
 		{ "schedule", lua_schedule },
 		{ "removeSchedule", lua_removeSchedule },
 		{ "softKeyboard",lua_enableSoftkeyboard },
+		{ "clipbaordCopy", lua_clipbaordCopy },
+		{ "clipbaordPast", lua_clipbaordPast },
+		{ "keyboardState", lua_keyboardState },
+		{ "getPlatform" ,lua_getPlatform },
+		{ "isDebug", lua_isDebug },
 		{ NULL, NULL }
 	};
 	const luaL_reg luax_exts[] = {
