@@ -44,7 +44,7 @@ return {
 			self._cursorPos = self._cornerRadius
 			self._textWidth = 0
 			self._horzPos = 0
-			self:relayout()
+			self:relayout(true)
 			return 
 		end
 		for i,v in pairs(t) do
@@ -56,7 +56,7 @@ return {
 					self._cursorPos = v.minx
 					self._textWidth = 0
 					self._horzPos = 0
-					self:relayout()
+					self:relayout(true)
 					return
 				end
 			end
@@ -69,7 +69,7 @@ return {
 					self._textWidth = t[#t].maxx+t[1].minx
 					self._pos = v.pos
 				end
-				self:relayout()
+				self:relayout(true)
 				return
 			end
 			last = v
@@ -79,7 +79,7 @@ return {
 			self._cursorPos = last.maxx
 			self._textWidth = t[#t].maxx+t[1].minx
 		end
-		self:relayout()
+		self:relayout(true)
 	end,
 	reCorsorPos=function(self)
 		local w,h = self:getSize()
@@ -104,25 +104,25 @@ return {
 			end
 		end
 	end,
-	relayout=function(self)
+	relayout=function(self,isdrop)
 		local w,h = self:getSize()
 		local x = self._cursorPos
-		if self._horzPos+x >= self._cornerRadius and self._horzPos+x <= w-self._cornerRadius then
-			--[[
-			if self._textWidth > w - 2*self._cornerRadius then
-				if x>=0 and x<w-self._cornerRadius then
-					self._horzPos = 0
-				elseif self._textWidth-x<=w-self._cornerRadius then
-					self._horzPos = self._textWidth-x-(w-self._cornerRadius)
-				end
-			end
-			--]]
-			return
-		end
+
 		if self._horzPos+x < self._cornerRadius then
 			self._horzPos = self._cornerRadius-x
 		elseif self._horzPos+x >  w-self._cornerRadius then
 			self._horzPos = w-self._cornerRadius-x
+		end
+		if not isdrop then
+			if self._textWidth > w - 2*self._cornerRadius then
+				if x>=0 and x<w-self._cornerRadius then
+					self._horzPos = 0
+				elseif (self._textWidth-x)<=w-2*self._cornerRadius then
+					self._horzPos = (w-2*self._cornerRadius)-self._textWidth
+				end
+			else
+				self._horzPos = 0
+			end	
 		end
 	end,
 	onEvent=function(self,event)
@@ -141,7 +141,12 @@ return {
 				self:ptCorsorPos(event.x,event.y)
 				softKeyboard(true,0,function(event,str)
 					self._flash = 0
-					if event=='insert' and str then
+					print( ' +'..event )
+					if event=='attach' then
+						print('attach:'..w)
+					elseif event=='detach' then
+						print('detach:'..w)
+					elseif event=='insert' and str then
 						self._isSeekbar = nil
 						local prefix = string.sub(self._text,0,self._pos) or ''
 						local surfix = string.sub(self._text,self._pos+1) or ''
