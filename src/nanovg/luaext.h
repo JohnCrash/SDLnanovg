@@ -33,7 +33,7 @@ extern "C"{
 	int lua_executeString(const char *code);
 	int lua_executeScriptFile(const char *filename);
 	int lua_executeScriptFileResult(const char *filename,int nRet);
-	void lua_callKeyboardFunc(const char *event);
+	void lua_callKeyboardFunc(const char *event,char *str);
 	lua_State * lua_GlobalState();
 #ifdef __cplusplus
 }

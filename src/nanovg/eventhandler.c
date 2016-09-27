@@ -61,12 +61,12 @@ _continue:
 			}
 			break;
 		case SDL_TEXTEDITING:
-			printf("EDITING start: %d,'%s' %d\n",
-				event.edit.start,event.edit.text,event.edit.length);
+		//	printf("EDITING start: %d,'%s' %d\n",
+		//		event.edit.start,event.edit.text,event.edit.length);
 			break;
 		case SDL_TEXTINPUT:
-			printf("TEXTINPUT: %s\n",event.text.text);
-			lua_callKeyboardFunc(event.text.text);
+		//	printf("TEXTINPUT: %s\n",event.text.text);
+			lua_callKeyboardFunc("insert",event.text.text);
 			break;
 		case SDL_KEYDOWN:
 			{
@@ -100,7 +100,7 @@ _continue:
 					key = "tab";
 					break;
 				}
-				if (key) lua_callKeyboardFunc(key);
+				if (key) lua_callKeyboardFunc(key,NULL);
 			}
 			break;
 		case SDL_KEYUP:
