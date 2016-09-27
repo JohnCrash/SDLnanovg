@@ -11,17 +11,9 @@ static lua_State * _state = NULL;
 static int _callFromLua = 0;
 #define MAX_PATH 256
 
-struct schedule{
-	double t;
-	double interval;
-	int	ref;
-	unsigned int id;
-	struct schedule * prev;
-	struct schedule * next;
-};
-
 static unsigned int _scheduleID = 0;
 static struct schedule * _schedule = NULL;
+static int _isTextInputOpen = 0;
 
 lua_State * lua_GlobalState()
 {
@@ -398,6 +390,51 @@ static int lua_isand(lua_State *L)
 	return 1;
 }
 
+struct schedule* add_c_schedule(c_schedule func, double dt)
+{
+	struct schedule * psch;
+	psch = (struct schedule *)malloc(sizeof(struct schedule));
+	if (psch){
+		psch->t = 0;
+		psch->cfunc = func;
+		psch->interval = dt;
+		psch->ref = LUA_REFNIL;
+		psch->id = _scheduleID++;
+		if (_schedule){
+			psch->prev = NULL;
+			psch->next = _schedule;
+			_schedule->prev = psch;
+			_schedule = psch;
+		}
+		else{
+			psch->next = NULL;
+			psch->prev = NULL;
+			_schedule = psch;
+		}
+	}
+	return psch;
+}
+
+void remove_c_schedule(struct schedule* next)
+{
+	struct schedule * temp;
+	
+	if (next){
+		temp = next->prev;
+		if (temp){
+			temp->next = next->next;
+			next->prev = temp;
+		}
+		else{
+			_schedule = next->next;
+			if (_schedule)
+				_schedule->prev = NULL;
+		}
+		free(next);
+	}
+	return;
+}
+
 /**
  * \brief 设置一个定时器
  * \param dt 每隔dt时间就调用函数func
@@ -414,6 +451,7 @@ static int lua_schedule(lua_State *L)
 		psch = (struct schedule *)malloc(sizeof(struct schedule));
 		if (psch){
 			psch->t = 0;
+			psch->cfunc = NULL;
 			psch->interval = dt;
 			lua_pushvalue(L, 2);
 			psch->ref = lua_ref(L, 1);
@@ -475,6 +513,7 @@ static int lua_removeSchedule(lua_State *L)
 }
 
 static int _inputRef = LUA_REFNIL;
+static struct schedule * _cSchedule = NULL;
 
 void lua_callKeyboardFunc(const char *event,char *str)
 {
@@ -488,6 +527,15 @@ void lua_callKeyboardFunc(const char *event,char *str)
 		lua_executeFunction(2);
 	}
 }
+
+static int closeTextInput()
+{
+	_isTextInputOpen = 0;
+	SDL_StopTextInput();
+	_cSchedule = NULL;
+	return 0;
+}
+
 /**
  * \brief 打开或者关闭软键盘
  * \param b true打开软键盘，false关闭软件盘
@@ -524,12 +572,23 @@ static int lua_enableSoftkeyboard(lua_State *L)
 				_inputRef = lua_ref(L, 1);
 			}
 			/* 打开软键盘 */
-			SDL_StartTextInput();
+			if (_cSchedule){
+				remove_c_schedule(_cSchedule);
+				_cSchedule = NULL;
+			}
+			if (!_isTextInputOpen){
+				_isTextInputOpen = 1;
+				SDL_StartTextInput();
+			}
 			/* 通知当前输入准备输入 */
 			lua_callKeyboardFunc("attach", NULL);
 		}else{
-			/* 关闭软键盘 */
-			SDL_StopTextInput();
+			/* 关闭软键盘,使用一个定时器进行关闭 */
+			if (_cSchedule){
+				_cSchedule->t = 0;
+			}else{
+				_cSchedule = add_c_schedule(closeTextInput, 0.025);
+			}
 		}
 	}
 	return 0;
@@ -621,27 +680,49 @@ void lua_EventLoop(double dt)
 	while (next){
 		next->t += dt;
 		if (next->t >= next->interval){
-			lua_getref(_state, next->ref);
-			lua_pushnumber(_state, next->t);
-			next->t = 0;
-			if (!lua_executeFunction(1)){
-				/* 清除此定时器 */
-				temp = next->prev;
-				if (temp){
-					temp->next = next->next;
-					next->prev = temp;
-					temp = next->next;
+			if (next->ref != LUA_REFNIL){
+				lua_getref(_state, next->ref);
+				lua_pushnumber(_state, next->t);
+				next->t = 0;
+				if (!lua_executeFunction(1)){
+					/* 清除此定时器 */
+					temp = next->prev;
+					if (temp){
+						temp->next = next->next;
+						next->prev = temp;
+						temp = next->next;
+					}
+					else{
+						_schedule = next->next;
+						if (_schedule)
+							_schedule->prev = NULL;
+						temp = _schedule;
+					}
+					lua_unref(_state, next->ref);
+					free(next);
+					next = temp;
+					continue;
 				}
-				else{
-					_schedule = next->next;
-					if (_schedule)
-						_schedule->prev = NULL;
-					temp = _schedule;
+			}
+			else if (next->cfunc){
+				if (!next->cfunc()){
+					/* 清除此定时器 */
+					temp = next->prev;
+					if (temp){
+						temp->next = next->next;
+						next->prev = temp;
+						temp = next->next;
+					}
+					else{
+						_schedule = next->next;
+						if (_schedule)
+							_schedule->prev = NULL;
+						temp = _schedule;
+					}
+					free(next);
+					next = temp;
+					continue;
 				}
-				lua_unref(_state, next->ref);
-				free(next);
-				next = temp;
-				continue;
 			}
 		}
 		next = next->next;
@@ -672,10 +753,12 @@ void lua_EventRelease()
 	while (next){
 		temp = next;
 		next = next->next;
-		lua_unref(_state, temp->ref);
+		if (temp->ref!=LUA_REFNIL)
+			lua_unref(_state, temp->ref);
 		free(temp);
 	}
 	_schedule = NULL;
+	_cSchedule = NULL;
 
 	if (lua_pushEventFunction(EVENT_RELEASE)){
 		lua_executeFunction(0);

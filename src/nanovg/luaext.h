@@ -16,6 +16,20 @@ extern "C"{
 		EVENT_COUNT,
 	};
 
+	typedef int (*c_schedule)();
+	struct schedule{
+		double t;
+		double interval;
+		int	ref;
+		c_schedule cfunc;
+		unsigned int id;
+		struct schedule * prev;
+		struct schedule * next;
+	};
+
+	struct schedule* add_c_schedule(c_schedule func,double dt);
+	void remove_c_schedule(struct schedule* psch);
+
 	int initLua();
 	void releaseLua();
 	void lua_EventLoop(double dt);

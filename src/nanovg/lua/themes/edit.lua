@@ -17,6 +17,7 @@ return {
 		self._cursorFlash = 0.5
 		self._flash = 0
 		self._text = ""
+		self._fontSpace = 0
 		self._fontSize = 18
 		self._textColor = vg.rgba(0,0,0,255)
 		self._font = 'default'
@@ -37,6 +38,7 @@ return {
 		self._fontSize = h - 2*self._cornerRadius
 		vg.fontFace(self._font)
 		vg.fontSize(self._fontSize)
+		vg.textLetterSpacing(self._fontSpace)
 		local t = vg.textGlyphPositions(self._cornerRadius,h-self._cornerRadius,self._text)
 		local last,first
 		if not t then 
@@ -86,6 +88,7 @@ return {
 		self._fontSize = h - 2*self._cornerRadius
 		vg.fontFace(self._font)
 		vg.fontSize(self._fontSize)
+		vg.textLetterSpacing(self._fontSpace)
 		local t = vg.textGlyphPositions(self._cornerRadius,h-self._cornerRadius,self._text)
 		local last,first
 		if not t or self._pos == 0 then
@@ -141,7 +144,6 @@ return {
 				self:ptCorsorPos(event.x,event.y)
 				softKeyboard(true,0,function(event,str)
 					self._flash = 0
-					print( ' +'..event )
 					if event=='attach' then
 						print('attach:'..w)
 					elseif event=='detach' then
@@ -221,6 +223,7 @@ return {
 			vg.fontSize(self._fontSize)
 			vg.fillColor(self._textColor)
 			vg.textAlign(self._nanoAlign)
+			vg.textLetterSpacing(self._fontSpace)
 			vg.textBox(self._horzPos+self._cornerRadius,h-self._cornerRadius,self._breakWidth,self._text)
 		end
 		vg.restore()
