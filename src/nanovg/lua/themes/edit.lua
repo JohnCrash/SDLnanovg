@@ -39,8 +39,13 @@ return {
 		self._seekRadius = 12
 		self._seekBarX = 0
 		self._seekBarY = 0
+		self._undo = {}
 		self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_BOTTOM
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
+	end,
+	pushUndo=function(self)
+	end,
+	popUndo=function(self)
 	end,
 	onRelease=function(self)
 	end,
@@ -158,7 +163,8 @@ return {
 		if isShiftDown() then
 			if self._select then
 				self._select.corsorEnd = self._cursorPos
-				self._select.en = self._pos			
+				self._select.en = self._pos
+				--print(string.format("select : %d,%d",self._select.start,self._select.en))
 			else
 				self._select = {}
 				self._select.start = self._pos
@@ -173,7 +179,7 @@ return {
 		local en = math.max(self._select.start,self._select.en)
 		local prefix = string.sub(self._text,1,start)
 		local surfix = string.sub(self._text,en+1)
-		--print(string.format("'%s',%d,%d",self._text,start,en))
+		--print(string.format("delete '%s',%d,%d",self._text,start,en))
 		--print(string.format("prefix:%s  surfix:%s",prefix,surfix))
 		self._text = prefix..surfix
 		self._pos = start
@@ -232,10 +238,10 @@ return {
 						print('detach:'..w)
 					elseif event=='insert' and str then
 						self:insertString(str)
-					elseif event=='backspace' and self._pos>0 then
+					elseif event=='backspace' then
 						if self._select and self._select.start and self._select.en then
 							self:deleteSelect()
-						else
+						elseif self._pos > 0 then
 							self._isSeekbar = nil
 							local prefix = string.sub(self._text,0,self._pos-1) or ''
 							local surfix = string.sub(self._text,self._pos+1) or ''					
@@ -279,25 +285,20 @@ return {
 						self._pos = string.len(self._text)
 						self:reCorsorPos()	
 						self:keyboardSelectEnd()
-					elseif event=='keydown' then
-						local isCtrl = isCtrlDown()
-						if self._select and self._select.en and isCtrl then
-							if str==sc.C then
-								self:copySelect()
-							elseif str==sc.X then
-								self:copySelect()
-								self:deleteSelect()
-								self:reCorsorPos()
-							elseif str==sc.A then
-								self:selectAll()
-							end
-						elseif isCtrl and str==sc.V then
+					elseif event=='keydown' and isCtrlDown() then
+						if str==sc.C and self._select and self._select.en then
+							self:copySelect()
+						elseif str==sc.X and self._select and self._select.en then
+							self:copySelect()
+							self:deleteSelect()
+							self:reCorsorPos()
+						elseif str==sc.V then
 							if self._select and self._select.en then
 								self:deleteSelect()
 								self:reCorsorPos()
 							end
 							self:insertString(clipbaordPast())
-						elseif isCtrl and str==sc.A then
+						elseif str==sc.A then
 							self:selectAll()
 						end
 					end
@@ -338,8 +339,8 @@ return {
 		vg.stroke()
 		
 		vg.save()
+		vg.scissor(self._cornerRadius,self._cornerRadius,w-2*self._cornerRadius,h-2*self._cornerRadius)
 		if self._text then
-			vg.scissor(self._cornerRadius,self._cornerRadius,w-2*self._cornerRadius,h-2*self._cornerRadius)
 			self._fontSize = h - 2*self._cornerRadius
 			vg.fontFace(self._font)
 			vg.fontSize(self._fontSize)
@@ -348,7 +349,15 @@ return {
 			vg.textLetterSpacing(self._fontSpace)
 			vg.textBox(self._horzPos+self._cornerRadius,h-self._cornerRadius,self._breakWidth,self._text)
 		end
+		if self._forcs and self._select and self._select.en then
+			vg.beginPath()
+			vg.rect(self._horzPos+self._select.corsorStart,self._cornerRadius,
+			self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius)
+			vg.fillColor(self._colorSelect)
+			vg.fill()
+		end
 		vg.restore()
+		
 		self._flash = self._flash + dt
 		if self._flash > 2*self._cursorFlash then
 			self._flash = 0
@@ -360,13 +369,7 @@ return {
 			vg.fill()
 		end
 		
-		if self._select and self._select.en then
-			vg.beginPath()
-			vg.rect(self._horzPos+self._select.corsorStart,self._cornerRadius,
-			self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius)
-			vg.fillColor(self._colorSelect)
-			vg.fill()
-		elseif self._isSeekbar then
+		if self._isSeekbar and not (self._select and self._select.en) then
 			self._seekBarX = self._horzPos+self._cursorPos
 			self._seekBarY = self._cornerRadius+h-2*self._cornerRadius+self._seekRadius
 			vg.beginPath()
