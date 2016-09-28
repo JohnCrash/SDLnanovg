@@ -541,6 +541,16 @@ void lua_callKeyboardFunc(const char *event,char *str)
 	}
 }
 
+void lua_callKeyboardFunc2(const char *event, int scancode)
+{
+	if (_inputRef != LUA_REFNIL){
+		lua_getref(_state, _inputRef);
+		lua_pushstring(_state, event);
+		lua_pushinteger(_state, scancode);
+		lua_executeFunction(2);
+	}
+}
+
 static int closeTextInput()
 {
 	_isTextInputOpen = 0;

@@ -168,6 +168,44 @@ return {
 			self._select = nil
 		end
 	end,
+	deleteSelect=function(self)
+		local start = math.min(self._select.start,self._select.en)
+		local en = math.max(self._select.start,self._select.en)
+		local prefix = string.sub(self._text,1,start)
+		local surfix = string.sub(self._text,en+1)
+		--print(string.format("'%s',%d,%d",self._text,start,en))
+		--print(string.format("prefix:%s  surfix:%s",prefix,surfix))
+		self._text = prefix..surfix
+		self._pos = start
+		self._select = nil
+	end,
+	copySelect=function(self)
+		local start = math.min(self._select.start,self._select.en)
+		local en = math.max(self._select.start,self._select.en)
+		local text = string.sub(self._text,start,en)
+		--print("copy : "..text)
+		clipbaordCopy(text)
+	end,
+	insertString=function(self,str)
+		if self._select and self._select.start and self._select.en then
+			self:deleteSelect()
+		end
+		self._isSeekbar = nil
+		local prefix = string.sub(self._text,0,self._pos) or ''
+		local surfix = string.sub(self._text,self._pos+1) or ''
+		self._text = prefix..str..surfix
+		self._pos = self._pos + string.len(str)
+		self:reCorsorPos()	
+	end,
+	selectAll=function(self)
+		self._select = {}
+		self._select.start = 0
+		self._select.corsorStart = self._cornerRadius
+		self._select.en = string.len(self._text)
+		self._select.corsorEnd = self._textWidth-self._cornerRadius
+		self._pos = self._select.en
+		self._cursorPos = self._select.corsorEnd
+	end,
 	onEvent=function(self,event)
 		if event.type == ui.EVENT_TOUCHDOWN then
 			local w,h = self:getSize()
@@ -193,26 +231,29 @@ return {
 					elseif event=='detach' then
 						print('detach:'..w)
 					elseif event=='insert' and str then
-						self._isSeekbar = nil
-						local prefix = string.sub(self._text,0,self._pos) or ''
-						local surfix = string.sub(self._text,self._pos+1) or ''
-						self._text = prefix..str..surfix
-						self._pos = self._pos + string.len(str)
-						self:reCorsorPos()
+						self:insertString(str)
 					elseif event=='backspace' and self._pos>0 then
-						self._isSeekbar = nil
-						local prefix = string.sub(self._text,0,self._pos-1) or ''
-						local surfix = string.sub(self._text,self._pos+1) or ''					
-						self._text = prefix..surfix
-						if self._pos > 0 then
-							self._pos = self._pos - 1
+						if self._select and self._select.start and self._select.en then
+							self:deleteSelect()
+						else
+							self._isSeekbar = nil
+							local prefix = string.sub(self._text,0,self._pos-1) or ''
+							local surfix = string.sub(self._text,self._pos+1) or ''					
+							self._text = prefix..surfix
+							if self._pos > 0 then
+								self._pos = self._pos - 1
+							end
 						end
 						self:reCorsorPos()
 					elseif event=='delete' then	
-						self._isSeekbar = nil
-						local prefix = string.sub(self._text,0,self._pos) or ''
-						local surfix = string.sub(self._text,self._pos+2) or ''					
-						self._text = prefix..surfix
+						if self._select and self._select.start and self._select.en then
+							self:deleteSelect()
+						else
+							self._isSeekbar = nil
+							local prefix = string.sub(self._text,0,self._pos) or ''
+							local surfix = string.sub(self._text,self._pos+2) or ''					
+							self._text = prefix..surfix
+						end
 						self:reCorsorPos()					
 					elseif event=='left' then
 						self:keyboardSelectBegin()
@@ -231,15 +272,34 @@ return {
 					elseif event=='home' then
 						self:keyboardSelectBegin()
 						self._pos = 0
-						self._select = nil
 						self:reCorsorPos()
 						self:keyboardSelectEnd()
 					elseif event=='end' then
 						self:keyboardSelectBegin()
-						self._select = nil
 						self._pos = string.len(self._text)
 						self:reCorsorPos()	
-						self:keyboardSelectEnd()					
+						self:keyboardSelectEnd()
+					elseif event=='keydown' then
+						local isCtrl = isCtrlDown()
+						if self._select and self._select.en and isCtrl then
+							if str==sc.C then
+								self:copySelect()
+							elseif str==sc.X then
+								self:copySelect()
+								self:deleteSelect()
+								self:reCorsorPos()
+							elseif str==sc.A then
+								self:selectAll()
+							end
+						elseif isCtrl and str==sc.V then
+							if self._select and self._select.en then
+								self:deleteSelect()
+								self:reCorsorPos()
+							end
+							self:insertString(clipbaordPast())
+						elseif isCtrl and str==sc.A then
+							self:selectAll()
+						end
 					end
 				end)
 			elseif rr and rr <= self._seekRadius*self._seekRadius then

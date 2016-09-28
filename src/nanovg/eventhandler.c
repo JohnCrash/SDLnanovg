@@ -100,10 +100,12 @@ _continue:
 					key = "tab";
 					break;
 				}
+				lua_callKeyboardFunc2("keydown",event.key.keysym.scancode);
 				if (key) lua_callKeyboardFunc(key,NULL);
 			}
 			break;
 		case SDL_KEYUP:
+			lua_callKeyboardFunc2("keyup", event.key.keysym.scancode);
 			break;
 		}
 		if (!addSDLEvent(&event))
