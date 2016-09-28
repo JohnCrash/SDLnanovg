@@ -6,6 +6,11 @@
 #include "eventhandler.h"
 #include "luaext.h"
 #include "ui.h"
+/**
+* \addtogroup LuaEXT lua global
+* \brief lua全局函数
+* @{
+*/
 
 static lua_State * _state = NULL;
 static int _callFromLua = 0;
@@ -609,8 +614,23 @@ static int lua_enableSoftkeyboard(lua_State *L)
  */
 int lua_keyboardState(lua_State *L)
 {
-	int len;
+	int len,sk,i = 1;
 	Uint8 * kbs = SDL_GetKeyboardState(&len);
+	lua_newtable(L);
+	lua_pushnil(L);
+	while (lua_next(L, 1) != 0){
+		if (lua_isnumber(L, -1)){
+			sk = (int)lua_tonumber(L, -1);
+			if (sk >= 0 && sk < len && kbs[sk] ){
+				lua_pushinteger(L, 1);
+			}
+			else{
+				lua_pushinteger(L, 0);
+			}
+			lua_rawseti(L,-4,i++);
+		}
+		lua_pop(L, 1);
+	}
 	return 1;
 }
 

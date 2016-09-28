@@ -1,8 +1,19 @@
 local vg = require "vg"
 local ui = require "ui"
+local sc = require "scancode"
 
 local function ptInRect(x,y,w,h)
 	return x > 0 and x <= w and y > 0 and y <= h
+end
+
+local function isShiftDown()
+	local ks = keyboardState{sc.LSHIFT,sc.RSHIFT}
+	return ks and (ks[1]==1 or ks[2]==1)
+end
+
+local function isCtrlDown()
+	local ks = keyboardState{sc.LCTRL,sc.RCTRL}
+	return ks and (ks[1]==1 or ks[2]==1)
 end
 
 return {
@@ -129,6 +140,34 @@ return {
 			end	
 		end
 	end,
+	keyboardSelectBegin=function(self)
+		if isShiftDown() then
+			if self._select then
+				self._select.corsorEnd = self._cursorPos
+				self._select.en = self._pos			
+			else
+				self._select = {}
+				self._select.start = self._pos
+				self._select.corsorStart = self._cursorPos
+			end			
+		else
+			self._select = nil
+		end	
+	end,
+	keyboardSelectEnd=function(self)
+		if isShiftDown() then
+			if self._select then
+				self._select.corsorEnd = self._cursorPos
+				self._select.en = self._pos			
+			else
+				self._select = {}
+				self._select.start = self._pos
+				self._select.corsorStart = self._cursorPos
+			end			
+		else
+			self._select = nil
+		end
+	end,
 	onEvent=function(self,event)
 		if event.type == ui.EVENT_TOUCHDOWN then
 			local w,h = self:getSize()
@@ -176,25 +215,31 @@ return {
 						self._text = prefix..surfix
 						self:reCorsorPos()					
 					elseif event=='left' then
+						self:keyboardSelectBegin()
 						if self._pos > 0 then
 							self._pos = self._pos - 1
 						end
-						self._select = nil
 						self:reCorsorPos()
+						self:keyboardSelectEnd()
 					elseif event=='right' then
+						self:keyboardSelectBegin()
 						if self._pos < string.len(self._text) then
 							self._pos = self._pos + 1
-						end
-						self._select = nil						
+						end					
 						self:reCorsorPos()
+						self:keyboardSelectEnd()
 					elseif event=='home' then
+						self:keyboardSelectBegin()
 						self._pos = 0
 						self._select = nil
 						self:reCorsorPos()
+						self:keyboardSelectEnd()
 					elseif event=='end' then
+						self:keyboardSelectBegin()
 						self._select = nil
 						self._pos = string.len(self._text)
-						self:reCorsorPos()					
+						self:reCorsorPos()	
+						self:keyboardSelectEnd()					
 					end
 				end)
 			elseif rr and rr <= self._seekRadius*self._seekRadius then
