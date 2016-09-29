@@ -42,7 +42,7 @@ return {
 		self._undo = {}
 		self._undoCount = 10
 		self._doubleClickDaley = 0.3
-		self._wordStrip = ' \t'
+		self._wordStrip = {[' ']=1,['\t']=1}
 		self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_BOTTOM
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 	end,
@@ -215,7 +215,7 @@ return {
 		local prefix = string.sub(self._text,1,start)
 		local surfix = string.sub(self._text,en+1)
 		--print(string.format("delete '%s',%d,%d",self._text,start,en))
-		--print(string.format("prefix:%s  surfix:%s",prefix,surfix))
+		--print(string.format("prefix:'%s'  surfix:'%s'",prefix,surfix))
 		self._text = prefix..surfix
 		self._pos = start
 		self._select = nil
@@ -223,8 +223,9 @@ return {
 	copySelect=function(self)
 		local start = math.min(self._select.start,self._select.en)
 		local en = math.max(self._select.start,self._select.en)
-		local text = string.sub(self._text,start,en)
-		--print("copy : "..text)
+		local text = string.sub(self._text,start+1,en)
+		--print(string.format("copySelect '%s',%d,%d",self._text,start,en))
+		--print(string.format("copy '%s'",text))
 		clipbaordCopy(text)
 	end,
 	insertString=function(self,str)
@@ -246,20 +247,20 @@ return {
 		self._select.corsorEnd = self._textWidth-self._cornerRadius
 		self._pos = self._select.en
 		self._cursorPos = self._select.corsorEnd
-		print(string.format('%d , %d',self._select.corsorStart,self._select.corsorEnd))
+		--print(string.format('%d , %d',self._select.corsorStart,self._select.corsorEnd))
 		self:reCorsorPos()
 	end,
 	selectPositionWord=function(self)
-		local head = 1
+		local head = 0
 		local tail = string.len(self._text)
 		for i=self._pos,0,-1 do
-			if string.find(self._wordStrip,string.sub(self._text,i,i)) then
+			if self._wordStrip[string.sub(self._text,i,i)] then
 				head = i
 				break
 			end
 		end
 		for i=self._pos,string.len(self._text) do
-			if string.find(self._wordStrip,string.sub(self._text,i,i)) then
+			if self._wordStrip[string.sub(self._text,i,i)] then
 				tail = i-1
 				break
 			end
@@ -279,6 +280,18 @@ return {
 				self._select.corsorEnd = v.maxx
 				break
 			end
+		end
+		--确保选择区域在屏幕中
+		local w,h = self:getSize()
+		--print(string.format('size: %d , %d',w,h))
+		--print(string.format('start:%d,end:%d,horz:%d',self._select.corsorStart,self._select.corsorEnd,self._horzPos))
+		if (self._select.corsorStart+self._horzPos)>= self._cornerRadius and 
+			(self._select.corsorEnd+self._horzPos)<=(w-self._cornerRadius) then
+			return
+		elseif self._select.corsorStart+self._horzPos<self._cornerRadius then
+			self._horzPos = self._fontSize + self._cornerRadius - self._select.corsorStart
+		elseif self._select.corsorEnd+self._horzPos>w-self._cornerRadius then
+			self._horzPos = w-self._cornerRadius - self._select.corsorEnd-self._fontSize
 		end
 	end,
 	openIme=function(self)
@@ -438,7 +451,7 @@ return {
 			vg.fillColor(self._textColor)
 			vg.textAlign(self._nanoAlign)
 			vg.textLetterSpacing(self._fontSpace)
-			vg.textBox(self._horzPos+self._cornerRadius,h-self._cornerRadius,self._breakWidth,self._text)
+			vg.text(self._horzPos+self._cornerRadius,h-self._cornerRadius,self._text)
 		end
 		if self._forcs and self._select and self._select.en then
 			vg.beginPath()
@@ -450,19 +463,18 @@ return {
 			--self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius))
 			--print('corsorEnd : '..self._select.corsorEnd)
 		end
-		vg.restore()
-		
 		self._flash = self._flash + dt
 		if self._flash > 2*self._cursorFlash then
 			self._flash = 0
 		end
-		if self._forcs and self._flash < self._cursorFlash then
+		vg.restore()
+		local px = self._horzPos+self._cursorPos
+		if self._forcs and self._flash < self._cursorFlash and px>0 and px<w then
 			vg.beginPath()
-			vg.rect(self._horzPos+self._cursorPos,self._cornerRadius,1,h-2*self._cornerRadius)
+			vg.rect(px,self._cornerRadius,1,h-2*self._cornerRadius)
 			vg.fillColor(self._colorBG)
 			vg.fill()
-		end
-		
+		end			
 		if self._isSeekbar and not (self._select and self._select.en) then
 			self._seekBarX = self._horzPos+self._cursorPos
 			self._seekBarY = self._cornerRadius+h-2*self._cornerRadius+self._seekRadius
