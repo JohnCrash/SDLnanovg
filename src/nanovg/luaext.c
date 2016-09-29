@@ -705,6 +705,42 @@ int lua_getPlatform(lua_State *L)
 	lua_pushstring(L, platform);
 	return 1;
 }
+
+/**
+ * \brief 返回utf8字符串的长度
+ * \param s utf8字符串
+ * \return 返回字符串长度
+ */
+int lua_utf8Length(lua_State *L)
+{
+	const char * str = luaL_checkstring(L, 1);
+	lua_pushinteger(L, cc_utf8_strlen(str,-1));
+	return 1;
+}
+
+/**
+ * \brief 返回一个表
+ * \param s utf8字符串
+ * \return 返回一个索引表
+ * \node 索引表的第一个值表示第一个字符的起始位置，第二个值表示第二个字符的起始位置。
+ */
+int lua_utf8Index(lua_State *L)
+{
+	char * p = luaL_checkstring(L, 1);
+	char * pp;
+	int i = 1;
+	int index = 1;
+	lua_newtable(L);
+	while (*p)
+	{
+		pp = p;
+		p = cc_utf8_next(pp);
+		lua_pushinteger(L, index);
+		lua_rawseti(L, -2, i++);
+		index += (p - pp);
+	}
+	return 1;
+}
 /*
  * 初始Lua环境
  */
@@ -724,6 +760,9 @@ int initLua()
 		{ "clipbaordPast", lua_clipbaordPast },
 		{ "keyboardState", lua_keyboardState },
 		{ "getPlatform" ,lua_getPlatform },
+		{ "utf8Length", lua_utf8Length },
+		{ "utf8Index", lua_utf8Index },
+		{ "getPlatform", lua_getPlatform },
 		{ "isDebug", lua_isDebug },
 		{ NULL, NULL }
 	};

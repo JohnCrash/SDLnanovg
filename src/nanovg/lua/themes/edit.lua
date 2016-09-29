@@ -16,6 +16,26 @@ local function isCtrlDown()
 	return ks and (ks[1]==1 or ks[2]==1)
 end
 
+local function utf8Sub(str,s,e)
+	local t = utf8Index(str)
+	if #t==0 then
+		print('utf8Sub return empty string')
+		return ''
+	end
+	print(string.format("'%s',%d,%d",str or '',s or -1,e or -1))
+	for i,v in pairs(t) do
+		print(string.format("[%d]:%d",i,v))
+	end
+	if s==0 then s=1 end
+	if e and e < #t then
+		print("start:"..tostring(t[s]).." end:"..tostring(t[e+1]))
+		return string.sub(str,t[s],t[e+1]-1)
+	else
+		print("start:"..tostring(t[s]))
+		return string.sub(str,t[s])
+	end
+end
+
 return {
 	onInit=function(self,themes)
 		self._color = themes.color
@@ -25,24 +45,23 @@ return {
 		self._cornerRadius = 3
 		self._forcs = nil
 		self._cursorPos = self._cornerRadius
-		self._pos = 0
+		self._pos = 0 --光标位置
 		self._cursorFlash = 0.5
 		self._flash = 0
-		self._text = ""
-		self._fontSpace = 0
+		self._text = "" --编辑器中的文本
+		self._fontSpace = 0 --字符间距
 		self._fontSize = 18
 		self._textColor = vg.rgba(0,0,0,255)
 		self._font = 'default'
-		self._breakWidth = 1280
-		self._horzPos = 0
+		self._horzPos = 0 --文字相对开头的x偏移量
 		self._isSeekbar = nil
 		self._seekRadius = 12
 		self._seekBarX = 0
 		self._seekBarY = 0
 		self._undo = {}
-		self._undoCount = 10
+		self._undoCount = 10 --最多可以进行多少次undo
 		self._doubleClickDaley = 0.3
-		self._wordStrip = {[' ']=1,['\t']=1}
+		self._wordStrip = {[' ']=1,['\t']=1} --双击选择时用于分隔符
 		self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_BOTTOM
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 	end,
@@ -212,8 +231,8 @@ return {
 	deleteSelect=function(self)
 		local start = math.min(self._select.start,self._select.en)
 		local en = math.max(self._select.start,self._select.en)
-		local prefix = string.sub(self._text,1,start)
-		local surfix = string.sub(self._text,en+1)
+		local prefix = utf8Sub(self._text,1,start)
+		local surfix = utf8Sub(self._text,en+1)
 		--print(string.format("delete '%s',%d,%d",self._text,start,en))
 		--print(string.format("prefix:'%s'  surfix:'%s'",prefix,surfix))
 		self._text = prefix..surfix
@@ -223,7 +242,7 @@ return {
 	copySelect=function(self)
 		local start = math.min(self._select.start,self._select.en)
 		local en = math.max(self._select.start,self._select.en)
-		local text = string.sub(self._text,start+1,en)
+		local text = utf8Sub(self._text,start+1,en)
 		--print(string.format("copySelect '%s',%d,%d",self._text,start,en))
 		--print(string.format("copy '%s'",text))
 		clipbaordCopy(text)
@@ -233,17 +252,19 @@ return {
 			self:deleteSelect()
 		end
 		self._isSeekbar = nil
-		local prefix = string.sub(self._text,0,self._pos) or ''
-		local surfix = string.sub(self._text,self._pos+1) or ''
+		print('_text :'..self._text)
+		print('_pos :'..self._pos)
+		local prefix = utf8Sub(self._text,0,self._pos) or ''
+		local surfix = utf8Sub(self._text,self._pos+1) or ''
 		self._text = prefix..str..surfix
-		self._pos = self._pos + string.len(str)
+		self._pos = self._pos + utf8Length(str)
 		self:reCorsorPos()	
 	end,
 	selectAll=function(self)
 		self._select = {}
 		self._select.start = 0
 		self._select.corsorStart = self._cornerRadius
-		self._select.en = string.len(self._text)
+		self._select.en = utf8Length(self._text)
 		self._select.corsorEnd = self._textWidth-self._cornerRadius
 		self._pos = self._select.en
 		self._cursorPos = self._select.corsorEnd
@@ -252,15 +273,15 @@ return {
 	end,
 	selectPositionWord=function(self)
 		local head = 0
-		local tail = string.len(self._text)
+		local tail = utf8Length(self._text)
 		for i=self._pos,0,-1 do
-			if self._wordStrip[string.sub(self._text,i,i)] then
+			if self._wordStrip[utf8Sub(self._text,i,i)] then
 				head = i
 				break
 			end
 		end
-		for i=self._pos,string.len(self._text) do
-			if self._wordStrip[string.sub(self._text,i,i)] then
+		for i=self._pos,utf8Length(self._text) do
+			if self._wordStrip[utf8Sub(self._text,i,i)] then
 				tail = i-1
 				break
 			end
@@ -305,6 +326,7 @@ return {
 				elseif event=='insert' and str then
 					self:pushUndo()
 					self:insertString(str)
+					self:NotifTextChangedEvent()
 				elseif event=='backspace' then
 					if self._select and self._select.start and self._select.en then
 						self:pushUndo()
@@ -312,14 +334,15 @@ return {
 					elseif self._pos > 0 then
 						self:pushUndo()
 						self._isSeekbar = nil
-						local prefix = string.sub(self._text,0,self._pos-1) or ''
-						local surfix = string.sub(self._text,self._pos+1) or ''					
+						local prefix = utf8Sub(self._text,0,self._pos-1) or ''
+						local surfix = utf8Sub(self._text,self._pos+1) or ''					
 						self._text = prefix..surfix
 						if self._pos > 0 then
 							self._pos = self._pos - 1
 						end
 					end
 					self:reCorsorPos()
+					self:NotifTextChangedEvent()
 				elseif event=='delete' then	
 					if self._select and self._select.start and self._select.en then
 						self:pushUndo()
@@ -327,11 +350,12 @@ return {
 					else
 						self:pushUndo()
 						self._isSeekbar = nil
-						local prefix = string.sub(self._text,0,self._pos) or ''
-						local surfix = string.sub(self._text,self._pos+2) or ''					
+						local prefix = utf8Sub(self._text,0,self._pos) or ''
+						local surfix = utf8Sub(self._text,self._pos+2) or ''					
 						self._text = prefix..surfix
 					end
-					self:reCorsorPos()					
+					self:reCorsorPos()
+					self:NotifTextChangedEvent()
 				elseif event=='left' then
 					self:keyboardSelectBegin()
 					if self._pos > 0 then
@@ -341,7 +365,7 @@ return {
 					self:keyboardSelectEnd()
 				elseif event=='right' then
 					self:keyboardSelectBegin()
-					if self._pos < string.len(self._text) then
+					if self._pos < utf8Length(self._text) then
 						self._pos = self._pos + 1
 					end					
 					self:reCorsorPos()
@@ -353,7 +377,7 @@ return {
 					self:keyboardSelectEnd()
 				elseif event=='end' then
 					self:keyboardSelectBegin()
-					self._pos = string.len(self._text)
+					self._pos = utf8Length(self._text)
 					self:reCorsorPos()	
 					self:keyboardSelectEnd()
 				elseif event=='keydown' and isCtrlDown() then
@@ -364,6 +388,7 @@ return {
 						self:copySelect()
 						self:deleteSelect()
 						self:reCorsorPos()
+						self:NotifTextChangedEvent()
 					elseif str==sc.V then
 						self:pushUndo()
 						if self._select and self._select.en then
@@ -371,11 +396,22 @@ return {
 							self:reCorsorPos()
 						end
 						self:insertString(clipbaordPast())
+						local txt = clipbaordPast()
+						print( string.format("'%s' utf8_len:%d %d",txt,utf8Length(txt),string.len(txt) ))
+						local t = utf8Index(txt)
+						for i,v in pairs(t) do
+							print(string.format("[%d] %d",i,v))
+						end
+						self:NotifTextChangedEvent()
 					elseif str==sc.A then
 						self:selectAll()
+						self:NotifTextChangedEvent()
 					elseif str==sc.Z then
 						self:popUndo()
+						self:NotifTextChangedEvent()
 					end
+				elseif event=='keydown' then
+					self:NotifPressAction(str)
 				end
 			end)
 		end	
@@ -433,6 +469,16 @@ return {
 				self._flash = 0
 				self:ptCorsorPos(event.x,event.y)
 			end
+		end
+	end,
+	NotifTextChangedEvent=function(self)
+		if self.onTextChanged then
+			self.onTextChanged(self._text)
+		end
+	end,
+	NotifPressAction=function(self,key)
+		if self.onPressAction then
+			self.onPressAction(key)
 		end
 	end,
 	onDraw=function(self,dt)

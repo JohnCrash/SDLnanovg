@@ -7,7 +7,8 @@ return {
 	colorBG = vg.rgba(0,128,168,255),
 	
 	onInit=function()
-		vg.createFont("default","fonts/Roboto-Regular.ttf")
+		--vg.createFont("default","fonts/Roboto-Regular.ttf")
+		vg.createFont("default","C:/Windows/Fonts/simfang.ttf")
 		vg.createFont("default-bold","fonts/Roboto-Bold.ttf")	
 	end,
 	window = require "themes/window",
