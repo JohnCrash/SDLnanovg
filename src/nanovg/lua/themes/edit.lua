@@ -40,12 +40,42 @@ return {
 		self._seekBarX = 0
 		self._seekBarY = 0
 		self._undo = {}
+		self._undoCount = 10
+		self._doubleClickDaley = 0.3
+		self._wordStrip = ' \t'
 		self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_BOTTOM
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 	end,
+	currentState=function(self)
+		return {
+			_text = self._text,
+			_horzPos = self._horzPos,
+			_pos = self._pos,
+			_cursorPos = self._cursorPos,
+		}
+	end,
+	restoreState=function(self,state)
+		self._select = nil
+		self._isSeekbar = nil
+		self._text = state._text
+		self._horzPos = state._horzPos
+		self._pos = state._pos
+		self._cursorPos = state._cursorPos
+	end,
 	pushUndo=function(self)
+		--简单后退一步
+		table.insert(self._undo,self:currentState())
+		if #self._undo > self._undoCount then
+			for i=1,#self._undo-self._undoCount do
+				table.remove(self._undo,1)
+			end
+		end
 	end,
 	popUndo=function(self)
+		if #self._undo > 0 then
+			self:restoreState(self._undo[#self._undo])
+			table.remove(self._undo,#self._undo)
+		end
 	end,
 	onRelease=function(self)
 	end,
@@ -73,7 +103,7 @@ return {
 				if x <= v.minx then
 					self._pos = 0
 					self._cursorPos = v.minx
-					self._textWidth = 0
+					self._textWidth = t[#t].maxx+t[1].minx
 					self._horzPos = 0
 					self:relayout(true)
 					return
@@ -100,6 +130,7 @@ return {
 		end
 		self:relayout(true)
 	end,
+	--根据_pos计算文本的宽度_textWidth和光标位置_cursorPos
 	reCorsorPos=function(self)
 		local w,h = self:getSize()
 		self._fontSize = h - 2*self._cornerRadius
@@ -110,9 +141,11 @@ return {
 		local last,first
 		if not t or self._pos == 0 then
 			self._cursorPos = self._cornerRadius
-			self._textWidth = 0
+			if t then
+				self._textWidth = t[#t].maxx+t[1].minx
+			end
 			self:relayout()
-			return
+			return t
 		end
 		for i,v in pairs(t) do
 			if self._pos == v.pos then
@@ -120,10 +153,12 @@ return {
 				self._cursorPos = v.maxx
 				self._textWidth = t[#t].maxx+t[1].minx
 				self:relayout()
-				return
+				return t
 			end
 		end
+		return t
 	end,
+	--将光标位置始终保持在编辑范围内
 	relayout=function(self,isdrop)
 		local w,h = self:getSize()
 		local x = self._cursorPos
@@ -211,6 +246,126 @@ return {
 		self._select.corsorEnd = self._textWidth-self._cornerRadius
 		self._pos = self._select.en
 		self._cursorPos = self._select.corsorEnd
+		print(string.format('%d , %d',self._select.corsorStart,self._select.corsorEnd))
+		self:reCorsorPos()
+	end,
+	selectPositionWord=function(self)
+		local head = 1
+		local tail = string.len(self._text)
+		for i=self._pos,0,-1 do
+			if string.find(self._wordStrip,string.sub(self._text,i,i)) then
+				head = i
+				break
+			end
+		end
+		for i=self._pos,string.len(self._text) do
+			if string.find(self._wordStrip,string.sub(self._text,i,i)) then
+				tail = i-1
+				break
+			end
+		end		
+		--print(string.format("'%s' %d,%d horzPos:%d",self._text,head,tail,self._horzPos))
+		if head >= tail then return end
+		self._select = {}
+		self._select.start = head
+		self._select.en = tail
+		self._pos = head
+		local t = self:reCorsorPos()
+		--print('horzPos:'..self._horzPos)
+		self._select.corsorStart = self._cursorPos
+		self._select.corsorEnd = self._select.corsorStart
+		for i,v in pairs(t) do
+			if tail == v.pos then
+				self._select.corsorEnd = v.maxx
+				break
+			end
+		end
+	end,
+	openIme=function(self)
+		if not self._isIME then
+			softKeyboard(true,0,function(event,str)
+				self._flash = 0
+				if event=='attach' then
+					self._isIME = 1
+				elseif event=='detach' then
+					self._isIME = nil
+				elseif event=='insert' and str then
+					self:pushUndo()
+					self:insertString(str)
+				elseif event=='backspace' then
+					if self._select and self._select.start and self._select.en then
+						self:pushUndo()
+						self:deleteSelect()
+					elseif self._pos > 0 then
+						self:pushUndo()
+						self._isSeekbar = nil
+						local prefix = string.sub(self._text,0,self._pos-1) or ''
+						local surfix = string.sub(self._text,self._pos+1) or ''					
+						self._text = prefix..surfix
+						if self._pos > 0 then
+							self._pos = self._pos - 1
+						end
+					end
+					self:reCorsorPos()
+				elseif event=='delete' then	
+					if self._select and self._select.start and self._select.en then
+						self:pushUndo()
+						self:deleteSelect()
+					else
+						self:pushUndo()
+						self._isSeekbar = nil
+						local prefix = string.sub(self._text,0,self._pos) or ''
+						local surfix = string.sub(self._text,self._pos+2) or ''					
+						self._text = prefix..surfix
+					end
+					self:reCorsorPos()					
+				elseif event=='left' then
+					self:keyboardSelectBegin()
+					if self._pos > 0 then
+						self._pos = self._pos - 1
+					end
+					self:reCorsorPos()
+					self:keyboardSelectEnd()
+				elseif event=='right' then
+					self:keyboardSelectBegin()
+					if self._pos < string.len(self._text) then
+						self._pos = self._pos + 1
+					end					
+					self:reCorsorPos()
+					self:keyboardSelectEnd()
+				elseif event=='home' then
+					self:keyboardSelectBegin()
+					self._pos = 0
+					self:reCorsorPos()
+					self:keyboardSelectEnd()
+				elseif event=='end' then
+					self:keyboardSelectBegin()
+					self._pos = string.len(self._text)
+					self:reCorsorPos()	
+					self:keyboardSelectEnd()
+				elseif event=='keydown' and isCtrlDown() then
+					if str==sc.C and self._select and self._select.en then
+						self:copySelect()
+					elseif str==sc.X and self._select and self._select.en then
+						self:pushUndo()
+						self:copySelect()
+						self:deleteSelect()
+						self:reCorsorPos()
+					elseif str==sc.V then
+						self:pushUndo()
+						if self._select and self._select.en then
+							self:deleteSelect()
+							self:reCorsorPos()
+						end
+						self:insertString(clipbaordPast())
+					elseif str==sc.A then
+						self:selectAll()
+					elseif str==sc.Z then
+						self:popUndo()
+					end
+				end
+			end)
+		end	
 	end,
 	onEvent=function(self,event)
 		if event.type == ui.EVENT_TOUCHDOWN then
@@ -230,86 +385,22 @@ return {
 				self._select = {}
 				self._select.start = self._pos
 				self._select.corsorStart = self._cursorPos
-				softKeyboard(true,0,function(event,str)
-					self._flash = 0
-					if event=='attach' then
-						print('attach:'..w)
-					elseif event=='detach' then
-						print('detach:'..w)
-					elseif event=='insert' and str then
-						self:insertString(str)
-					elseif event=='backspace' then
-						if self._select and self._select.start and self._select.en then
-							self:deleteSelect()
-						elseif self._pos > 0 then
-							self._isSeekbar = nil
-							local prefix = string.sub(self._text,0,self._pos-1) or ''
-							local surfix = string.sub(self._text,self._pos+1) or ''					
-							self._text = prefix..surfix
-							if self._pos > 0 then
-								self._pos = self._pos - 1
-							end
-						end
-						self:reCorsorPos()
-					elseif event=='delete' then	
-						if self._select and self._select.start and self._select.en then
-							self:deleteSelect()
-						else
-							self._isSeekbar = nil
-							local prefix = string.sub(self._text,0,self._pos) or ''
-							local surfix = string.sub(self._text,self._pos+2) or ''					
-							self._text = prefix..surfix
-						end
-						self:reCorsorPos()					
-					elseif event=='left' then
-						self:keyboardSelectBegin()
-						if self._pos > 0 then
-							self._pos = self._pos - 1
-						end
-						self:reCorsorPos()
-						self:keyboardSelectEnd()
-					elseif event=='right' then
-						self:keyboardSelectBegin()
-						if self._pos < string.len(self._text) then
-							self._pos = self._pos + 1
-						end					
-						self:reCorsorPos()
-						self:keyboardSelectEnd()
-					elseif event=='home' then
-						self:keyboardSelectBegin()
-						self._pos = 0
-						self:reCorsorPos()
-						self:keyboardSelectEnd()
-					elseif event=='end' then
-						self:keyboardSelectBegin()
-						self._pos = string.len(self._text)
-						self:reCorsorPos()	
-						self:keyboardSelectEnd()
-					elseif event=='keydown' and isCtrlDown() then
-						if str==sc.C and self._select and self._select.en then
-							self:copySelect()
-						elseif str==sc.X and self._select and self._select.en then
-							self:copySelect()
-							self:deleteSelect()
-							self:reCorsorPos()
-						elseif str==sc.V then
-							if self._select and self._select.en then
-								self:deleteSelect()
-								self:reCorsorPos()
-							end
-							self:insertString(clipbaordPast())
-						elseif str==sc.A then
-							self:selectAll()
-						end
-					end
-				end)
+				if self._prevClickTime and (event.time-self._prevClickTime)/1000<self._doubleClickDaley then
+					--双击选择段
+					self:selectPositionWord()
+					self._seekDown = nil
+				end
+				self._prevClickTime = event.time
+				self:openIme()
 			elseif rr and rr <= self._seekRadius*self._seekRadius then
 				self._seekDown = 2
 			elseif not ptInRect(event.x,event.y,w,h) then
 				self._forcs =  nil
 				self._isSeekbar = nil
 				self:disableEvent(ui.EVENT_UNBOUNDED)
-				softKeyboard(false,0)
+				if self._isIME then
+					softKeyboard(false,0)
+				end
 			end
 		elseif event.type == ui.EVENT_TOUCHUP then
 			if self._seekDown then
@@ -355,6 +446,9 @@ return {
 			self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius)
 			vg.fillColor(self._colorSelect)
 			vg.fill()
+			--print(string.format('select %d,%d,%d,%d',self._horzPos+self._select.corsorStart,self._cornerRadius,
+			--self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius))
+			--print('corsorEnd : '..self._select.corsorEnd)
 		end
 		vg.restore()
 		

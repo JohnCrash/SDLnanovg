@@ -553,6 +553,11 @@ void lua_callKeyboardFunc2(const char *event, int scancode)
 
 static int closeTextInput()
 {
+	lua_callKeyboardFunc("detach", NULL);
+	if (_inputRef != LUA_REFNIL){
+		lua_unref(_state, _inputRef);
+		_inputRef = LUA_REFNIL;
+	}
 	_isTextInputOpen = 0;
 	SDL_StopTextInput();
 	_cSchedule = NULL;
