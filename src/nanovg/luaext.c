@@ -723,6 +723,7 @@ int lua_utf8Length(lua_State *L)
  * \param s utf8字符串
  * \return 返回一个索引表
  * \node 索引表的第一个值表示第一个字符的起始位置，第二个值表示第二个字符的起始位置。
+ *	（第一个字符位置为1）
  */
 int lua_utf8Index(lua_State *L)
 {

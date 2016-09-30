@@ -16,24 +16,46 @@ local function isCtrlDown()
 	return ks and (ks[1]==1 or ks[2]==1)
 end
 
+local function print_caller()
+	local caller = debug.getinfo(3,'nSl')
+	if caller then
+		print('	call from '..caller.source..':'..caller.currentline )
+	else
+		print("ERROR: log_caller debug.getinfo return nil.")
+	end
+end
+
+local function print_utf8index(str)
+	local t = utf8Index(str)
+	local tt = {}
+	table.insert(tt,'|')
+	for i,v in pairs(t) do
+		table.insert(tt,v)
+		table.insert(tt,'|')
+	end
+	print(table.concat(tt))
+end
+
 local function utf8Sub(str,s,e)
 	local t = utf8Index(str)
 	if #t==0 then
-		print('utf8Sub return empty string')
 		return ''
 	end
-	print(string.format("'%s',%d,%d",str or '',s or -1,e or -1))
-	for i,v in pairs(t) do
-		print(string.format("[%d]:%d",i,v))
-	end
-	if s==0 then s=1 end
-	if e and e < #t then
-		print("start:"..tostring(t[s]).." end:"..tostring(t[e+1]))
+	--print_caller()
+	--print(string.format("'%s',%s,%s",str,tostring(s),tostring(e)))
+	s = s or -1
+	e = e or -1
+	if s==0 and e~=0 then s=1 end
+	--print(string.format("'%s',%d,%d",str,s,e))
+	--print_utf8index(str)
+	if t[s] and t[e+1] then
+	--	print("start:"..tostring(t[s]).." end:"..tostring(t[e+1]))
 		return string.sub(str,t[s],t[e+1]-1)
-	else
-		print("start:"..tostring(t[s]))
+	elseif s and t[s] then
+	--	print("start:"..tostring(t[s]))
 		return string.sub(str,t[s])
 	end
+	return ''
 end
 
 return {
@@ -45,7 +67,7 @@ return {
 		self._cornerRadius = 3
 		self._forcs = nil
 		self._cursorPos = self._cornerRadius
-		self._pos = 0 --光标位置
+		self._pos = 0 --光标位置，以字符为单位的，汉字算一个单位
 		self._cursorFlash = 0.5
 		self._flash = 0
 		self._text = "" --编辑器中的文本
@@ -106,7 +128,7 @@ return {
 		vg.fontSize(self._fontSize)
 		vg.textLetterSpacing(self._fontSpace)
 		local t = vg.textGlyphPositions(self._cornerRadius,h-self._cornerRadius,self._text)
-		local last,first
+		local last,first,lasti
 		if not t then 
 			self._pos = 0
 			self._cursorPos = self._cornerRadius
@@ -131,19 +153,20 @@ return {
 			if x >=v.minx and x <= v.maxx then
 				if x < (v.maxx+v.minx)/2 then
 					self._cursorPos = v.minx
-					self._pos = v.pos - 1
+					self._pos = i - 1
 				else
 					self._cursorPos = v.maxx
 					self._textWidth = t[#t].maxx+t[1].minx
-					self._pos = v.pos
+					self._pos = i
 				end
 				self:relayout(true)
 				return
 			end
 			last = v
+			lasti = i
 		end
 		if last then
-			self._pos = last.pos
+			self._pos = lasti
 			self._cursorPos = last.maxx
 			self._textWidth = t[#t].maxx+t[1].minx
 		end
@@ -167,7 +190,7 @@ return {
 			return t
 		end
 		for i,v in pairs(t) do
-			if self._pos == v.pos then
+			if self._pos == i then
 				--print(string.format('%s pos:%d x:%d horzPos:%d',self._text,v.pos,v.maxx,self._horzPos))
 				self._cursorPos = v.maxx
 				self._textWidth = t[#t].maxx+t[1].minx
@@ -252,10 +275,8 @@ return {
 			self:deleteSelect()
 		end
 		self._isSeekbar = nil
-		print('_text :'..self._text)
-		print('_pos :'..self._pos)
-		local prefix = utf8Sub(self._text,0,self._pos) or ''
-		local surfix = utf8Sub(self._text,self._pos+1) or ''
+		local prefix = utf8Sub(self._text,0,self._pos)
+		local surfix = utf8Sub(self._text,self._pos+1)
 		self._text = prefix..str..surfix
 		self._pos = self._pos + utf8Length(str)
 		self:reCorsorPos()	
@@ -297,7 +318,7 @@ return {
 		self._select.corsorStart = self._cursorPos
 		self._select.corsorEnd = self._select.corsorStart
 		for i,v in pairs(t) do
-			if tail == v.pos then
+			if tail == i then
 				self._select.corsorEnd = v.maxx
 				break
 			end
@@ -310,9 +331,9 @@ return {
 			(self._select.corsorEnd+self._horzPos)<=(w-self._cornerRadius) then
 			return
 		elseif self._select.corsorStart+self._horzPos<self._cornerRadius then
-			self._horzPos = self._fontSize + self._cornerRadius - self._select.corsorStart
+			self._horzPos = self._cornerRadius - self._select.corsorStart
 		elseif self._select.corsorEnd+self._horzPos>w-self._cornerRadius then
-			self._horzPos = w-self._cornerRadius - self._select.corsorEnd-self._fontSize
+			self._horzPos = w-self._cornerRadius - self._select.corsorEnd
 		end
 	end,
 	openIme=function(self)
@@ -334,8 +355,8 @@ return {
 					elseif self._pos > 0 then
 						self:pushUndo()
 						self._isSeekbar = nil
-						local prefix = utf8Sub(self._text,0,self._pos-1) or ''
-						local surfix = utf8Sub(self._text,self._pos+1) or ''					
+						local prefix = utf8Sub(self._text,0,self._pos-1)
+						local surfix = utf8Sub(self._text,self._pos+1)				
 						self._text = prefix..surfix
 						if self._pos > 0 then
 							self._pos = self._pos - 1
@@ -350,8 +371,8 @@ return {
 					else
 						self:pushUndo()
 						self._isSeekbar = nil
-						local prefix = utf8Sub(self._text,0,self._pos) or ''
-						local surfix = utf8Sub(self._text,self._pos+2) or ''					
+						local prefix = utf8Sub(self._text,0,self._pos)
+						local surfix = utf8Sub(self._text,self._pos+2)					
 						self._text = prefix..surfix
 					end
 					self:reCorsorPos()
@@ -396,12 +417,6 @@ return {
 							self:reCorsorPos()
 						end
 						self:insertString(clipbaordPast())
-						local txt = clipbaordPast()
-						print( string.format("'%s' utf8_len:%d %d",txt,utf8Length(txt),string.len(txt) ))
-						local t = utf8Index(txt)
-						for i,v in pairs(t) do
-							print(string.format("[%d] %d",i,v))
-						end
 						self:NotifTextChangedEvent()
 					elseif str==sc.A then
 						self:selectAll()

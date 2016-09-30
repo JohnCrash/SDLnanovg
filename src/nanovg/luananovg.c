@@ -5,6 +5,7 @@
 #include "nanovg_sdl.h"
 #include "sdlmain.h"
 #include "eventhandler.h"
+#include "utf8.h"
 
 /**
  * \addtogroup VG lua vg
@@ -1083,7 +1084,7 @@ static int lua_textGlyphPositions(lua_State *L)
 	x = (float)luaL_checknumber(L, 1);
 	y = (float)luaL_checknumber(L, 2);
 	string = luaL_checkstring(L, 3);
-	maxPositions = strlen(string);
+	maxPositions = cc_utf8_strlen(string,-1);
 	if (maxPositions > 0){
 		positions = (NVGglyphPosition *)malloc((maxPositions+1)*sizeof(NVGglyphPosition));
 		int npos = nvgTextGlyphPositions(_vg, x, y, string, NULL, positions, maxPositions);
