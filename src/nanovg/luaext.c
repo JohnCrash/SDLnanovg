@@ -565,9 +565,23 @@ static int closeTextInput()
 }
 
 /**
+ * \brief 设置输入栏矩形，用于判断在打开软键盘时向上推高多少
+ * \param x,y,w,h 输入栏矩形
+ */
+static int lua_softKeyboardInputRect(lua_State *L)
+{
+	SDL_Rect rect;
+	rect.x = luaL_checkint(L, 1);
+	rect.y = luaL_checkint(L, 2);
+	rect.w = luaL_checkint(L, 3);
+	rect.h = luaL_checkint(L, 4);
+	SDL_SetTextInputRect(&rect);
+	return 0;
+}
+
+/**
  * \brief 打开或者关闭软键盘
  * \param b true打开软键盘，false关闭软件盘
- * \param h 控件在屏幕上的高度，如果有必要屏幕将向上推起
  * \param func 软键盘处理函数
  * \return 成功返回true,失败返回false
  * \note 软键盘处理函数原型func(event,param),event可以是下面的值
@@ -588,15 +602,14 @@ static int lua_enableSoftkeyboard(lua_State *L)
 {
 	if (lua_isboolean(L, 1)){
 		if(lua_toboolean(L, 1)){
-			int h = luaL_checkinteger(L, 2);
 			/* 通知上一个结束输入 */
 			lua_callKeyboardFunc("detach", NULL);
 			if (_inputRef != LUA_REFNIL){
 				lua_unref(L, _inputRef);
 				_inputRef = LUA_REFNIL;
 			}
-			if (lua_isfunction(L, 3)){
-				lua_pushvalue(L, 3);
+			if (lua_isfunction(L, 2)){
+				lua_pushvalue(L, 2);
 				_inputRef = lua_ref(L, 1);
 			}
 			/* 打开软键盘 */
@@ -757,6 +770,7 @@ int initLua()
 		{ "schedule", lua_schedule },
 		{ "removeSchedule", lua_removeSchedule },
 		{ "softKeyboard",lua_enableSoftkeyboard },
+		{ "softKeyboardInputRect", lua_softKeyboardInputRect },
 		{ "clipbaordCopy", lua_clipbaordCopy },
 		{ "clipbaordPast", lua_clipbaordPast },
 		{ "keyboardState", lua_keyboardState },

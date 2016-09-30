@@ -338,10 +338,11 @@ return {
 	end,
 	openIme=function(self)
 		if not self._isIME then
-			softKeyboard(true,0,function(event,str)
+			softKeyboard(true,function(event,str)
 				self._flash = 0
 				if event=='attach' then
-					self._isIME = 1
+					self:setInputRect()
+					self._isIME = 1					
 				elseif event=='detach' then
 					self._isIME = nil
 				elseif event=='insert' and str then
@@ -496,6 +497,11 @@ return {
 			self.onPressAction(key)
 		end
 	end,
+	setInputRect=function(self)
+		local w,h = self:getSize()
+		local x,y = ui.widgetToRoot(self,0,0)
+		softKeyboardInputRect(x,y,w,h)	
+	end,
 	onDraw=function(self,dt)
 		local w,h = self:getSize()
 		vg.beginPath()
@@ -543,6 +549,6 @@ return {
 			vg.circle(self._seekBarX,self._seekBarY,self._seekRadius)
 			vg.fillColor(self._colorBG)
 			vg.fill()
-		end
+		end		
 	end,
 }

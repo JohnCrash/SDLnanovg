@@ -525,7 +525,7 @@ static int lua_widgetToRoot(lua_State *L)
 	pt[0] = (float)luaL_checknumber(L, 2);
 	pt[1] = (float)luaL_checknumber(L, 3);
 	if (widget){
-		uiWidgetToRoot(widget, pt, 2);
+		uiWidgetToRoot(widget, pt, 1);
 		lua_pushnumber(L, pt[0]);
 		lua_pushnumber(L, pt[1]);
 	}
