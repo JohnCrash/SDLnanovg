@@ -31,7 +31,7 @@ SDL_Event * getSDLEvent(int n)
 }
 
 static int _background = 0;
-
+static int _isediting = 0; //是否处于IME输入状态
 int eventLoop(SDLState *state)
 {
 	SDL_Event event;
@@ -53,6 +53,7 @@ _continue:
 			}
 			else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST){
 				_background = 1;
+				_isediting = 0;
 				lua_EventWindow("background");
 			}
 			else if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED){
@@ -63,13 +64,21 @@ _continue:
 		case SDL_TEXTEDITING:
 		//	printf("EDITING start: %d,'%s' %d\n",
 		//		event.edit.start,event.edit.text,event.edit.length);
+			if (!event.edit.text[0]){
+				_isediting = 0;
+			}
+			else{
+				_isediting = 1;
+			}
+			lua_callKeyboardFunc3("editing", event.edit.text,event.edit.start);
 			break;
 		case SDL_TEXTINPUT:
-		//	printf("TEXTINPUT: %s\n",event.text.text);
+			_isediting = 0;
+		//	printf("TEXTINPUT : %s\n",event.text.text);
 			lua_callKeyboardFunc("insert",event.text.text);
 			break;
 		case SDL_KEYDOWN:
-			{
+			if (!_isediting){
 				const char * key = NULL;
 				switch (event.key.keysym.scancode){
 				case SDL_SCANCODE_HOME:
@@ -100,9 +109,9 @@ _continue:
 					key = "tab";
 					break;
 				}
-				lua_callKeyboardFunc2("keydown",event.key.keysym.scancode);
-				if (key) lua_callKeyboardFunc(key,NULL);
+				if (key) lua_callKeyboardFunc(key, NULL);
 			}
+			lua_callKeyboardFunc2("keydown",event.key.keysym.scancode);
 			break;
 		case SDL_KEYUP:
 			lua_callKeyboardFunc2("keyup", event.key.keysym.scancode);

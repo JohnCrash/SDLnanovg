@@ -281,6 +281,37 @@ return {
 		self._pos = self._pos + utf8Length(str)
 		self:reCorsorPos()	
 	end,
+	editingString=function(self,str,start)
+		if self._select and self._select.start and self._select.en then
+			self:deleteSelect()
+		end
+		self._isSeekbar = nil
+		local prefix = utf8Sub(self._text,0,self._pos)
+		local surfix = utf8Sub(self._text,self._pos+1)
+		self._text = prefix..str..surfix
+		if str=='' then return end
+		self._select = {}
+		self._select.start = utf8Length(prefix)
+		self._select.en = self._select.start+utf8Length(str)
+		self._pos = self._pos + start--utf8Length(str)
+		local t = self:reCorsorPos()
+		if self._select.start==0 then
+			self._select.corsorStart = self._cornerRadius
+		end
+		if self._select.en==0 then
+			self._select.corsorEnd = self._cornerRadius
+		end
+		if t then
+			for i,v in pairs(t) do
+				if self._select.start == i then
+					self._select.corsorStart = v.maxx
+				end
+				if self._select.en == i then
+					self._select.corsorEnd = v.maxx
+				end
+			end
+		end
+	end,
 	selectAll=function(self)
 		self._select = {}
 		self._select.start = 0
@@ -338,7 +369,7 @@ return {
 	end,
 	openIme=function(self)
 		if not self._isIME then
-			softKeyboard(true,function(event,str)
+			softKeyboard(true,function(event,str,p1)
 				self._flash = 0
 				if event=='attach' then
 					self:setInputRect()
@@ -349,6 +380,8 @@ return {
 					self:pushUndo()
 					self:insertString(str)
 					self:NotifTextChangedEvent()
+				elseif event=='editing' and str then
+					self:editingString(str,p1)
 				elseif event=='backspace' then
 					if self._select and self._select.start and self._select.en then
 						self:pushUndo()

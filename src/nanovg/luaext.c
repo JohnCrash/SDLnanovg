@@ -551,6 +551,17 @@ void lua_callKeyboardFunc2(const char *event, int scancode)
 	}
 }
 
+void lua_callKeyboardFunc3(const char *event,char *str, int start)
+{
+	if (_inputRef != LUA_REFNIL){
+		lua_getref(_state, _inputRef);
+		lua_pushstring(_state, event);
+		lua_pushstring(_state, str);
+		lua_pushinteger(_state, start);
+		lua_executeFunction(3);
+	}
+}
+
 static int closeTextInput()
 {
 	lua_callKeyboardFunc("detach", NULL);
