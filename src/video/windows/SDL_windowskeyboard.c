@@ -826,6 +826,28 @@ IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, SDL_VideoD
         break;
     case WM_IME_STARTCOMPOSITION:
         trap = SDL_TRUE;
+		/*
+		 * 让输入法选择栏跟随SDL_SetTextInputRect设置的矩形下面
+		 */
+		CANDIDATEFORM form;
+		form.dwIndex = 0;
+		form.dwStyle = CFS_EXCLUDE;
+		form.ptCurrentPos.x = videodata->ime_rect.x;
+		form.ptCurrentPos.y = videodata->ime_rect.y + videodata->ime_rect.h;
+		form.rcArea.top = videodata->ime_rect.y;
+		form.rcArea.bottom = videodata->ime_rect.y + videodata->ime_rect.h;
+		form.rcArea.left = videodata->ime_rect.x;
+		form.rcArea.right = videodata->ime_rect.x+videodata->ime_rect.w;
+
+		COMPOSITIONFORM compForm;
+		compForm.ptCurrentPos = form.ptCurrentPos;
+		compForm.rcArea = form.rcArea;
+		compForm.dwStyle = CFS_POINT;
+
+		himc = ImmGetContext(hwnd);
+		ImmSetCandidateWindow(himc, &form);
+		ImmSetCompositionWindow(himc, &compForm);
+		ImmReleaseContext(hwnd, himc);
         break;
     case WM_IME_COMPOSITION:
         trap = SDL_TRUE;

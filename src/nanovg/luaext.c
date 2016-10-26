@@ -788,7 +788,6 @@ int initLua()
 		{ "getPlatform" ,lua_getPlatform },
 		{ "utf8Length", lua_utf8Length },
 		{ "utf8Index", lua_utf8Index },
-		{ "getPlatform", lua_getPlatform },
 		{ "isDebug", lua_isDebug },
 		{ NULL, NULL }
 	};
