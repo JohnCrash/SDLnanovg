@@ -158,6 +158,9 @@ static void uiDeleteWidgetSelf(uiWidget *self)
 				self->luaobj->widget = NULL;
 				lua_unref(L, self->luaobj->ref);
 			}
+			if (L && self->hookRef != LUA_REFNIL){
+				lua_unref(L, self->hookRef);
+			}
 			free(self);
 		}
 	}
@@ -212,6 +215,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 				uiWidget * self = (uiWidget*)malloc(sizeof(uiWidget));
 				if (!self)return NULL;
 				memset(self, 0, sizeof(uiWidget));
+				self->hookRef = LUA_REFNIL;
 				self->classRef = lua_ref(L, 1);
 				lua_newtable(L);
 				self->selfRef = lua_ref(L,1);

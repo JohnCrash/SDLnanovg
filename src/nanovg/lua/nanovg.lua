@@ -77,8 +77,8 @@ ui.ALIGN_TOP = 8
 ui.ALIGN_MIDDLE = 16
 ui.ALIGN_BOTTOM = 32
 ui.ALIGN_BASELINE = 64
-ui.ALIGN_H = 128 --horizontal
-ui.ALIGN_V = 256 --vertical
+ui.HORIZONTAL = 128 --horizontal
+ui.VERTICAL = 256 --vertical
 ui.ALIGN_REVERSE = 512 --reverse
 
 ui.EVENT_NONE = 0;
@@ -96,7 +96,7 @@ end
 
 ui.linearRelayout = function(rect,list,align,space)
 	space = space or 0
-	if isand(align,ui.ALIGN_H) then --horizontal
+	if isand(align,ui.HORIZONTAL) then --horizontal
 		local width = space
 		local height = 0
 		for i,widget in ipairs(list) do

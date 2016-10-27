@@ -199,10 +199,26 @@ static int lua_setSizeWidget(lua_State *L)
 	float w = (float)luaL_checknumber(L, 2);
 	float h = (float)luaL_checknumber(L, 3);
 	if (self){
+		int ow, oh;
+		if (self->hookRef != LUA_REFNIL){
+			ow = self->width;
+			oh = self->height;
+		}
 		uiSetSize(self, w, h);
+		/*
+		 * 调用钩子函数，通知widget被设置了新的尺寸
+		 */
+		if (self->hookRef != LUA_REFNIL){
+			lua_getref(L, self->hookRef);
+			lua_pushstring(L, "setSize");
+			lua_pushinteger(L, ow);
+			lua_pushinteger(L, oh);
+			lua_pushinteger(L, self->width);
+			lua_pushinteger(L, self->height);
+			lua_executeFunction(5);
+		}
 	}
 	return 0;
-
 }
 
 /**
@@ -216,7 +232,24 @@ static int lua_setPositionWidget(lua_State *L)
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 	if (self){
+		int ox, oy;
+		if (self->hookRef != LUA_REFNIL){
+			ox = self->x;
+			oy = self->y;
+		}
 		uiSetPosition(self, x, y);
+		/*
+		* 调用钩子函数，通知widget被设置了新的位置
+		*/
+		if (self->hookRef != LUA_REFNIL){
+			lua_getref(L, self->hookRef);
+			lua_pushstring(L, "setPosition");
+			lua_pushinteger(L, ox);
+			lua_pushinteger(L, oy);
+			lua_pushinteger(L, self->x);
+			lua_pushinteger(L, self->y);
+			lua_executeFunction(5);
+		}
 	}
 	return 0;
 }
@@ -556,6 +589,28 @@ static int lua_widgetFormPt(lua_State *L)
 	return 1;
 }
 
+/**
+ * \brief 设置控件的事件回调，ui.widgetHook(hookFunc)
+ * \param hookFunc 事件回调函数，nil将清除事件回调
+ * \return 返回老的事件回调函数，如果没有返回nil
+ */
+static int lua_widgetHook(lua_State *L)
+{
+	uiWidget * widget = lua_checkWidget(L, 1);
+	int oldHookRef = widget->hookRef;
+	if (lua_isfunction(L, 2)){
+		lua_pushvalue(L, 2);
+		widget->hookRef = lua_ref(L, 1);
+	}
+	if (widget->hookRef != LUA_REFNIL){
+		lua_getref(L, oldHookRef);
+		lua_unref(L, oldHookRef);
+	}else{
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
 static int lua_widgetFunction(lua_State *L);
 
 static const struct luaL_Reg uimeta_methods_c[] =
@@ -580,6 +635,7 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "childs", lua_childs },
 	{ "enableEvent",lua_enableEvent },
 	{ "disableEvent", lua_disableEvent },
+	{ "widgetHook", lua_widgetHook },
 	{ NULL, NULL },
 };
 

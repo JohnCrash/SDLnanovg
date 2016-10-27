@@ -221,6 +221,7 @@ return {
 				self._horzPos = 0
 			end	
 		end
+		self:setInputRect()
 	end,
 	keyboardSelectBegin=function(self)
 		if isShiftDown() then
@@ -279,7 +280,7 @@ return {
 		local surfix = utf8Sub(self._text,self._pos+1)
 		self._text = prefix..str..surfix
 		self._pos = self._pos + utf8Length(str)
-		self:reCorsorPos()	
+		self:reCorsorPos()
 	end,
 	editingString=function(self,str,start)
 		if self._select and self._select.start and self._select.en then
@@ -533,6 +534,8 @@ return {
 	setInputRect=function(self)
 		local w,h = self:getSize()
 		local x,y = ui.widgetToRoot(self,0,0)
+		x = x + self._horzPos+self._cursorPos
+		h = h-14
 		softKeyboardInputRect(x,y,w,h)	
 	end,
 	onDraw=function(self,dt)

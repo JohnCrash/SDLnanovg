@@ -67,6 +67,7 @@ extern "C"{
 		unsigned char handleEvent;
 		int classRef;
 		int selfRef;
+		int hookRef;
 		luaWidget * luaobj;
 		struct uiWidget_t *parent; /**<父窗口*/
 		struct uiWidget_t *child; /**<子窗口*/
