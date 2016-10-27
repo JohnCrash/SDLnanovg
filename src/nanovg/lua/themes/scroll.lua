@@ -5,6 +5,7 @@ return {
 	onInit=function(self,themes)
 		self._color = vg.rgba(255,0,0,0)
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
+		self._setSize_cfunc = lua_widgetFunction("setSize")
 		self._first = nil
 		self._last = nil
 		self._visibaleWidgets = {}
@@ -16,6 +17,7 @@ return {
 		self._space = 0;
 		self._rangeW = 0;
 		self._rangeH = 0;
+		self._W,self._H = self:getSize()
 	end,
 	onRelease=function(self)
 	end,	
@@ -91,7 +93,23 @@ return {
 			return self._rangeW
 		end
 	end,
+	setSize=function(self,w,h)
+		self._W = w
+		self._H = h
+		self._setSize_cfunc(self,w,h)
+	end,
 	widgetIsVisible=function(self,widget)
+		if widget and (widget._prev or widget._next) then
+			local w,h = widget:getSize()
+			local x,y = widget:getPosition()
+			if self._mode==ui.VERTICAL then
+				return y+h >= self._scrollY and y < self._scrollY + self._H
+			else
+				return x+w >= self._scrollX and x < self._scrollX + self._W
+			end
+		else
+			return false
+		end
 	end,
 	getFirstVisibleWidget=function(self)
 		local first
