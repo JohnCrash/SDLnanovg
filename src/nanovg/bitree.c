@@ -16,18 +16,20 @@ static int pow2table[] = {
 	1<<25, 1 << 26, 1 << 27, 1 << 28, 1 << 29, 1 << 30, 1 << 31,
 };
 
-#define PARENT_VALUE(v) v
-#define LEFT_VALUE(v) v
-#define RIGHT_VALUE(v) v
-
-static int bi_level(int v)
+int bi_level(int v)
 {
 	int i = 0;
-	if (v & 1)return i;
-	while (!(v>>=1&1))
+	if (v & 1 || v == 0)return i;
+	i++;
+	while (!((v >>= 1) & 1))
 		i++;
 	return i;
 }
+
+#define PARENT_VALUE(v) v
+#define LOW_VALUE(v) v
+#define LEFT_VALUE(v) (v - pow2table[bi_level(v) - 1])
+#define RIGHT_VALUE(v) (v + pow2table[bi_level(v) - 1])
 
 bitree * bitree_create(int v)
 {
@@ -96,6 +98,16 @@ bitree * bitree_add(bitree * pbt, int v)
 }
 
 /**
+ * \brief 如果v是pbt的一个子节点返回1，否则0.
+ * \param pbt 二分树节点
+ * \param v	一个整数值
+ */
+int bitree_ischild(bitree * pbt, int v)
+{
+	return (v < PARENT_VALUE(pbt->value)) && (v > LOW_VALUE(pbt->value));
+}
+
+/**
  * \brief 返回给定值的树节点
  * \param pbt 搜索起点
  * \param v 要搜索的整数值
@@ -104,9 +116,15 @@ bitree * bitree_at(bitree * pbt, int v)
 {
 	bitree * it = pbt;
 
-	while( it && v>(pbt->value >> 1)){
+	/* 
+	 * 先向上搜索，找到第一个包括v的节点
+	 */
+	while (it && bitree_ischild(it,v)){
 		it = it->p;
 	}
+	/*
+	 * 从这个包括v的节点向下搜索，小于value向左搜索，大于value向右搜索
+	 */
 	while (it){
 		if (it->value > v)
 			it = it->l;
@@ -133,6 +151,35 @@ bitree * bitree_root(bitree * pbt)
 	return root;
 }
 
+/*
+ * 找到一个最接近v值的节点
+ */
+static bitree * bitree_near(bitree * pbt, int v)
+{
+	bitree * it = pbt;
+	bitree * near;
+	/*
+	 * 先向上搜索，找到第一个包括v的节点
+	 */
+	while (it && bitree_ischild(it, v)){
+		it = it->p;
+	}
+	/*
+	 * 从这个包括v的节点向下搜索，小于value向左搜索，大于value向右搜索
+	 */
+	near = it;
+	while (it){
+		near = it;
+		if (it->value > v)
+			it = it->l;
+		else if (it->value < v)
+			it = it->r;
+		else
+			return it;
+	}
+	return near;
+}
+
 /**
  * \brief 遍历树的指定范围
  * \param pbt 起点
@@ -142,7 +189,9 @@ bitree * bitree_root(bitree * pbt)
  */
 void bitree_range(bitree * pbt, int v0, int v1, void(*cb)(bitree *it))
 {
-	
+	bitree * it = pbt;
+
+	return it;
 }
 
 /**
