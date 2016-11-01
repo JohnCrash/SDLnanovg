@@ -70,6 +70,12 @@ end
 --init ui
 local ui = require "ui"
 
+ui.INVISIBLE = 0
+ui.VISIBLE = 1
+ui.LINEAR = 2
+ui.CLIP = 4
+ui.SCROLL_CLIP = 8
+
 ui.ALIGN_LEFT = 1
 ui.ALIGN_CENTER = 2
 ui.ALIGN_RIGHT = 4

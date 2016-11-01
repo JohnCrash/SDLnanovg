@@ -376,7 +376,15 @@ int loadThemes(const char *name, const char *filename)
 	if (lua_executeScriptFileResult(filename, 1)){
 		if (lua_istable(L, -1)){
 			ThemesList * ptl = (ThemesList *)malloc(sizeof(ThemesList));
-			if (!ptl)return 0;
+			if (!ptl){
+				lua_pop(L, 1);
+				return 0;
+			}
+			//对样式表设置名称
+			lua_pushstring(L, "name");
+			lua_pushstring(L, name);
+			lua_settable(L, -3);
+
 			ptl->filename = strdup(filename);
 			ptl->name = strdup(name);
 			lua_pushvalue(L, -1);

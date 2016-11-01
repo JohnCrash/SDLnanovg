@@ -1,7 +1,6 @@
 local vg = require "vg"
 
 return {
-	name = 'default',
 	version = 1,
 	color = vg.rgba(255,255,255,255),
 	colorBG = vg.rgba(0,128,168,255),

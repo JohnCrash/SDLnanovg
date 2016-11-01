@@ -389,6 +389,26 @@ static int lua_enableClip(lua_State *L)
 	return 0;
 }
 
+static int lua_enableFlags(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	int flags = luaL_checkint(L, 2);
+	if (self){
+		self->isVisible |= flags;
+	}
+	return 0;
+}
+
+static int lua_disableFlags(lua_State *L)
+{
+	uiWidget *self = lua_checkWidget(L, 1);
+	int flags = luaL_checkint(L, 2);
+	if (self){
+		self->isVisible &= !flags;
+	}
+	return 0;
+}
+
 /**
  * \brief 返回样式表中的给定函数,ui.themeFunction(func)
  * \param func 函数名称
@@ -627,7 +647,6 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "getRotate", lua_getRotate },
 	{ "setRotate", lua_setRotate },
 	{ "getOrigin", lua_getOrigin },
-	{ "enableClip", lua_enableClip },
 	{ "widgetFunction", lua_widgetFunction },
 	{ "themeFunction", lua_themeFunction },
 	{ "bringTop", lua_bringTop },
@@ -635,6 +654,9 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "childs", lua_childs },
 	{ "enableEvent",lua_enableEvent },
 	{ "disableEvent", lua_disableEvent },
+	{ "enableClip", lua_enableClip },
+	{ "enableFlags", lua_enableFlags },
+	{ "disableFlags", lua_disableFlags },
 	{ "widgetHook", lua_widgetHook },
 	{ NULL, NULL },
 };

@@ -6,7 +6,7 @@ return {
 		self._color = themes.color
 		self._colorBG = themes.colorBG
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
-		self._inner = ui.createWidget("normal","inner")
+		self._inner = ui.createWidget(themes.name,"inner")
 		self:addChild(self._inner)
 	end,
 	onRelease=function(self)
@@ -21,11 +21,18 @@ return {
 	onEvent=function(self,event)
 		if event.type == ui.EVENT_TOUCHDOWN then
 			self._down = true
+			self._downx = event.x
+			self._downy = event.y
 		elseif event.type == ui.EVENT_TOUCHUP then
 			self._down = false
 		elseif event.type == ui.EVENT_TOUCHDROP then
 			if self._down then
-				self._down = event.inside
+				--self._down = event.inside
+				local x,y = self._inner:getPosition()
+				--print(string.format("1 x = %d,y = %d",event.y,event.y2))
+				y = y + event.y - self._downy
+				self._downy = event.y
+				self._inner:setPosition(x,y)
 			end
 		end
 		return true
