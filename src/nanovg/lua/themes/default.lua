@@ -20,6 +20,7 @@ return {
 	seekbar = require "themes/seekbar",
 	edit = require "themes/edit",
 	scroll = require "themes/scroll",
+	inner = require "themes/inner",
 	--[[
 	tab = require "themes/tab",
 	list = require "themes/list",

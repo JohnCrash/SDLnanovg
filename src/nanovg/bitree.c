@@ -1,6 +1,6 @@
 #include "bitree.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <memory.h>
 
 /**
 * \addtogroup bitree bitree bitree
@@ -46,10 +46,11 @@ void bi_decompose(int v, int *m, int *n)
  */
 void bi_range(int v, int *minx, int *maxx)
 {
-	int m, n, pm, pn;
+	int m, n;
 	if (v == 0){
-		*minx = -(1 << 31 - 1);
-		*maxx = (1 << 31 - 1);
+		int c = (1 << 31);
+		*minx = -(c - 1);
+		*maxx = (c - 1);
 	}
 	else{
 		bi_decompose(v, &m, &n);
@@ -72,12 +73,25 @@ bitree * bitree_create(int v)
 	return pi;
 }
 
+static void bitree_delete_recursion(bitree * p)
+{
+	if (p->l)
+		bitree_delete_recursion(p->l);
+	if (p->r)
+		bitree_delete_recursion(p->l);
+
+	free(p);
+}
+
 /**
  * \brief 删除树相连接的全部节点
  * \param pbt 搜索节点起点
  */
 void bitree_delete(bitree * pbt)
 {
+	bitree * it = bitree_root(pbt);
+	if(it)
+		bitree_delete_recursion(it);
 }
 
 /**
@@ -89,6 +103,9 @@ bitree * bitree_add(bitree * pbt, int v)
 {
 	int m, n;
 	bitree * it = pbt;
+	/*
+	 * 先向上查找，找不到就创建，只道一个包含v的节点
+	 */
 	while (it){
 		if (bitree_ischild(it, v))
 			break;
@@ -223,9 +240,19 @@ static bitree * bitree_near(bitree * pbt, int v)
  */
 void bitree_range(bitree * pbt, int v0, int v1, void(*cb)(bitree *it))
 {
-	bitree * it = pbt;
+	int minx, maxx;
+	bitree * it;
+	bitree * bibegin, *biend;
+	minx = min(v0, v1);
+	maxx = max(v0, v1);
+	bibegin = bitree_near(pbt,minx);
+	biend = bitree_near(pbt, maxx);
 
-	return it;
+	it = bibegin;
+	while (it){
+
+	}
+	return;
 }
 
 /**

@@ -1,4 +1,5 @@
 ﻿#include <math.h>
+#include <memory.h>
 #include "SDL.h"
 #include "lua.h"
 #include "lauxlib.h"
@@ -491,6 +492,15 @@ void enableClipClient(uiWidget *self, int b)
 		self->isVisible &= !CLIP;
 }
 
+static int InParentWidget(uiWidget *parent, uiWidget *child, float x, float y)
+{
+	if (child->x+x > parent->width || child->x+x + child->width < 0)
+		return 0;
+	if (child->y+y > parent->height || child->y+y + child->height < 0)
+		return 0;
+	return 1;
+}
+
 int InWidget(uiWidget *parent, uiWidget *child)
 {
 	if (child->x > parent->width || child->x + child->width < 0)
@@ -526,17 +536,39 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 	//	isclip = 1;
 	}
 	child = root->child;
-	while (child){
-		if (child->isVisible&VISIBLE){
-			if (InWidget(root, child)){
-				tail->enum_next = child;
-				child->enum_prev = tail;
-				tail = child;
-				tail->enum_next = NULL;
-				tail = uiEnumWidgetVisible(child, tail, renderFunc);
+	if ( (root->isVisible&SCROLL_CLIP) && root->parent){
+		//根据父窗口的大小进行剪切
+		uiWidget *pParent = root->parent;
+		float x, y;
+		x = root->x;
+		y = root->y;
+		while (child){
+			if (child->isVisible&VISIBLE){
+				if (InParentWidget(pParent, child,x,y)){
+					tail->enum_next = child;
+					child->enum_prev = tail;
+					tail = child;
+					tail->enum_next = NULL;
+					tail = uiEnumWidgetVisible(child, tail, renderFunc);
+				}
 			}
+			child = child->next;
 		}
-		child = child->next;
+	}
+	else{
+		//正常情况
+		while (child){
+			if (child->isVisible&VISIBLE){
+				if (InWidget(root, child)){
+					tail->enum_next = child;
+					child->enum_prev = tail;
+					tail = child;
+					tail->enum_next = NULL;
+					tail = uiEnumWidgetVisible(child, tail, renderFunc);
+				}
+			}
+			child = child->next;
+		}
 	}
 
 	//if (isclip){
@@ -567,8 +599,8 @@ static void prepareUIEvent()
 			if (pevent->button.button == SDL_BUTTON_LEFT){
 				pev = &(_eventState.events[_eventState.nEvent++]);
 				pev->t = pevent->button.timestamp;
-				pev->x = pevent->button.x;
-				pev->y = pevent->button.y;
+				pev->x = (float)pevent->button.x;
+				pev->y = (float)pevent->button.y;
 				if (pevent->type==SDL_MOUSEBUTTONDOWN){
 					_eventState.haveEventType |= EVENT_TOUCHDOWN;
 					pev->type = EVENT_TOUCHDOWN;
@@ -585,8 +617,8 @@ static void prepareUIEvent()
 			if (_eventState.isTouchDown){
 				pev = &(_eventState.events[_eventState.nEvent++]);
 				pev->t = pevent->motion.timestamp;
-				pev->x = pevent->motion.x;
-				pev->y = pevent->motion.y;
+				pev->x = (float)pevent->motion.x;
+				pev->y = (float)pevent->motion.y;
 				pev->type = EVENT_TOUCHDROP;
 				_eventState.haveEventType |= EVENT_TOUCHDROP;
 			}
@@ -745,7 +777,7 @@ static void renderWidget(uiWidget * widget)
 			lua_pushnumber(L, getLoopInterval());
 			lua_executeFunction(2);
 			lua_pop(L, 1); //classRef;
-			return 0;
+			return;
 		}
 		else{
 			lua_pop(L, 2);
@@ -767,7 +799,7 @@ static void renderWidget(uiWidget * widget)
 			lua_pop(L, 2);
 		}
 	}
-	return 0;
+	return;
 }
 
 /**
@@ -996,7 +1028,7 @@ static void donothingFunc(uiWidget *self)
  */
 int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
 {
-	uiWidget * head, *temp, *tail;
+	uiWidget * head, *tail;
 	int idx = 0;
 	head = _root;
 	head->enum_next = NULL;
