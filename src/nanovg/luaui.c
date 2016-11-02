@@ -640,9 +640,10 @@ static int lua_widgetHook(lua_State *L)
  *	- ui.ALIGN_TOP 上对齐
  *	- ui.ALIGN_MIDDLE 纵向中心对齐
  *	- ui.ALIGN_BOTTOM 下对齐
- *	- ui.HORIZONTAL	横向排序
- *	- ui.VERTICAL 纵向排序
- *	- ui.GRID 网格排序
+ *	- ui.HORIZONTAL	横向排序，这时sx表示物件的间距，sy表示上部的间距
+ *	- ui.VERTICAL 纵向排序，这时sx表示左侧间距，sy表示每个物件的间距
+ *	- ui.GRID 网格排序，和HORIZONTAL组合先横向排布grid_n个物件，然后排布第二排
+ *和VERTICAL组合先纵向排布grid_n个物件
  *	- ui.REVERSE 方向顺序
  * \param sx 横向间隔
  * \param sy 纵向间隔
@@ -650,7 +651,79 @@ static int lua_widgetHook(lua_State *L)
  */
 static int lua_relayout(lua_State *L)
 {
-
+	uiWidget * it, * last;
+	uiWidget * widget = lua_checkWidget(L, 1);
+	int mode = luaL_checkinteger(L, 2);
+	int sx = luaL_checkinteger(L, 3);
+	int sy = luaL_checkinteger(L, 4);
+	float w, h, x, y;
+	w = h = 0;
+	if (mode&HORIZONTAL){
+		it = widget->child;
+		while (it){
+			last = it;
+			h = max(h, it->height);
+			it = it->next;
+		}
+		if (mode&REVERSE)
+			it = last;
+		else
+			it = widget->child;
+		x = sx;
+		while (it){
+			it->x = x;
+			if (mode&ALIGN_TOP)
+				it->y = sy + sx;
+			else if (mode&ALIGN_BOTTOM)
+				it->y = h-it->height-sx+sy;
+			else
+				it->y = (h-it->height)/2+sy;
+			x += (it->width+sx);
+			if (mode&REVERSE)
+				it = it->prev;
+			else
+				it = it->next;
+		}
+		widget->width = x;
+		widget->height = h+sy+2*sx;
+	}
+	else if (mode&VERTICAL){
+		it = widget->child;
+		while (it){
+			last = it;
+			w = max(w, it->width);
+			it = it->next;
+		}
+		if (mode&REVERSE)
+			it = last;
+		else
+			it = widget->child;
+		y = sy;
+		while (it){
+			it->y = y;
+			if (mode&ALIGN_LEFT)
+				it->x = sy + sx;
+			else if (mode&ALIGN_RIGHT)
+				it->x = w - it->width - sy + sx;
+			else
+				it->x = (w - it->width) / 2 + sx;
+			y += (it->height + sy);
+			if (mode&REVERSE)
+				it = it->prev;
+			else
+				it = it->next;
+		}
+		widget->width = w + sx + 2*sy;
+		widget->height = y;
+	}
+	else if (mode&GRID){
+		
+	}
+	else{
+		return 0;
+	}
+	lua_pushboolean(L, 1);
+	return 1;
 }
 
 static int lua_widgetFunction(lua_State *L);

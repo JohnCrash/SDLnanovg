@@ -25,6 +25,19 @@ extern "C"{
 		EVENT_UNBOUNDED = 64, /**<不考虑节点的尺寸直接将事件传递给该节点*/
 	};
 
+	enum{
+		ALIGN_LEFT = 1,
+		ALIGN_CENTER = 2,
+		ALIGN_RIGHT = 4,
+		ALIGN_TOP = 8,
+		ALIGN_MIDDLE = 16,
+		ALIGN_BOTTOM = 32,
+		ALIGN_BASELINE = 64,
+		HORIZONTAL = 128,
+		VERTICAL = 256,
+		GRID = 512,
+		REVERSE = 1024,
+	};
 	/**
 	 * #uiWidget isVisible 的可能组合 
 	 */
