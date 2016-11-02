@@ -610,7 +610,7 @@ static int lua_widgetFormPt(lua_State *L)
 }
 
 /**
- * \brief 设置控件的事件回调，ui.widgetHook(hookFunc)
+ * \brief 设置控件的事件回调，self:widgetHook(hookFunc)
  * \param hookFunc 事件回调函数，nil将清除事件回调
  * \return 返回老的事件回调函数，如果没有返回nil
  */
@@ -629,6 +629,28 @@ static int lua_widgetHook(lua_State *L)
 		lua_pushnil(L);
 	}
 	return 1;
+}
+
+/**
+ * \brief 排列子窗口self:relayout(mode,sx,sy,grid_n)
+ * \param mode 可以是下面值的组合
+ *	- ui.ALIGN_LEFT 左对齐
+ *	- ui.ALIGN_CENTER 横向中心对齐
+ *	- ui.ALIGN_RIGHT 右对齐
+ *	- ui.ALIGN_TOP 上对齐
+ *	- ui.ALIGN_MIDDLE 纵向中心对齐
+ *	- ui.ALIGN_BOTTOM 下对齐
+ *	- ui.HORIZONTAL	横向排序
+ *	- ui.VERTICAL 纵向排序
+ *	- ui.GRID 网格排序
+ *	- ui.REVERSE 方向顺序
+ * \param sx 横向间隔
+ * \param sy 纵向间隔
+ * \param grid_n 表示网格
+ */
+static int lua_relayout(lua_State *L)
+{
+
 }
 
 static int lua_widgetFunction(lua_State *L);
@@ -654,6 +676,7 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "childs", lua_childs },
 	{ "enableEvent",lua_enableEvent },
 	{ "disableEvent", lua_disableEvent },
+	{ "relayout", lua_relayout },
 	{ "enableClip", lua_enableClip },
 	{ "enableFlags", lua_enableFlags },
 	{ "disableFlags", lua_disableFlags },

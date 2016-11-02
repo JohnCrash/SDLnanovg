@@ -85,7 +85,8 @@ ui.ALIGN_BOTTOM = 32
 ui.ALIGN_BASELINE = 64
 ui.HORIZONTAL = 128 --horizontal
 ui.VERTICAL = 256 --vertical
-ui.ALIGN_REVERSE = 512 --reverse
+ui.GRID = 512 --grid
+ui.REVERSE = 1024 --reverse
 
 ui.EVENT_NONE = 0;
 ui.EVENT_TOUCHDOWN = 1

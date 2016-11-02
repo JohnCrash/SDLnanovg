@@ -54,7 +54,6 @@ return {
 			v:setPosition(x,y)
 			y = y + h + 5
 			ww = math.max(ww,w)
-			print(string.format("x=%d,y=%d",x,y))
 		end
 		self._inner:setSize(ww,y)
 		self._inner:setPosition(30,-30)
