@@ -52,9 +52,9 @@ extern "C"{
 	typedef struct {
 		int type;
 		int inside; /**< 事件在对象内部发生 */
-		unsigned int t; /**< 发生的时间 SDL_GetTicks */
+		double t; /**< 发生的时间 getLoopInterval() */
 		float x, y; /**< touch */
-		unsigned int t2; /**< 发生的时间 SDL_GetTicks */
+		double t2; /**< 发生的时间 SDL_GetTicks */
 		float x2, y2; /**< zoom */
 	} uiEvent;
 

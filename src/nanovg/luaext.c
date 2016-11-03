@@ -456,7 +456,6 @@ void remove_c_schedule(struct schedule* next)
  */
 static int lua_schedule(lua_State *L)
 {
-	int ref;
 	double dt = luaL_checknumber(L, 1);
 	if (lua_isfunction(L, 2)){
 		struct schedule * psch;
@@ -957,8 +956,8 @@ void lua_EventChangeSize(int w,int h)
 
 	root = uiRootWidget();
 	if (root){
-		root->width = w;
-		root->height = h;
+		root->width = (float)w;
+		root->height = (float)h;
 	}
 	if (lua_pushEventFunction(EVENT_WINDOW)){
 		lua_pushstring(_state, "sizeChanged");

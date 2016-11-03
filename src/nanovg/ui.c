@@ -606,7 +606,7 @@ static void prepareUIEvent()
 		case SDL_MOUSEBUTTONUP:
 			if (pevent->button.button == SDL_BUTTON_LEFT){
 				pev = &(_eventState.events[_eventState.nEvent++]);
-				pev->t = pevent->button.timestamp;
+				pev->t = pevent->button.timestamp/1000.0;
 				pev->x = (float)pevent->button.x;
 				pev->y = (float)pevent->button.y;
 				if (pevent->type==SDL_MOUSEBUTTONDOWN){
@@ -624,7 +624,7 @@ static void prepareUIEvent()
 		case SDL_MOUSEMOTION:
 			if (_eventState.isTouchDown){
 				pev = &(_eventState.events[_eventState.nEvent++]);
-				pev->t = pevent->motion.timestamp;
+				pev->t = pevent->motion.timestamp / 1000.0;
 				pev->x = (float)pevent->motion.x;
 				pev->y = (float)pevent->motion.y;
 				pev->type = EVENT_TOUCHDROP;
@@ -634,7 +634,7 @@ static void prepareUIEvent()
 		case SDL_FINGERDOWN:
 			{
 				pev = &(_eventState.events[_eventState.nEvent++]);
-				pev->t = pevent->tfinger.timestamp;
+				pev->t = pevent->tfinger.timestamp / 1000.0;
 				pev->x = pevent->tfinger.x;
 				pev->y = pevent->tfinger.y;
 				pev->type = EVENT_TOUCHDOWN;
@@ -646,7 +646,7 @@ static void prepareUIEvent()
 		case SDL_FINGERUP:
 			{
 				pev = &(_eventState.events[_eventState.nEvent++]);
-				pev->t = pevent->tfinger.timestamp;
+				pev->t = pevent->tfinger.timestamp / 1000.0;
 				pev->x = pevent->tfinger.x;
 				pev->y = pevent->tfinger.y;
 				pev->type = EVENT_TOUCHUP;
@@ -656,7 +656,7 @@ static void prepareUIEvent()
 		case SDL_FINGERMOTION:
 			if (_eventState.isTouchDown){
 				pev = &(_eventState.events[_eventState.nEvent++]);
-				pev->t = pevent->tfinger.timestamp;
+				pev->t = pevent->tfinger.timestamp / 1000.0;
 				pev->x = pevent->tfinger.x;
 				pev->y = pevent->tfinger.y;
 				pev->type = EVENT_TOUCHDROP;

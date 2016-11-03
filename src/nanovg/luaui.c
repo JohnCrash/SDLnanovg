@@ -652,7 +652,7 @@ static void relayout_raw(uiWidget *col[], float w[], float maxh, float sx,float 
 	}
 }
 /**
- * \brief 排列子窗口self:relayout(mode,sx,sy,grid_n)
+ * \brief 排列子窗口self:relayout(mode,sx,sy,grid_n),函数将设置控件的尺寸
  * \param mode 可以是下面值的组合
  *	- ui.ALIGN_LEFT 左对齐
  *	- ui.ALIGN_CENTER 横向中心对齐
