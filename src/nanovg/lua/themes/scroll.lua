@@ -43,19 +43,6 @@ return {
 		self._inner:addChild(widget)
 	end,
 	relayout=function(self)
-		local childs = self._inner:childs()
-		local x,y,ww,hh
-		x = 0
-		y = 0
-		ww = 0
-		hh = 0
-		for i,v in pairs(childs) do
-			local w,h = v:getSize()
-			v:setPosition(x,y)
-			y = y + h + 5
-			ww = math.max(ww,w)
-		end
-		self._inner:setSize(ww,y)
-		self._inner:setPosition(30,-30)
+		self._inner:relayout(ui.GRID,12,12,31)
 	end,
 }

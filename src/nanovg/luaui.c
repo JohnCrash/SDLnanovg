@@ -6,7 +6,7 @@
 #endif
 
 #define LUA_UI_HANDLE "lua_nanoui_t"
-
+#define max(a, b)  (((a) > (b)) ? (a) : (b)) 
 /**
  * \addtogroup LuaUI lua ui
  * \brief 界面相关的lua函数
@@ -24,7 +24,7 @@ void lua_pushWidget(lua_State *L, uiWidget * widget)
 	else{
 		luaWidget *pluawidget = (luaWidget *)lua_newuserdata(L, sizeof(luaWidget));
 		if (pluawidget){
-			pluawidget->widget = widget;
+			pluawidget->widget = (struct uiWidget *)widget;
 			luaL_getmetatable(L, LUA_UI_HANDLE);
 			lua_setmetatable(L, -2);
 			lua_pushvalue(L, -1);
@@ -39,7 +39,7 @@ static uiWidget * lua_checkWidget(lua_State *L, int idx)
 {
 	luaWidget * luaobj = (luaWidget *)luaL_checkudata(L, idx, LUA_UI_HANDLE);
 	if (luaobj){
-		return luaobj->widget;
+		return (uiWidget *)luaobj->widget;
 	}
 	return NULL;
 }
@@ -199,7 +199,7 @@ static int lua_setSizeWidget(lua_State *L)
 	float w = (float)luaL_checknumber(L, 2);
 	float h = (float)luaL_checknumber(L, 3);
 	if (self){
-		int ow, oh;
+		float ow, oh;
 		if (self->hookRef != LUA_REFNIL){
 			ow = self->width;
 			oh = self->height;
@@ -211,10 +211,10 @@ static int lua_setSizeWidget(lua_State *L)
 		if (self->hookRef != LUA_REFNIL){
 			lua_getref(L, self->hookRef);
 			lua_pushstring(L, "setSize");
-			lua_pushinteger(L, ow);
-			lua_pushinteger(L, oh);
-			lua_pushinteger(L, self->width);
-			lua_pushinteger(L, self->height);
+			lua_pushnumber(L, ow);
+			lua_pushnumber(L, oh);
+			lua_pushnumber(L, self->width);
+			lua_pushnumber(L, self->height);
 			lua_executeFunction(5);
 		}
 	}
@@ -232,7 +232,7 @@ static int lua_setPositionWidget(lua_State *L)
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 	if (self){
-		int ox, oy;
+		float ox, oy;
 		if (self->hookRef != LUA_REFNIL){
 			ox = self->x;
 			oy = self->y;
@@ -244,10 +244,10 @@ static int lua_setPositionWidget(lua_State *L)
 		if (self->hookRef != LUA_REFNIL){
 			lua_getref(L, self->hookRef);
 			lua_pushstring(L, "setPosition");
-			lua_pushinteger(L, ox);
-			lua_pushinteger(L, oy);
-			lua_pushinteger(L, self->x);
-			lua_pushinteger(L, self->y);
+			lua_pushnumber(L, ox);
+			lua_pushnumber(L, oy);
+			lua_pushnumber(L, self->x);
+			lua_pushnumber(L, self->y);
 			lua_executeFunction(5);
 		}
 	}
@@ -298,13 +298,13 @@ static int lua_getScale(lua_State *L)
 static int lua_setScale(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
-	float sx = luaL_checknumber(L, 2);
-	float sy = luaL_checknumber(L, 3);
+	float sx = (float)luaL_checknumber(L, 2);
+	float sy = (float)luaL_checknumber(L, 3);
 	if (self){
 		/* 设置缩放中心点 */
 		if (lua_isnumber(L, 4) && lua_isnumber(L, 5)){
-			float ox = luaL_checknumber(L, 4);
-			float oy = luaL_checknumber(L, 5);
+			float ox = (float)luaL_checknumber(L, 4);
+			float oy = (float)luaL_checknumber(L, 5);
 			self->ox = ox;
 			self->oy = oy;
 		}
@@ -340,12 +340,12 @@ static int lua_getRotate(lua_State *L)
 static int lua_setRotate(lua_State *L)
 {
 	uiWidget *self = lua_checkWidget(L, 1);
-	float angle = luaL_checknumber(L, 2);
+	float angle = (float)luaL_checknumber(L, 2);
 	if (self){
 		/* 设置旋转中心点 */
 		if (lua_isnumber(L, 3) && lua_isnumber(L, 4)){
-			float ox = luaL_checknumber(L, 3);
-			float oy = luaL_checknumber(L, 4);
+			float ox = (float)luaL_checknumber(L, 3);
+			float oy = (float)luaL_checknumber(L, 4);
 			self->ox = ox;
 			self->oy = oy;
 		}
@@ -631,6 +631,26 @@ static int lua_widgetHook(lua_State *L)
 	return 1;
 }
 
+static void relayout_raw(uiWidget *col[], float w[], float maxh, float sx,float y,int n, int mode)
+{
+	float x = 0;
+	for (int i = 0; i < n; i++){
+		if (mode&ALIGN_LEFT)
+			col[i]->x = x+sx;
+		else if (mode&ALIGN_RIGHT)
+			col[i]->x = x+w[i]-col[i]->width-sx;
+		else
+			col[i]->x = x + (w[i] - col[i]->width)/2;
+		if (mode&ALIGN_TOP)
+			col[i]->y = y;
+		else if (mode&ALIGN_BOTTOM)
+			col[i]->y = y+maxh-col[i]->height;
+		else
+			col[i]->y = y + (maxh - col[i]->height)/2;
+		uiSetPosition(col[i], col[i]->x, col[i]->y);
+		x += w[i];
+	}
+}
 /**
  * \brief 排列子窗口self:relayout(mode,sx,sy,grid_n)
  * \param mode 可以是下面值的组合
@@ -654,12 +674,13 @@ static int lua_relayout(lua_State *L)
 	uiWidget * it, * last;
 	uiWidget * widget = lua_checkWidget(L, 1);
 	int mode = luaL_checkinteger(L, 2);
-	int sx = luaL_checkinteger(L, 3);
-	int sy = luaL_checkinteger(L, 4);
+	float sx = (float)luaL_checknumber(L, 3);
+	float sy = (float)luaL_checknumber(L, 4);
 	float w, h, x, y;
 	w = h = 0;
 	if (mode&HORIZONTAL){
 		it = widget->child;
+		last = it;
 		while (it){
 			last = it;
 			h = max(h, it->height);
@@ -678,6 +699,7 @@ static int lua_relayout(lua_State *L)
 				it->y = h-it->height-sx+sy;
 			else
 				it->y = (h-it->height)/2+sy;
+			uiSetPosition(it, it->x, it->y);
 			x += (it->width+sx);
 			if (mode&REVERSE)
 				it = it->prev;
@@ -689,6 +711,7 @@ static int lua_relayout(lua_State *L)
 	}
 	else if (mode&VERTICAL){
 		it = widget->child;
+		last = it;
 		while (it){
 			last = it;
 			w = max(w, it->width);
@@ -707,6 +730,7 @@ static int lua_relayout(lua_State *L)
 				it->x = w - it->width - sy + sx;
 			else
 				it->x = (w - it->width) / 2 + sx;
+			uiSetPosition(it, it->x, it->y);
 			y += (it->height + sy);
 			if (mode&REVERSE)
 				it = it->prev;
@@ -716,8 +740,52 @@ static int lua_relayout(lua_State *L)
 		widget->width = w + sx + 2*sy;
 		widget->height = y;
 	}
-	else if (mode&GRID){
-		
+	else if ( (mode&GRID) && lua_isnumber(L,5)){
+		float ww[32];
+		uiWidget * col[32];
+		int i = 0;
+		int grid_n = lua_tointeger(L, 5);
+		if (grid_n >= 32 || grid_n < 0)return 0;
+
+		it = widget->child;
+		last = it;
+		while (it){
+			last = it;
+			ww[i%grid_n] = max(ww[i%grid_n], it->width+2*sx);
+			i++;
+			it = it->next;
+		}
+		if (mode&REVERSE)
+			it = last;
+		else
+			it = widget->child;
+		i = 0;
+		y = sy;
+		while (it){
+			h = max(h, it->height);
+			if ((i%grid_n == 0) && i != 0){
+				relayout_raw(col, ww, h,sx,y, grid_n,mode);
+				y += (h + sy);
+				h = 0;
+			}
+			col[i%grid_n] = it;
+			if (mode&REVERSE)
+				it = it->prev;
+			else
+				it = it->next;
+			i++;
+		}
+		if (i>0){
+			int n = i%grid_n == 0 ? grid_n : i%grid_n;
+			relayout_raw(col, ww, h, sx, y, n, mode);
+			y += (h + sy);
+		}
+		x = 0;
+		int n = i < grid_n ? i : grid_n;
+		for (i = 0; i < n; i++)
+			x += ww[i];
+		widget->width = x;
+		widget->height = y;
 	}
 	else{
 		return 0;
