@@ -1,9 +1,15 @@
 local vg = require "vg"
 local ui = require "ui"
 
-local k = 2000
-local k2 = 1 --velocity 
-local m = 1
+local SLIDE = 1 --滑动
+local SLOWDOWN = 2 --缓存减速
+local REBOUND = 3 --回弹
+local REBOUND2 = 4 --回弹
+local MOTIONLESS = 0 --静止
+
+local SLIDETIME = 0.5 --滑动时间
+local SLOWDOWNTIME = 0.5 --停止时间
+local REBOUNDTIME = 0.5 --回弹时间
 return {
 	onInit=function(self,themes)
 		self._color = themes.color
@@ -17,18 +23,51 @@ return {
 		self._spacey = 3
 		self._lastDrapPt = {}
 		self._lastDrapIdx = 1
+		self._status = MOTIONLESS
+		self._tick = 0
 	end,
 	onRelease=function(self)
 	end,
+	calcRebound=function(self,x,y,w,h,sw,sh)
+		if y <= 0 or y + h >= sh then
+			self._status = REBOUND
+			self._tick = REBOUNDTIME
+		end
+	end,
 	onDraw=function(self,dt)
-		--[[
-		local w,h = self:getSize()
-		vg.beginPath()
-		vg.rect(0,0,w,h)
-		vg.fillColor(self._colorBG)
-		vg.fill()
-		]]
-		self:clacForce(dt)
+		if self._status == MOTIONLESS then
+			return
+		end
+		local sw,sh = self:getSize()
+		local w,h = self._inner:getSize()
+		local x,y = self._inner:getPosition()
+		
+		if self._status == SLIDE then
+			self._tick = self._tick - dt
+			if self._tick < 0 then
+				self._status = SLOWDOWN
+				self._tick = SLOWDOWNTIME
+				self._slowdownVelocity = {x=self._velocity.x,y=self._velocity.y}
+			end
+			self:calcRebound()		
+		elseif self._status == SLOWDOWN then
+			self._tick = self._tick - dt
+			if self._tick > 0 then
+				self._velocity.x = self._slowdownVelocity.x * self._tick/SLOWDOWNTIME
+				self._velocity.y = self._slowdownVelocity.y * self._tick/SLOWDOWNTIME
+			else
+				self._status = MOTIONLESS
+				self._velocity.x = 0
+				self._velocity.y = 0
+			end
+			self:calcRebound()				
+		elseif self._status == REBOUND then
+		
+		end
+		
+		--x = x + self._velocity.x * dt
+		y = y + self._velocity.y * dt
+		self._inner:setPosition(x,y)
 	end,
 	addDrapPt=function(self,x,y,t)
 		self._lastDrapPt[self._lastDrapIdx] = {x=x,y=y,t=t}
@@ -39,8 +78,9 @@ return {
 	end,
 	clearDrapPt=function(self)
 		for i=1,10 do
-			self._lastDrapPt[self._lastDrapIdx] = nil
+			self._lastDrapPt[i] = nil
 		end
+		self._lastDrapIdx = 1
 	end,
 	calcDrapVelocity=function(self)
 		local p,last_p,x,y,n
@@ -69,48 +109,11 @@ return {
 			end			
 		end
 		if n > 0 then
+			n = n * 2
 			return {x=x/n,y=y/n}
 		else
 			return {x=0,y=0}
 		end
-	end,
-	clacForce=function(self,dt)
-		if not self._velocity then	return end
-		local f = {x=0,y=0}
-		local sw,sh = self:getSize()
-		local w,h = self._inner:getSize()
-		local x,y = self._inner:getPosition()
-		local ox,oy
-		ox = x
-		oy = y
-		if x < sw-w then
-			f.x = g
-		elseif x > 0 then
-			f.x = -g
-		end
-		if y < sh-h then
-			f.y = g
-		elseif y > 0 then
-			f.y = -g
-		end
-		f.x = f.x - k2*self._velocity.x
-		f.y = f.y - k2*self._velocity.y
-
-		if isand(self._mode,ui.HORIZONTAL) then
-			x = x + dt*self._velocity.x
-			self._velocity.x = self._velocity.x + f.x*dt/m
-		else
-			y = y + dt*self._velocity.y
-			self._velocity.y = self._velocity.y + f.y*dt/m
-			if oy < sw-w and y > sw-w then
-				y = sw-w
-				self._velocity = nil
-			elseif oy > 0 and y < 0 then
-				y = 0
-				self._velocity = nil
-			end
-		end
-		self._inner:setPosition(x,y)
 	end,
 	onEvent=function(self,event)
 		if event.type == ui.EVENT_TOUCHDOWN then
@@ -121,6 +124,8 @@ return {
 		elseif event.type == ui.EVENT_TOUCHUP then
 			self._down = false
 			self._velocity = self:calcDrapVelocity()
+			self._tick = SLIDETIME
+			self._status = SLIDE
 		elseif event.type == ui.EVENT_TOUCHDROP then
 			if self._down then
 				local sw,sh = self:getSize()

@@ -765,6 +765,17 @@ int lua_utf8Index(lua_State *L)
 	}
 	return 1;
 }
+
+/**
+* \brief 返回当前的毫秒精度的一个计时
+* \return 返回一个秒为单位的计时数
+*/
+int lua_tick(lua_State *L)
+{
+	lua_pushnumber(L, SDL_GetTicks() / 1000.0);
+	return 1;
+}
+
 /*
  * 初始Lua环境
  */
@@ -788,6 +799,7 @@ int initLua()
 		{ "utf8Length", lua_utf8Length },
 		{ "utf8Index", lua_utf8Index },
 		{ "isDebug", lua_isDebug },
+		{ "tick",lua_tick },
 		{ NULL, NULL }
 	};
 	const luaL_reg luax_exts[] = {
