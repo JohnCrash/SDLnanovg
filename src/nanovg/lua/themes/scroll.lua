@@ -1,15 +1,17 @@
 local vg = require "vg"
 local ui = require "ui"
 
-local SLIDE = 1 --滑动
-local SLOWDOWN = 2 --缓存减速
-local REBOUND = 3 --回弹
-local REBOUND2 = 4 --回弹
-local MOTIONLESS = 0 --静止
+local SLIDE = 1		--滑动
+local SLOWDOWN = 2	--缓存减速
+local REBOUND = 3	--回弹
+local REBOUND2 = 4	--回弹
+local MOTIONLESS = 0	--静止
 
-local SLIDETIME = 0.5 --滑动时间
-local SLOWDOWNTIME = 0.5 --停止时间
-local REBOUNDTIME = 0.5 --回弹时间
+local SLIDETIME = 0.5		--滑动时间
+local SLOWDOWNTIME = 1		--停止时间
+local REBOUNDTIME = 0.1		--回弹时间
+local REBOUNDVELOCITY = 5	--回弹速度
+
 return {
 	onInit=function(self,themes)
 		self._color = themes.color
@@ -19,20 +21,51 @@ return {
 		self._inner = ui.createWidget(themes.name,"inner")
 		self:addChild(self._inner)
 		self._mode = ui.VERTICAL
+		self._isrebound = true		--是否回弹默认打开
 		self._spacex = 0
 		self._spacey = 3
-		self._lastDrapPt = {}
-		self._lastDrapIdx = 1
 		self._status = MOTIONLESS
 		self._tick = 0
+		self._velocity = {x=0,y=0}
+		self._st = require "themes/slidetrack".new()
+		self._isHoriz = isand(self._mode,ui.HORIZONTAL)
 	end,
 	onRelease=function(self)
 	end,
-	calcRebound=function(self,x,y,w,h,sw,sh)
-		if y <= 0 or y + h >= sh then
-			self._status = REBOUND
-			self._tick = REBOUNDTIME
+	--计算超出部分长度
+	calcOverbound=function(self,x,y,sw,sh,w,h)
+		if self._isHoriz then
+			if x > 0 then
+				return -x,0
+			elseif sw-x-w > 0 then
+				return sw-x-w,sw-w
+			end		
+		else
+			if y > 0 then
+				return -y,0
+			elseif sh-y-h > 0 then
+				return sh-y-h,sh-h
+			end
 		end
+		return 0,0
+	end,
+	calcReboundVelocity=function(self,o,op)
+		if self._isHoriz then
+			if o ~= 0 then
+				if math.abs(o) < 1 then
+					return {x=op,y=0,isend=1}
+				end
+				return {x=REBOUNDVELOCITY*o,y=0}
+			end		
+		else
+			if o ~= 0 then
+				if math.abs(o) < 1 then
+					return {x=0,y=op,isend=1}
+				end
+				return {x=0,y=REBOUNDVELOCITY*o}
+			end
+		end
+		return {x=0,y=0}
 	end,
 	onDraw=function(self,dt)
 		if self._status == MOTIONLESS then
@@ -41,6 +74,14 @@ return {
 		local sw,sh = self:getSize()
 		local w,h = self._inner:getSize()
 		local x,y = self._inner:getPosition()
+		local o,op = self:calcOverbound(x,y,sw,sh,w,h)
+		
+		if self._status == SLIDE or self._status == SLOWDOWN then
+			if o ~= 0 then
+				self._status = REBOUND
+				self._tick = REBOUNDTIME
+			end
+		end
 		
 		if self._status == SLIDE then
 			self._tick = self._tick - dt
@@ -49,7 +90,6 @@ return {
 				self._tick = SLOWDOWNTIME
 				self._slowdownVelocity = {x=self._velocity.x,y=self._velocity.y}
 			end
-			self:calcRebound()		
 		elseif self._status == SLOWDOWN then
 			self._tick = self._tick - dt
 			if self._tick > 0 then
@@ -59,95 +99,93 @@ return {
 				self._status = MOTIONLESS
 				self._velocity.x = 0
 				self._velocity.y = 0
-			end
-			self:calcRebound()				
+			end		
 		elseif self._status == REBOUND then
-		
+			self._tick = self._tick - dt
+			if self._tick < 0 then
+				self._status = REBOUND2
+				self._tick = REBOUNDTIME
+				self._velocity.x = -self._velocity.x
+				self._velocity.y = -self._velocity.y			
+			end
+		elseif self._status == REBOUND2 then
+			self._velocity = self:calcReboundVelocity(o,op)
+			if self._velocity.isend then
+				self._status = MOTIONLESS
+				self._inner:setPosition(self._velocity.x,self._velocity.y)
+				self._velocity = {x=0,y=0}
+				return
+			end
 		end
 		
-		--x = x + self._velocity.x * dt
-		y = y + self._velocity.y * dt
-		self._inner:setPosition(x,y)
-	end,
-	addDrapPt=function(self,x,y,t)
-		self._lastDrapPt[self._lastDrapIdx] = {x=x,y=y,t=t}
-		self._lastDrapIdx = self._lastDrapIdx + 1
-		if self._lastDrapIdx > 10 then
-			self._lastDrapIdx = 1
+		if self._isHoriz then
+			x = x + self._velocity.x * dt
+		else
+			y = y + self._velocity.y * dt
 		end
-	end,
-	clearDrapPt=function(self)
-		for i=1,10 do
-			self._lastDrapPt[i] = nil
-		end
-		self._lastDrapIdx = 1
-	end,
-	calcDrapVelocity=function(self)
-		local p,last_p,x,y,n
-		local bidx = self._lastDrapIdx
-		if bidx > 10 then
-			bidx = 1
-		end
-		n = 0
-		x = 0
-		y = 0
-		for i=1,10 do
-			p = self._lastDrapPt[bidx]
-			
-			if last_p and p then
-				local dt = p.t-last_p.t
-				if dt~=0 then
-					x = x + (p.x-last_p.x)/dt
-					y = y + (p.y-last_p.y)/dt
-					n = n + 1
+		
+		if not self._isrebound then
+			o,op = self:calcOverbound(x,y,sw,sh,w,h)
+			if o ~= 0 then
+				self._status = MOTIONLESS
+				if self._isHoriz then
+					x = op
+				else
+					y = op
 				end
 			end
-			last_p = p
-			bidx = bidx + 1
-			if bidx > 10 then
-				bidx = 1
-			end			
 		end
-		if n > 0 then
-			n = n * 2
-			return {x=x/n,y=y/n}
-		else
-			return {x=0,y=0}
-		end
+		--print(string.format("STATUS : %d , (%d,%d)",self._status,x,y))
+		self._inner:setPosition(x,y)
 	end,
 	onEvent=function(self,event)
+		self._st:track(event)
 		if event.type == ui.EVENT_TOUCHDOWN then
-			self._down = true
-			self._downx = event.x
-			self._downy = event.y
-			self:clearDrapPt()
+			self._down = event
+			self._status = MOTIONLESS
 		elseif event.type == ui.EVENT_TOUCHUP then
-			self._down = false
-			self._velocity = self:calcDrapVelocity()
+			self._down = nil
 			self._tick = SLIDETIME
 			self._status = SLIDE
+			self._velocity = self._st:velocity()
 		elseif event.type == ui.EVENT_TOUCHDROP then
 			if self._down then
 				local sw,sh = self:getSize()
 				local w,h = self._inner:getSize()
 				local x,y = self._inner:getPosition()
-				if isand(self._mode,ui.HORIZONTAL) then
-					x = x + event.x - self._downx
-					self._downx = event.x
+				
+				if self._isHoriz then
+					x = x + (event.x - self._down.x)/2
 				else
-					y = y + event.y - self._downy
-					self._downy = event.y			
+					y = y + (event.y - self._down.y)/2
+				end
+				self._down = event
+				if not self._isrebound then
+					local o,op = self:calcOverbound(x,y,sw,sh,w,h)
+					if self._isHoriz then
+						if o ~= 0 then
+							x = op
+						end									
+					else
+						if o ~= 0 then
+							y = op
+						end					
+					end
 				end
 				self._inner:setPosition(x,y)
-				self:addDrapPt(event.x,event.y,event.time)
 			end
 		end
 		return true
 	end,
-	configScroll=function(self,mode,sx,sy)
+	configScroll=function(self,mode,sx,sy,isrebound)
 		self._mode = mode
 		self._spacex = sx
 		self._spacey = sy
+		self._isrebound = isrebound
+		self._isHoriz = isand(self._mode,ui.HORIZONTAL)
+	end,
+	setRebound=function(self,en)
+		self._isrebound = en
 	end,
 	addWidget=function(self,widget)
 		self._inner:addChild(widget)

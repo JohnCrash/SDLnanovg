@@ -604,6 +604,7 @@ static void prepareUIEvent()
 		switch (pevent->type){
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
+			SDL_CaptureMouse(pevent->type == SDL_MOUSEBUTTONDOWN);
 			if (pevent->button.button == SDL_BUTTON_LEFT){
 				pev = &(_eventState.events[_eventState.nEvent++]);
 				pev->t = pevent->button.timestamp/1000.0;

@@ -17,14 +17,16 @@ eventFunction("init",function()
 	
 	local scroll = ui.createWidget("normal","scroll")
 	scroll:setPosition(0,h)
-	scroll:setSize(250,320)
+	scroll:setSize(480,320)
 	--scroll:setRotate(vg.degToRad(-10),0,0)
 	root:addChild(scroll)
-	for i=1,3200 do
+	
+	scroll:configScroll(ui.HORIZONTAL,12,0,true)
+	for i=1,24 do
 		local widget = ui.createWidget("normal","label")
 		widget:setString("Label "..i)
 		scroll:addWidget(widget)
 	end
-	--scroll:configScroll(ui.HORIZONTAL,5,0)
+	
 	scroll:relayout()
 end)
