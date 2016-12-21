@@ -1,6 +1,6 @@
 --!
---! \addtogroup luaUI lua themes
---! \brief luaUI控件
+--! \addtogroup scroll scroll widget
+--! \brief scroll widget界面组件，实现横向或者纵向滚动控件。
 --! @{
 --!
 local vg = require "vg"
@@ -18,6 +18,8 @@ local REBOUNDTIME = 0.1		--回弹时间
 local REBOUNDVELOCITY = 5	--回弹速度
 
 return {
+	--!	\brief scroll widget初始化
+	--!	\param themes 引用样式的公共表，包括样式名称和字体等
 	onInit=function(self,themes)
 		self._color = themes.color
 		self._colorBG = themes.colorBG
@@ -35,9 +37,14 @@ return {
 		self._st = require "themes/slidetrack".new()
 		self._isHoriz = isand(self._mode,ui.HORIZONTAL)
 	end,
+	--! \brief 释放操作，当控件被从系统中删除的时候调用
 	onRelease=function(self)
 	end,
-	--计算超出部分长度
+	--! \breif 内部函数，计算超出部分长度
+	--! \param x,y		inner当前位置
+	--! \param sw,sh	scroll widget尺寸
+	--!	\param w,h		inner尺寸
+	--!\return 第一返回值为超出部分长度，第二个部分是不超出应该设置的值
 	calcOverbound=function(self,x,y,sw,sh,w,h)
 		if self._isHoriz then
 			if x > 0 then
@@ -54,6 +61,9 @@ return {
 		end
 		return 0,0
 	end,
+	--! \breif 内部函数，计算反弹速度
+	--! \param o,op	这两个参数是calcOverbound的返回值
+	--! \return 函数返回反弹速度，速度很低时isend=1
 	calcReboundVelocity=function(self,o,op)
 		if self._isHoriz then
 			if o ~= 0 then
@@ -72,6 +82,9 @@ return {
 		end
 		return {x=0,y=0}
 	end,
+	--! \breif widget绘制函数
+	--! \param dt 从上一次调用绘制到这次的时间差，单位时秒
+	--! \return 函数不需要返回值
 	onDraw=function(self,dt)
 		if self._status == MOTIONLESS then
 			return
@@ -143,6 +156,9 @@ return {
 		--print(string.format("STATUS : %d , (%d,%d)",self._status,x,y))
 		self._inner:setPosition(x,y)
 	end,
+	--! \breif widget事件处理函数
+	--! \param event 事件表
+	--! \return 返回true表示事件处理了事件
 	onEvent=function(self,event)
 		self._st:track(event)
 		if event.type == ui.EVENT_TOUCHDOWN then
@@ -195,12 +211,12 @@ return {
 		self._isrebound = isrebound
 		self._isHoriz = isand(self._mode,ui.HORIZONTAL)
 	end,
-	setRebound=function(self,en)
-		self._isrebound = en
-	end,
+	--! \breif 向scroll widget中加入子widget
+	--! \param widget 要加入的子widget
 	addWidget=function(self,widget)
 		self._inner:addChild(widget)
 	end,
+	--! \breif 布局子widget
 	relayout=function(self)
 		self._inner:relayout(self._mode,self._spacex,self._spacey)
 	end,

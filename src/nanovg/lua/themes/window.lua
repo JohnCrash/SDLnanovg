@@ -1,3 +1,8 @@
+--!
+--! \addtogroup window window widget
+--! \brief window widget界面组件，实现窗口控件。
+--! @{
+--!
 local vg = require "vg"
 local ui = require "ui"
 
@@ -66,10 +71,19 @@ return {
 				end
 			end
 		end,
+		--! \brief 设置窗口的标题
 		setTitle=function(self,title)
 			self._title = title
 		end,
+		--! \brief 返回窗口的标题
+		getTitle=function(self)
+			return self._title
+		end,
+		--! \brief 返回窗口标题的高度
 		getTitleHeight=function(self)
 			return 30
 		end,
 	}
+--!
+--! @}
+--!	

@@ -1,3 +1,8 @@
+--!
+--! \addtogroup button button widget
+--! \brief button widget界面组件，实现按钮控件。
+--! @{
+--!
 local vg = require "vg"
 local ui = require "ui"
 
@@ -76,6 +81,8 @@ return {
 			local w,h = self:getSize()
 			drawButton(0,self._title or "OK",0,0,w,h,self._color,self._down)
 		end,
+		--! \brief 按钮的事件处理函数，可以为对象设置.onClick函数
+		--!		例如：buttonObject.onClick = function() end
 		onEvent=function(self,event)
 			if event.type == ui.EVENT_TOUCHDOWN then
 				self._down = true
@@ -91,10 +98,19 @@ return {
 			end
 			return true
 		end,
+		--! \brief 设置按钮的标题
+		--! \param title 要设置的标题
 		setTitle=function(self,title)
 			self._title = title
 			local width,x,y,x2,y2 = vg.textBounds(0,0,title)
-			print(string.format("%d %d %d %d %d",width,x,y,x2,y2))
+			--print(string.format("%d %d %d %d %d",width,x,y,x2,y2))
 			self:setSize(width,y2-y)
-		end,		
+		end,
+		--! \brief 返回按钮的标题文本
+		getTitle=function(self)
+			return self._title
+		end,
 	}
+--!
+--! @}
+--!

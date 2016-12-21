@@ -1,3 +1,8 @@
+--!
+--! \addtogroup progress progress widget
+--! \brief progress widget界面组件，实现进度条控件。
+--! @{
+--!
 local vg = require "vg"
 local ui = require "ui"
 
@@ -31,10 +36,17 @@ return {
 	end,
 	onEvent=function(self,event)
 	end,
+	--! \brief 取得进度条的当前进度0-1.
 	getProgress=function()
 		return self._progress
 	end,
+	--! \brief 设置当前进度，值可以是0-1.
 	setProgress=function(p)
+		if p > 1 then p = 1 end
+		if p < 0 then p = 0 end
 		self._progress = p
 	end,
 }
+--!
+--! @}
+--!

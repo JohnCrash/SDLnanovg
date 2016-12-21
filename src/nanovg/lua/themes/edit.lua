@@ -1,3 +1,8 @@
+--!
+--! \addtogroup edit edit widget
+--! \brief edit widget界面组件，实现单行编辑控件。
+--! @{
+--!
 local vg = require "vg"
 local ui = require "ui"
 local sc = require "scancode"
@@ -200,7 +205,7 @@ return {
 		end
 		return t
 	end,
-	--将光标位置始终保持在编辑范围内
+	--! \brief 将光标位置始终保持在编辑范围内
 	relayout=function(self,isdrop)
 		local w,h = self:getSize()
 		local x = self._cursorPos
@@ -521,11 +526,15 @@ return {
 			end
 		end
 	end,
+	--! \brief 注意不要调用这个函数，如果你想监控文本编辑的变化，就设置onTextChanged
+	--!		例如： editObject.onTextChanged=function(text) end
 	NotifTextChangedEvent=function(self)
 		if self.onTextChanged then
 			self.onTextChanged(self._text)
 		end
 	end,
+	--! \brief 注意不是调用这个函数，如果你想监控回车动作，可以设置onPressAction
+	--!		例如： editObject.onPressAction=function(key) end
 	NotifPressAction=function(self,key)
 		if self.onPressAction then
 			self.onPressAction(key)
@@ -588,3 +597,6 @@ return {
 		end		
 	end,
 }
+--!
+--! @}
+--!

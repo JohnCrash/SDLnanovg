@@ -1,3 +1,8 @@
+--!
+--! \addtogroup label label widget
+--! \brief label widget界面组件，实现文本控件。
+--! @{
+--!
 local vg = require "vg"
 local ui = require "ui"
 
@@ -29,29 +34,43 @@ function label:onDraw()
 	vg.textBox(0,0,math.min(self._breakWidth,w),self._text)
 end
 
+--! \brief 设置对齐方式
+--! \param align 对齐方式，可以是下面的值
+--!		- ALIGN_LEFT	左对齐
+--!		- ALIGN_CENTER	中心对齐
+--!		- ALIGN_RIGHT	右对齐
 function label:setAlign(align)
 	self._align = align
 end
 
+--! \brief 设置文字颜色
+--! \param c 字体颜色，可以使用vg.rgba(255,255,255,255),vg.rgbaf(1,1,1,1)
 function label:setColor(c)
 	self._color = c
 end
 
+--! \brief 设置字体
+--! \param name 字体名称
 function label:setFont( name )
 	self._font = name
 	self:reCalcSize()
 end
 
+--! \brief 设置字体尺寸，函数将重新计算尺寸
+--! \param size 字体尺寸
 function label:setFontSize( size )
 	self._fontSize = size
 	self:reCalcSize()
 end
 
+--! \brief 设置文本的强制折行宽度
+--! \param bw 强制折行宽度
 function label:setBreakWidth(bw)
 	self._breakWidth = bw
 	self:reCalcSize()
 end
 
+--! \brief 根据文本的内容，重新计算控件尺寸
 function label:reCalcSize()
 	vg.save()
 	vg.fontSize(self._fontSize)
@@ -61,13 +80,19 @@ function label:reCalcSize()
 	vg.restore()
 end
 
+--! \brief 设置当前控件的内容,重新计算控件尺寸
 function label:setString(s)
 	self._text = s
 	self:reCalcSize()
 end
 
+--! \brief 取得当前文本控件的内容
+--! \return 返回内容字符串
 function label:getString()
 	return self._text
 end
 
 return label
+--!
+--! @}
+--!

@@ -1,3 +1,8 @@
+--!
+--! \addtogroup switch switch widget
+--! \brief switch widget界面组件，实现开关控件。
+--! @{
+--!
 local vg = require "vg"
 local ui = require "ui"
 
@@ -61,11 +66,18 @@ return {
 		end	
 		return true
 	end,
+	--! \brief 打开或者关闭
+	--! \param on 如果on是ture就打开，否则就关闭
 	switch=function(self,on)
 		self._on = on
 		self._animationDelay = self._animationSpeed
 	end,
+	--! \brief 取得开关控件的状态
+	--! \return 如果开关为开返回true，否则返回false
 	state=function(self,on)
 		return self._on
 	end,
 }
+--！
+--！ @}
+--！
