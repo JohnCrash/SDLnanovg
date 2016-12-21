@@ -1,3 +1,8 @@
+--!
+--! \addtogroup luaUI lua themes
+--! \brief luaUI控件
+--! @{
+--!
 local vg = require "vg"
 local ui = require "ui"
 
@@ -177,6 +182,12 @@ return {
 		end
 		return true
 	end,
+	--! \brief configScroll函数配置scroll控件的参数
+	--! \param mode	指定是横向还是属相
+	--! \param sx	scroll子对象的横向间隔
+	--! \param sy	scroll子对象的竖向间隔
+	--! \param isrebound	滚动到头部或者尾部是否回弹
+	--! \return 无返回
 	configScroll=function(self,mode,sx,sy,isrebound)
 		self._mode = mode
 		self._spacex = sx
@@ -194,3 +205,7 @@ return {
 		self._inner:relayout(self._mode,self._spacex,self._spacey)
 	end,
 }
+
+--!
+--! @}
+--!

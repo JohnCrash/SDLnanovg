@@ -4,11 +4,11 @@
 
 /**
 * \addtogroup bitree bitree bitree
-* \brief ¶ş·Ö·¨¶Ô¿Õ¼ä½øĞĞ·Ö¸î²éÕÒ
+* \brief äºŒåˆ†æ³•å¯¹ç©ºé—´è¿›è¡Œåˆ†å‰²æŸ¥æ‰¾
 *
-* ½«ÈÎºÎÒ»¸öÊıv±íÊ¾ÎªÈçÏÂ½á¹¹,v = 2^m*(2n+1)£¬ÆäÖĞm=0,1,2,3...,n=0,1,2,3
-* ÄÇÃ´Èç¹ûn = 0,2,4...ÄÇÃ´vÊÇ×óÖ¦£¬Èç¹ûn = 1,3,5...ÄÇÃ´vÊÇÓÒÖ¦¡£
-* ÖµvµÄ×ó×ÓÖ¦ÊÇv-2^(m-1)£¬vµÄÓÒ×ÓÖ¦ÊÇv+2^(m-1)¡£vµÄ¸¸½ÚµãÖµÊÇv+-2^mÈç¹ûvÊÇ×óÖµ¾Í+£¬ÓÒÖµ¾Í-
+* å°†ä»»ä½•ä¸€ä¸ªæ•°vè¡¨ç¤ºä¸ºå¦‚ä¸‹ç»“æ„,v = 2^m*(2n+1)ï¼Œå…¶ä¸­m=0,1,2,3...,n=0,1,2,3
+* é‚£ä¹ˆå¦‚æœn = 0,2,4...é‚£ä¹ˆvæ˜¯å·¦æï¼Œå¦‚æœn = 1,3,5...é‚£ä¹ˆvæ˜¯å³æã€‚
+* å€¼vçš„å·¦å­ææ˜¯v-2^(m-1)ï¼Œvçš„å³å­ææ˜¯v+2^(m-1)ã€‚vçš„çˆ¶èŠ‚ç‚¹å€¼æ˜¯v+-2^må¦‚æœvæ˜¯å·¦å€¼å°±+ï¼Œå³å€¼å°±-
 * @{
 */
 int pow2table[] = {
@@ -19,9 +19,9 @@ int pow2table[] = {
 };
 
 /**
- * \breif ¶ÔÒ»¸öÖµ×ö¶ş·Ö·Ö½â£¬v = 2^m(2n+1) ,m=0,1,2..,n=0,1,2..
- * \param m ·µ»ØmÖµ
- * \param n ·µ»ØnÖµ
+ * \breif å¯¹ä¸€ä¸ªå€¼åšäºŒåˆ†åˆ†è§£ï¼Œv = 2^m(2n+1) ,m=0,1,2..,n=0,1,2..
+ * \param m è¿”å›må€¼
+ * \param n è¿”å›nå€¼
  */
 void bi_decompose(int v, int *m, int *n)
 {
@@ -40,9 +40,9 @@ void bi_decompose(int v, int *m, int *n)
 }
 
 /**
- * \breif ¶ş·Ö·¨£¬·µ»ØÖµ¶ÔÓ¦µÄ½ÚµãµÄ·¶Î§
- * \param minx ·µ»Ø×îĞ¡Öµ
- * \param maxx ·µ»Ø×î´óÖµ
+ * \breif äºŒåˆ†æ³•ï¼Œè¿”å›å€¼å¯¹åº”çš„èŠ‚ç‚¹çš„èŒƒå›´
+ * \param minx è¿”å›æœ€å°å€¼
+ * \param maxx è¿”å›æœ€å¤§å€¼
  */
 void bi_range(int v, int *minx, int *maxx)
 {
@@ -60,8 +60,8 @@ void bi_range(int v, int *minx, int *maxx)
 }
 
 /**
- * \brief ´´½¨Ò»¸öÊ÷½Úµã£¬¸Ã½ÚµãµÄÖµÎªv
- * \return ³É¹¦·µ»ØÊ÷½Úµã£¬Ê§°Ü·µ»ØNULL
+ * \brief åˆ›å»ºä¸€ä¸ªæ ‘èŠ‚ç‚¹ï¼Œè¯¥èŠ‚ç‚¹çš„å€¼ä¸ºv
+ * \return æˆåŠŸè¿”å›æ ‘èŠ‚ç‚¹ï¼Œå¤±è´¥è¿”å›NULL
  */
 bitree * bitree_create(int v)
 {
@@ -84,8 +84,8 @@ static void bitree_delete_recursion(bitree * p)
 }
 
 /**
- * \brief É¾³ıÊ÷ÏàÁ¬½ÓµÄÈ«²¿½Úµã
- * \param pbt ËÑË÷½ÚµãÆğµã
+ * \brief åˆ é™¤æ ‘ç›¸è¿æ¥çš„å…¨éƒ¨èŠ‚ç‚¹
+ * \param pbt æœç´¢èŠ‚ç‚¹èµ·ç‚¹
  */
 void bitree_delete(bitree * pbt)
 {
@@ -95,16 +95,16 @@ void bitree_delete(bitree * pbt)
 }
 
 /**
- * \brief ÏòÊ÷ÉÏ¼ÓÈëÒ»¸ö½Úµã£¬²¢½«¸Ã½ÚµãÁ¬½Óµ½Ö¦¸ÉÉÏ
- * \param pbt Ö÷Ö¦¸ÉÉÏµÄÈÎÒâÒ»¸ö½Úµã
- * \param v Òª¼ÓÈëµÄ½ÚµãÖµ£¬Èç¹ûÒÑ¾­´æÔÚ¾ÍÖ±½Ó·µ»Ø¸Ã½Úµã
+ * \brief å‘æ ‘ä¸ŠåŠ å…¥ä¸€ä¸ªèŠ‚ç‚¹ï¼Œå¹¶å°†è¯¥èŠ‚ç‚¹è¿æ¥åˆ°æå¹²ä¸Š
+ * \param pbt ä¸»æå¹²ä¸Šçš„ä»»æ„ä¸€ä¸ªèŠ‚ç‚¹
+ * \param v è¦åŠ å…¥çš„èŠ‚ç‚¹å€¼ï¼Œå¦‚æœå·²ç»å­˜åœ¨å°±ç›´æ¥è¿”å›è¯¥èŠ‚ç‚¹
  */
 bitree * bitree_add(bitree * pbt, int v)
 {
 	int m, n;
 	bitree * it = pbt;
 	/*
-	 * ÏÈÏòÉÏ²éÕÒ£¬ÕÒ²»µ½¾Í´´½¨£¬Ö»µÀÒ»¸ö°üº¬vµÄ½Úµã
+	 * å…ˆå‘ä¸ŠæŸ¥æ‰¾ï¼Œæ‰¾ä¸åˆ°å°±åˆ›å»ºï¼Œåªé“ä¸€ä¸ªåŒ…å«vçš„èŠ‚ç‚¹
 	 */
 	while (it){
 		if (bitree_ischild(it, v))
@@ -120,7 +120,7 @@ bitree * bitree_add(bitree * pbt, int v)
 		it = it->p;
 	}
 	/*
-	 * ÏòÏÂ²éÕÒÃ»ÓĞ¾ÍÌí¼Ó½Úµã
+	 * å‘ä¸‹æŸ¥æ‰¾æ²¡æœ‰å°±æ·»åŠ èŠ‚ç‚¹
 	 */
 	while (it){
 		if (it->value > v){
@@ -147,9 +147,9 @@ bitree * bitree_add(bitree * pbt, int v)
 }
 
 /**
- * \brief Èç¹ûvÊÇpbtµÄÒ»¸ö×Ó½Úµã·µ»Ø1£¬·ñÔò0.
- * \param pbt ¶ş·ÖÊ÷½Úµã
- * \param v	Ò»¸öÕûÊıÖµ
+ * \brief å¦‚æœvæ˜¯pbtçš„ä¸€ä¸ªå­èŠ‚ç‚¹è¿”å›1ï¼Œå¦åˆ™0.
+ * \param pbt äºŒåˆ†æ ‘èŠ‚ç‚¹
+ * \param v	ä¸€ä¸ªæ•´æ•°å€¼
  */
 int bitree_ischild(bitree * pbt, int v)
 {
@@ -159,22 +159,22 @@ int bitree_ischild(bitree * pbt, int v)
 }
 
 /**
- * \brief ·µ»Ø¸ø¶¨ÖµµÄÊ÷½Úµã
- * \param pbt ËÑË÷Æğµã
- * \param v ÒªËÑË÷µÄÕûÊıÖµ
+ * \brief è¿”å›ç»™å®šå€¼çš„æ ‘èŠ‚ç‚¹
+ * \param pbt æœç´¢èµ·ç‚¹
+ * \param v è¦æœç´¢çš„æ•´æ•°å€¼
  */
 bitree * bitree_at(bitree * pbt, int v)
 {
 	bitree * it = pbt;
 
 	/* 
-	 * ÏÈÏòÉÏËÑË÷£¬ÕÒµ½µÚÒ»¸ö°üÀ¨vµÄ½Úµã
+	 * å…ˆå‘ä¸Šæœç´¢ï¼Œæ‰¾åˆ°ç¬¬ä¸€ä¸ªåŒ…æ‹¬vçš„èŠ‚ç‚¹
 	 */
 	while (it && !bitree_ischild(it,v)){
 		it = it->p;
 	}
 	/*
-	 * ´ÓÕâ¸ö°üÀ¨vµÄ½ÚµãÏòÏÂËÑË÷£¬Ğ¡ÓÚvalueÏò×óËÑË÷£¬´óÓÚvalueÏòÓÒËÑË÷
+	 * ä»è¿™ä¸ªåŒ…æ‹¬vçš„èŠ‚ç‚¹å‘ä¸‹æœç´¢ï¼Œå°äºvalueå‘å·¦æœç´¢ï¼Œå¤§äºvalueå‘å³æœç´¢
 	 */
 	while (it){
 		if (it->value > v)
@@ -188,8 +188,8 @@ bitree * bitree_at(bitree * pbt, int v)
 }
 
 /**
- * \brief ·µ»Ø¸ú½Úµã
- * \param pbt ËÑË÷Æğµã
+ * \brief è¿”å›è·ŸèŠ‚ç‚¹
+ * \param pbt æœç´¢èµ·ç‚¹
  */
 bitree * bitree_root(bitree * pbt)
 {
@@ -203,20 +203,20 @@ bitree * bitree_root(bitree * pbt)
 }
 
 /*
- * ÕÒµ½Ò»¸ö×î½Ó½üvÖµµÄ½Úµã
+ * æ‰¾åˆ°ä¸€ä¸ªæœ€æ¥è¿‘vå€¼çš„èŠ‚ç‚¹
  */
 static bitree * bitree_near(bitree * pbt, int v)
 {
 	bitree * it = pbt;
 	bitree * near;
 	/*
-	 * ÏÈÏòÉÏËÑË÷£¬ÕÒµ½µÚÒ»¸ö°üÀ¨vµÄ½Úµã
+	 * å…ˆå‘ä¸Šæœç´¢ï¼Œæ‰¾åˆ°ç¬¬ä¸€ä¸ªåŒ…æ‹¬vçš„èŠ‚ç‚¹
 	 */
 	while (it && !bitree_ischild(it, v)){
 		it = it->p;
 	}
 	/*
-	 * ´ÓÕâ¸ö°üÀ¨vµÄ½ÚµãÏòÏÂËÑË÷£¬Ğ¡ÓÚvalueÏò×óËÑË÷£¬´óÓÚvalueÏòÓÒËÑË÷
+	 * ä»è¿™ä¸ªåŒ…æ‹¬vçš„èŠ‚ç‚¹å‘ä¸‹æœç´¢ï¼Œå°äºvalueå‘å·¦æœç´¢ï¼Œå¤§äºvalueå‘å³æœç´¢
 	 */
 	near = it;
 	while (it){
@@ -232,11 +232,11 @@ static bitree * bitree_near(bitree * pbt, int v)
 }
 
 /**
- * \brief ±éÀúÊ÷µÄÖ¸¶¨·¶Î§
- * \param pbt Æğµã
- * \param v0 ÆğÊ¼·¶Î§Öµ
- * \param v1 ½áÊø·¶Î§Öµ
- * \param cb ±éÀú»Øµ÷µô£¬µ±ÕÒµ½·ûºÏÒªÇóµÄÖµ¾Íµ÷ÓÃ¸Ã»Øµ÷
+ * \brief éå†æ ‘çš„æŒ‡å®šèŒƒå›´
+ * \param pbt èµ·ç‚¹
+ * \param v0 èµ·å§‹èŒƒå›´å€¼
+ * \param v1 ç»“æŸèŒƒå›´å€¼
+ * \param cb éå†å›è°ƒæ‰ï¼Œå½“æ‰¾åˆ°ç¬¦åˆè¦æ±‚çš„å€¼å°±è°ƒç”¨è¯¥å›è°ƒ
  */
 void bitree_range(bitree * pbt, int v0, int v1, void(*cb)(bitree *it))
 {

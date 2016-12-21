@@ -22,7 +22,7 @@ void bi_decompose(int v, int *m, int *n);
 void bi_range(int v, int *minx, int *maxx);
 
 /*
- * ½«´óÓÚ0ºÍÐ¡ÓÚ0µÄÁ¬½Óµ½0½ÚµãÉÏ,ÕâÑù½«Õû¸öintÈ«²¿ÕûºÏÔÚÒ»¸ö¿ÃÊ÷ÉÏ
+ * å°†å¤§äºŽ0å’Œå°äºŽ0çš„è¿žæŽ¥åˆ°0èŠ‚ç‚¹ä¸Š,è¿™æ ·å°†æ•´ä¸ªintå…¨éƒ¨æ•´åˆåœ¨ä¸€ä¸ªæ£µæ ‘ä¸Š
  */
 #define BI_PARENT_VALUE(v,m,n) (m >= 30 ? 0:(n % 2 ? v - pow2table[m] : v + pow2table[m]))
 #define BI_LEFT_VALUE(v,m) (m == 31 ? pow2table[31] : v - pow2table[m - 1])

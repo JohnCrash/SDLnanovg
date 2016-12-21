@@ -7,11 +7,12 @@
 
 #define LUA_UI_HANDLE "lua_nanoui_t"
 #define max(a, b)  (((a) > (b)) ? (a) : (b)) 
-/**
- * \addtogroup LuaUI lua ui
- * \brief 界面相关的lua函数
- * @{
- */
+
+///
+/// \addtogroup LuaUI lua ui
+/// \brief 界面相关的lua函数,装入控件样式，创建界面控件等。
+/// @{
+///
 /**
  * 如果没有对应的luaWidget对象，就创建一个luaWidget对象。
  * 并将其压入到lua堆栈，否则将引用的luaWidget压入到堆栈。
@@ -62,11 +63,9 @@ static int lua_createWidget(lua_State *L)
 	lua_pushnil(L);
 	return 1;
 }
-	
-/**
- * \brief 删除控件，在lua中的调用方式 ui.deleteWidget(widget)
- * \param self 要删除的控件
- */
+
+/// \brief 删除控件，在lua中的调用方式 ui.deleteWidget(widget)
+/// \param self 要删除的控件
 static int lua_deleteWidget(lua_State *L)
 {
 	uiWidget *widget = lua_checkWidget(L, 1);
