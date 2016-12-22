@@ -198,7 +198,7 @@ return {
 		end
 		return true
 	end,
-	--! \brief configScroll函数配置scroll控件的参数
+	--! \breif configScroll函数配置scroll控件的参数
 	--! \param mode	指定是横向还是属相
 	--! \param sx	scroll子对象的横向间隔
 	--! \param sy	scroll子对象的竖向间隔
@@ -220,6 +220,23 @@ return {
 	relayout=function(self)
 		self._inner:relayout(self._mode,self._spacex,self._spacey)
 	end,
+	--! \brief 设置对齐方式
+	--! \param align 对齐方式，可以是下面的值
+	--!		- ui.ALIGN_LEFT		左对齐
+	--!		- ui.ALIGN_CENTER	中心对齐
+	--!		- ui.ALIGN_RIGHT	右对齐
+	--!		- ui.ALIGN_TOP		顶对齐
+	--!		- ui.ALIGN_MIDDLE	竖向中心对齐
+	--!		- ui.ALIGN_BOTTOM	低对齐	
+	setAlign=function(align,offx,offy)
+		self._align = align
+		self._alignX = offx
+		self._alignY = offy
+	end,
+	--! \brief 取得对齐方式
+	getAlign=function()
+		return self._align,self._alignX,self._alignY
+	end,	
 }
 
 --!

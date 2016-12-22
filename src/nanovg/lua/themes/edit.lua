@@ -527,14 +527,14 @@ return {
 		end
 	end,
 	--! \brief 注意不要调用这个函数，如果你想监控文本编辑的变化，就设置onTextChanged
-	--!		例如： editObject.onTextChanged=function(text) end
+	--!	\note 例如： editObject.onTextChanged=function(text) end
 	NotifTextChangedEvent=function(self)
 		if self.onTextChanged then
 			self.onTextChanged(self._text)
 		end
 	end,
 	--! \brief 注意不是调用这个函数，如果你想监控回车动作，可以设置onPressAction
-	--!		例如： editObject.onPressAction=function(key) end
+	--!	\note 例如： editObject.onPressAction=function(key) end
 	NotifPressAction=function(self,key)
 		if self.onPressAction then
 			self.onPressAction(key)
@@ -595,6 +595,23 @@ return {
 			vg.fillColor(self._colorBG)
 			vg.fill()
 		end		
+	end,
+	--! \brief 设置对齐方式
+	--! \param align 对齐方式，可以是下面的值
+	--!		- ui.ALIGN_LEFT		左对齐
+	--!		- ui.ALIGN_CENTER	中心对齐
+	--!		- ui.ALIGN_RIGHT	右对齐
+	--!		- ui.ALIGN_TOP		顶对齐
+	--!		- ui.ALIGN_MIDDLE	竖向中心对齐
+	--!		- ui.ALIGN_BOTTOM	低对齐	
+	setAlign=function(align,offx,offy)
+		self._align = align
+		self._alignX = offx
+		self._alignY = offy
+	end,
+	--! \brief 取得对齐方式
+	getAlign=function()
+		return self._align,self._alignX,self._alignY
 	end,
 }
 --!

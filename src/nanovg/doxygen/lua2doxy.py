@@ -3,16 +3,16 @@ import sys
 import string
 
 def lua2doxyline(line):
-	if string.find(line,'function')!=-1:
+	if string.find(line,'--!')!=-1:
+		sys.stdout.write(string.replace(line,'--!','///'))
+	elif string.find(line,'function')!=-1:
 		if string.find(line,'=function')!=-1:
 			sys.stdout.write('function '+string.replace(line,'=function',''))
 		elif string.find(line,'= function')!=-1:
 			sys.stdout.write('function '+string.replace(line,'= function',''))
 		else:
-			sys.stdout.write(line)
+			pass
 		sys.stdout.write(';\n')
-	elif string.find(line,'--!')!=-1:
-		sys.stdout.write(string.replace(line,'--!','///'))
 		
 def lua2doxy(filename):
 	lua = open(filename,'rb')

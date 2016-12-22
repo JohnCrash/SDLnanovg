@@ -776,6 +776,18 @@ int lua_tick(lua_State *L)
 	return 1;
 }
 
+/**
+* \brief 在window系统中用来调整主窗口的尺寸
+* \param w,h 屏幕宽度与高度
+*/
+int lua_setWindowSize(lua_State *L)
+{
+	int w = luaL_checkint(L, 1);
+	int h = luaL_checkint(L, 2);
+	SDLState * state = getSDLState();
+	SDL_SetWindowSize(state->window, w, h);
+	return 0;
+}
 /*
  * 初始Lua环境
  */
@@ -788,6 +800,7 @@ int initLua()
 		{ "eventFunction", lua_eventFunction },
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },
+		{ "setWindowSize",lua_setWindowSize},
 		{ "schedule", lua_schedule },
 		{ "removeSchedule", lua_removeSchedule },
 		{ "softKeyboard",lua_enableSoftkeyboard },
