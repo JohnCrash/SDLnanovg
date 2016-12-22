@@ -3,17 +3,12 @@ local vg = require "vg"
 
 local themes = "normal"
 
-local titleLayout
-local scrollLayout
+local baseLayout
 
 local function relayout()
 	local w,h = screenSize()
-	titleLayout:setPosition(0,0)
-	titleLayout:setSize(w,32)
-	titleLayout:relayout()
-	scrollLayout:setPosition(0,32)
-	scrollLayout:setSize(w,h-32)
-	scrollLayout:relayout()
+	baseLayout:setSize(w,h)
+	baseLayout:relayout()
 end
 
 eventFunction("init",function()
@@ -23,25 +18,36 @@ eventFunction("init",function()
 
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
+
+	baseLayout = ui.createWidget(themes,"layout")
 	
-	titleLayout = ui.createWidget(themes,"layout")
+	local titleLayout = ui.createWidget(themes,"layout")
 	local title = ui.createWidget(themes,"label")
 	title:setString("设置")
 	title:setAlign(ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
-	root:addChild(titleLayout)
 	titleLayout:addChild(title)
+	titleLayout:setAlign(ui.ALIGN_LEFT+ui.ALIGN_TOP)
+	titleLayout:setLayoutMatch(ui.WIDTH_MATCH_PARENT)
+	titleLayout:setSize(w,32)
+	baseLayout:addChild(titleLayout)
 	
-	scrollLayout = ui.createWidget(themes,"scroll")
-	scrollLayout:configScroll(ui.VERTICAL,0,0,true)
-	root:addChild(scrollLayout)
+	local scrollLayout = ui.createWidget(themes,"scroll")
+	scrollLayout:configScroll(ui.VERTICAL+ui.ALIGN_RIGHT,0,0,true)
+	scrollLayout:setAlign(ui.ALIGN_LEFT+ui.ALIGN_BOTTOM)
+	scrollLayout:setLayoutMatch(ui.FILL_PARENT,0,32)
+	baseLayout:addChild(scrollLayout)
 	
+	local search = ui.createWidget(themes,"edit")
+	
+	scrollLayout:addChild(search)
 	
 	for i=1,64 do
 		local widget = ui.createWidget(themes,"label")
 		widget:setString("Label "..i)
-		scrollLayout:addWidget(widget)
+		scrollLayout:addChild(widget)
 	end
 	
+	root:addChild(baseLayout)
 	relayout()
 end)
 
