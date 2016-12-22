@@ -23,8 +23,6 @@ local function relayoutChild(child,align,w,h)
 		ch = h-(child._matchY or 0)
 		child:setSize(cw,ch)
 	end
-	cw,ch = child:getSize()
-	--print(string.format("%d , (%d,%d)",match,cw,ch))
 	if isand(align,ui.ALIGN_LEFT) then
 		cx = child._alignX or 0
 	elseif isand(align,ui.ALIGN_CENTER) then
@@ -40,8 +38,7 @@ local function relayoutChild(child,align,w,h)
 		cy = h-ch+(child._alignY or 0)
 	end	
 	child:setPosition(cx,cy)
-	--print(string.format("position %d , %d",cx,cy))
-	if child._type == 'layout' then
+	if child._type == 'layout' or child._type == 'scroll' then
 		child:relayout()
 	end
 end
