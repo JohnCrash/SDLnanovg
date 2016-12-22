@@ -11,21 +11,20 @@ local function relayoutChild(child,align,w,h)
 	local cx,cy = child:getPosition()
 	local match = child._match or ui.WRAP_CONTENT
 	
-	if isand(match,ui.FILL_PARENT) then
+	if isand(match,ui.WIDTH_MATCH_PARENT) and 
+		isand(match,ui.HEIGHT_MATCH_PARENT) then
 		cw = w-(child._matchX or 0)
 		ch = h-(child._matchY or 0)
 		child:setSize(cw,ch)
-		print(string.format("1size %d , %d",cw,ch))
 	elseif isand(match,ui.WIDTH_MATCH_PARENT) then
 		cw = w-(child._matchX or 0)
 		child:setSize(cw,ch)
-		print(string.format("2size %d , %d",cw,ch))
 	elseif isand(match,ui.HEIGHT_MATCH_PARENT) then
 		ch = h-(child._matchY or 0)
 		child:setSize(cw,ch)
-		print(string.format("3size %d , %d",cw,ch))
 	end
-	
+	cw,ch = child:getSize()
+	--print(string.format("%d , (%d,%d)",match,cw,ch))
 	if isand(align,ui.ALIGN_LEFT) then
 		cx = child._alignX or 0
 	elseif isand(align,ui.ALIGN_CENTER) then
@@ -41,24 +40,29 @@ local function relayoutChild(child,align,w,h)
 		cy = h-ch+(child._alignY or 0)
 	end	
 	child:setPosition(cx,cy)
-	print(string.format("position %d , %d",cx,cy))
+	--print(string.format("position %d , %d",cx,cy))
+	if child._type == 'layout' then
+		child:relayout()
+	end
 end
 
 return {
 	_animationSpeed = 0.1,
 	onInit=function(self,themes)
-		self._color = themes.color
-		self._colorBG = themes.colorBG
+		self._type = 'layout'
+		--self._color = themes.color
+		--self._colorBG = themes.colorBG
 	end,
 	onRelease=function(self)
 	end,	
 	onDraw=function(self,dt)
-		local w,h = self:getSize()
-
-		vg.beginPath()
-		vg.rect(0,0,w,h)
-		vg.fillColor(self._colorBG)
-		vg.fill()
+		if self._colorBG then
+			local w,h = self:getSize()
+			vg.beginPath()
+			vg.rect(0,0,w,h)
+			vg.fillColor(self._colorBG)
+			vg.fill()
+		end
 	end,
 	onEvent=function(self,event)
 		if event.type == ui.EVENT_TOUCHDOWN then

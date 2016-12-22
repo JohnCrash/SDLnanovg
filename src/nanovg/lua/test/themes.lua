@@ -29,16 +29,18 @@ eventFunction("init",function()
 	titleLayout:setAlign(ui.ALIGN_LEFT+ui.ALIGN_TOP)
 	titleLayout:setLayoutMatch(ui.WIDTH_MATCH_PARENT)
 	titleLayout:setSize(w,32)
+	
 	baseLayout:addChild(titleLayout)
 	
 	local scrollLayout = ui.createWidget(themes,"scroll")
-	scrollLayout:configScroll(ui.VERTICAL+ui.ALIGN_RIGHT,0,0,true)
+	scrollLayout:configScroll(ui.VERTICAL+ui.ALIGN_LEFT,0,0,true)
 	scrollLayout:setAlign(ui.ALIGN_LEFT+ui.ALIGN_BOTTOM)
 	scrollLayout:setLayoutMatch(ui.FILL_PARENT,0,32)
 	baseLayout:addChild(scrollLayout)
 	
 	local search = ui.createWidget(themes,"edit")
-	
+	search:setLayoutMatch(ui.WIDTH_MATCH_PARENT)
+	search:setSize(w,28)
 	scrollLayout:addChild(search)
 	
 	for i=1,64 do
@@ -48,6 +50,7 @@ eventFunction("init",function()
 	end
 	
 	root:addChild(baseLayout)
+	scrollLayout:relayout()
 	relayout()
 end)
 

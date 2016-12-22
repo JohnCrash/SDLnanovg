@@ -26,7 +26,8 @@ return {
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
 		self:enableClip(true)
 		self._inner = ui.createWidget(themes.name,"inner")
-		self:addChild(self._inner)
+		--注意addChild已经被重装，widgetFunction返回默认的c函数
+		self:widgetFunction("addChild")(self,self._inner)
 		self._mode = ui.VERTICAL
 		self._isrebound = true		--是否回弹默认打开
 		self._spacex = 0
@@ -213,7 +214,7 @@ return {
 	end,
 	--! \breif 向scroll widget中加入子widget
 	--! \param widget 要加入的子widget
-	addChild=function(self,widget,tag)
+	addChild=function(self,widget)
 		self._inner:addChild(widget)
 	end,
 	--! \breif 布局子widget

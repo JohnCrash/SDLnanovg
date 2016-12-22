@@ -25,7 +25,7 @@ eventFunction("init",function()
 	for i=1,24 do
 		local widget = ui.createWidget("normal","label")
 		widget:setString("Label "..i)
-		scroll:addWidget(widget)
+		scroll:addChild(widget)
 	end
 	
 	scroll:relayout()
