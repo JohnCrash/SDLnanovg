@@ -20,6 +20,7 @@ function label:onInit(themes)
 	self._breakWidth = 1280
 	self._align = self.ALIGN_LEFT
 	self._nanoAlign = vg.NVG_ALIGN_LEFT+vg.NVG_ALIGN_TOP
+	self._bold = false
 end
 
 function label:onRelease()
@@ -31,7 +32,7 @@ function label:onDraw()
 	vg.fontFace(self._font)
 	vg.fillColor(self._color)
 	vg.textAlign(self._nanoAlign)
-	vg.textBox(0,0,math.min(self._breakWidth,w),self._text)
+	vg.textBox(0,0,self._breakWidth,self._text)
 end
 
 --! \brief 设置对齐方式
@@ -84,6 +85,17 @@ end
 function label:setFont( name )
 	self._font = name
 	self:reCalcSize()
+end
+
+--! \brief 加粗字体或者关闭
+--! \param en true加粗字体，否则正常
+function label:setFontBold( en )
+	self._bold = en
+end
+
+--! \brief 如果字体加粗返回true，否则返回false
+function label:getFontBold()
+	return self._bold
 end
 
 --! \brief 设置字体尺寸，函数将重新计算尺寸

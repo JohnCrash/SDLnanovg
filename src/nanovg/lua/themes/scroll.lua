@@ -17,29 +17,6 @@ local SLOWDOWNTIME = 1		--停止时间
 local REBOUNDTIME = 0.1		--回弹时间
 local REBOUNDVELOCITY = 5	--回弹速度
 
-local function relayoutChild(child,w,h)
-	local cw,ch = child:getSize()
-	local cx,cy = child:getPosition()
-	local match = child._match or ui.WRAP_CONTENT
-
-	if isand(match,ui.WIDTH_MATCH_PARENT) and 
-		isand(match,ui.HEIGHT_MATCH_PARENT) then
-		cw = w-(child._matchX or 0)
-		ch = h-(child._matchY or 0)
-		child:setSize(cw,ch)
-	elseif isand(match,ui.WIDTH_MATCH_PARENT) then
-		cw = w-(child._matchX or 0)
-		child:setSize(cw,ch)
-	elseif isand(match,ui.HEIGHT_MATCH_PARENT) then
-		ch = h-(child._matchY or 0)
-		child:setSize(cw,ch)
-	end
-	print(string.format("%d,%d",w,h))
-	if child._type == 'layout' then
-		child:relayout()
-	end	
-end
-
 return {
 	--!	\brief scroll widget初始化
 	--!	\param themes 引用样式的公共表，包括样式名称和字体等
@@ -242,13 +219,7 @@ return {
 		self._inner:addChild(widget)
 	end,
 	--! \breif 布局子widget
-	relayout=function(self)
-		local w,h = self:getSize()
-		for i,child in pairs(self._inner:childs()) do
-			if child._match then
-				relayoutChild(child,w,h)
-			end
-		end		
+	relayout=function(self)	
 		self._inner:relayout(self._mode,self._spacex,self._spacey)
 	end,
 	--! \brief 设置对齐方式

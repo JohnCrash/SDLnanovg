@@ -43,7 +43,8 @@ return {
 	edit = require "themes/edit",
 	scroll = require "themes/scroll",
 	inner = require "themes/inner",
-	layout = require "themes/layout"
+	layout = require "themes/layout",
+	vgw = require "themes/vgw",
 	--[[
 	tab = require "themes/tab",
 	list = require "themes/list",
