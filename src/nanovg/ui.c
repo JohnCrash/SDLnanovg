@@ -461,9 +461,9 @@ void unloadThemes(const char *name)
 void uiSetVisible(uiWidget *self, int b)
 {
 	if (b)
-		self->isVisible &= !VISIBLE;
-	else
 		self->isVisible |= VISIBLE;
+	else
+		self->isVisible &= !VISIBLE;
 }
 
 void uiSetPosition(uiWidget *self, float x, float y)

@@ -108,6 +108,14 @@ ui.rect=function(x,y,width,height)
 	return {x=x,y=y,width=width,height=height}
 end
 
+--! /brief 排列对象
+--! /param rect 在该矩形中进行排列
+--! /param list 要排列的widget列表
+--! /param align 指定排列的方向，可以是下面的值
+--! 	- ui.HORIZONTAL 横向
+--!		- ui.VERTICAL 竖向
+--! /param space 排列中间的空隙
+--! /return 返回需要的宽度和高度
 ui.linearRelayout = function(rect,list,align,space)
 	space = space or 0
 	if isand(align,ui.HORIZONTAL) then --horizontal
@@ -200,3 +208,93 @@ ui.linearRelayout = function(rect,list,align,space)
 		return width,height
 	end
 end
+
+ui.RIGHT = 1
+ui.LEFT	= 2
+ui.TOP = 3
+ui.BOTTOM = 4
+
+ui.switchUI=function(current,widget,orientation)
+	if not current or not widget then return end
+	
+	local rate = 0.04/2
+	local STEP
+	local sw,sh = screenSize()
+	local x1,y1 = current:getPosition()
+	local w1,h1 = current:getSize()
+	local w2,h2 = widget:getSize()
+	local x2,y2
+	
+	current:setVisible(true)
+	widget:setVisible(true)
+	
+	--设置初始值
+	if orientation == ui.RIGHT then
+		x2 = x1 + w1
+		y2 = y1
+		STEP = w1 * rate
+	elseif orientation == ui.LEFT then
+		x2 = x1 - w1
+		y2 = y1	
+		STEP = w1 * rate
+	elseif orientation == ui.TOP then		
+		x2 = x1
+		y2 = y1 + h1
+		STEP = h1 * rate
+	elseif orientation == ui.BOTTOM then			
+		x2 = x1
+		STEP = h1 * rate
+		y2 = y1 - h1	
+	else
+		return
+	end
+	widget:setPosition(x2,y2)	
+	--设置定时器进行平移
+	schedule(0.04,function(dt)
+		local ret = true
+
+		if orientation == ui.RIGHT then
+			x1 = x1 - STEP
+			x2 = x2 - STEP
+			if x2 <= 0 then
+				ret = false
+				x2 = 0
+			end
+		elseif orientation == ui.LEFT then
+			x1 = x1 + STEP
+			x2 = x2 + STEP	
+			if x2 >= 0 then
+				ret = false
+				x2 = 0
+			end
+		elseif orientation == ui.TOP then
+			y1 = y1 - STEP
+			y2 = y2 - STEP
+			if y2 <= 0 then
+				ret = false
+				y2 = 0
+			end		
+		elseif orientation == ui.BOTTOM then
+			y1 = y1 + STEP
+			y2 = y2 + STEP
+			if y2 >= 0 then
+				ret = false
+				y2 = 0
+			end				
+		else
+			return
+		end
+		current:setPosition(x1,y1)
+		widget:setPosition(x2,y2)
+		
+		if not ret then
+			current:setVisible(false)
+		end
+		return ret
+	end)
+	return true
+end
+
+ui.popupUI=function(current,widget,mode)
+end
+

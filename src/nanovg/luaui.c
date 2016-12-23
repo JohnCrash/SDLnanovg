@@ -630,6 +630,30 @@ static int lua_widgetHook(lua_State *L)
 	return 1;
 }
 
+/**
+* \brief 设置对象的可见性
+* \param b 如果true对象将可见，否则设置为不可见
+*/
+static int lua_setVisible(lua_State *L)
+{
+	uiWidget * widget = lua_checkWidget(L, 1);
+	if (lua_isboolean(L, 2)){
+		uiSetVisible(widget, lua_toboolean(L, 2));
+	}
+	return 0;
+}
+
+/**
+* \brief 判断对象的可见性
+* \return 可见返回true，否则返回false
+*/
+static int lua_isVisible(lua_State *L)
+{
+	uiWidget * widget = lua_checkWidget(L, 1);
+	lua_pushboolean(L, widget->isVisible&VISIBLE);
+	return 1;
+}
+
 static void relayout_raw(uiWidget *col[], float w[], float maxh, float sx,float y,int n, int mode)
 {
 	float x = 0;
@@ -821,6 +845,8 @@ static const struct luaL_Reg uimeta_methods_c[] =
 	{ "enableFlags", lua_enableFlags },
 	{ "disableFlags", lua_disableFlags },
 	{ "widgetHook", lua_widgetHook },
+	{ "setVisible",lua_setVisible },
+	{ "isVisible", lua_isVisible },
 	{ NULL, NULL },
 };
 

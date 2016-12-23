@@ -61,6 +61,14 @@ return {
 			vg.fill()
 		end
 	end,
+	--! \brief 设置背景颜色，默认不绘制背景
+	setBGColor=function(self,c)
+		self._colorBG = c
+	end,
+	--! \brief 取得背景颜色
+	getBGColor=function(self,c)
+		return self._colorBG
+	end,	
 	onEvent=function(self,event)
 		if event.type == ui.EVENT_TOUCHDOWN then
 			self._down = true
@@ -74,7 +82,7 @@ return {
 				self._down = event.inside
 			end
 		end	
-		return true
+		return false
 	end,
 	--! \brief 重新对子控件进行排版，该函数不需要参数
 	--! \note 放入到layout的子控件必须具备变量_align才可以被layout排版。
