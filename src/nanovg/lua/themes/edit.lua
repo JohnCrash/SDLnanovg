@@ -489,7 +489,7 @@ return {
 				self._select = {}
 				self._select.start = self._pos
 				self._select.corsorStart = self._cursorPos
-				if self._prevClickTime and (event.time-self._prevClickTime)/1000<self._doubleClickDaley then
+				if self._prevClickTime and (event.time-self._prevClickTime)<self._doubleClickDaley then
 					--双击选择段
 					self:selectPositionWord()
 					self._seekDown = nil
@@ -525,6 +525,7 @@ return {
 				self:ptCorsorPos(event.x,event.y)
 			end
 		end
+		return true
 	end,
 	--! \brief 注意不要调用这个函数，如果你想监控文本编辑的变化，就设置onTextChanged
 	--!	\note 例如： editObject.onTextChanged=function(text) end

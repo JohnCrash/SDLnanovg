@@ -198,7 +198,6 @@ return {
 				self._inner:setPosition(x,y)
 			end
 		end
-		return true
 	end,
 	--! \breif configScroll函数配置scroll控件的参数
 	--! \param mode	指定是横向还是属相

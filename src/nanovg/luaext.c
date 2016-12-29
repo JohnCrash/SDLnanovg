@@ -788,6 +788,20 @@ int lua_setWindowSize(lua_State *L)
 	SDL_SetWindowSize(state->window, w, h);
 	return 0;
 }
+
+/**
+ * \brief 用于调试，当调用时可以让调试器停在lua调用点的c调用栈处。
+ *	仅仅在windows平台可用。
+ */
+int lua_breakpoint(lua_State *L)
+{
+#ifdef _WIN32
+	_asm{
+		int 3
+	}
+#endif
+	return 0;
+}
 /*
  * 初始Lua环境
  */
@@ -813,6 +827,7 @@ int initLua()
 		{ "utf8Index", lua_utf8Index },
 		{ "isDebug", lua_isDebug },
 		{ "tick",lua_tick },
+		{ "breakpoint",lua_breakpoint },
 		{ NULL, NULL }
 	};
 	const luaL_reg luax_exts[] = {

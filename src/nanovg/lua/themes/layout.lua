@@ -73,16 +73,15 @@ return {
 		if event.type == ui.EVENT_TOUCHDOWN then
 			self._down = true
 		elseif event.type == ui.EVENT_TOUCHUP then
-			self._down = false
-			if event.inside then
+			if event.inside and self._down then
 				if self.onClick then self.onClick() end
 			end
+			self._down = false
 		elseif event.type == ui.EVENT_TOUCHDROP then
 			if self._down then
 				self._down = event.inside
 			end
 		end	
-		return false
 	end,
 	--! \brief 重新对子控件进行排版，该函数不需要参数
 	--! \note 放入到layout的子控件必须具备变量_align才可以被layout排版。
