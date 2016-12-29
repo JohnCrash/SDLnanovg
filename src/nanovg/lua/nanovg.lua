@@ -217,7 +217,7 @@ ui.BOTTOM = 4
 ui.switchUI=function(current,widget,orientation)
 	if not current or not widget then return end
 	
-	local rate = 0.04/2
+	local rate = 0.04/0.2
 	local STEP
 	local sw,sh = screenSize()
 	local x1,y1 = current:getPosition()

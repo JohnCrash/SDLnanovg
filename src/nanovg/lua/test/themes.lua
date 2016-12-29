@@ -130,7 +130,8 @@ local function createWLANLayout()
 	titleLayout:setSize(sw,32)
 	titleLayout:relayout()
 	
-	
+	baseLayout:addChild(titleLayout)
+	titleLayout:relayout()
 	
 	local scrollLayout = ui.createWidget(themes,"scroll")
 	scrollLayout:configScroll(ui.VERTICAL+ui.ALIGN_LEFT,0,0,true)
@@ -138,7 +139,7 @@ local function createWLANLayout()
 	scrollLayout:setLayoutMatch(ui.FILL_PARENT,0,32)
 	
 	baseLayout:addChild(scrollLayout)
-	baseLayout:addChild(titleLayout)
+	--baseLayout:addChild(titleLayout)
 	
 	addSpeareItem(scrollLayout,"开关")
 	local fly_layout = addSettingItem(scrollLayout,"WLAN")

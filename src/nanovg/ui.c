@@ -528,7 +528,7 @@ int InWidget(uiWidget *parent, uiWidget *child)
 static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderProc renderFunc)
 {
 	uiWidget * child;
-	//int isclip = 0;
+	int isclip = 0;
 
 	memcpy(root->curxform, root->xform, sizeof(float) * 6);
 	/* 如果有父控件将父控件的当前矩阵应用到变换中 */
@@ -539,9 +539,9 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 	renderFunc(root);
 	/* 对子窗口设置剪切区域 */
 	if (root->isVisible&CLIP){
-	//	nvgSave(_vg);
+		nvgSave(_vg);
 		nvgScissor(_vg, 0, 0, root->width, root->height);
-	//	isclip = 1;
+		isclip = 1;
 	}
 	child = root->child;
 	if ( (root->isVisible&SCROLL_CLIP) && root->parent){
@@ -579,9 +579,9 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 		}
 	}
 
-	//if (isclip){
-	//	nvgRestore(_vg);
-	//}
+	if (isclip){
+		nvgRestore(_vg);
+	}
 	return tail;
 }
 
