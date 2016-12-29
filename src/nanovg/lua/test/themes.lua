@@ -90,7 +90,6 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 		layout.onClick = arrowFunc
 	end
 
-	layout:relayout()
 	return layout
 end
 
@@ -107,7 +106,6 @@ local function addSpeareItem(scroll,text)
 	layout:setBGColor(vg.rgba(0,0,0,128))
 	
 	layout:setSize(540,28)
-	layout:relayout()
 	return layout	
 end
 
@@ -128,10 +126,8 @@ local function createWLANLayout()
 	titleLayout:setLayoutMatch(ui.WIDTH_MATCH_PARENT)
 	titleLayout:setBGColor(vg.rgba(0,0,0,128))
 	titleLayout:setSize(sw,32)
-	titleLayout:relayout()
 	
 	baseLayout:addChild(titleLayout)
-	titleLayout:relayout()
 	
 	local scrollLayout = ui.createWidget(themes,"scroll")
 	scrollLayout:configScroll(ui.VERTICAL+ui.ALIGN_LEFT,0,0,true)
@@ -139,14 +135,13 @@ local function createWLANLayout()
 	scrollLayout:setLayoutMatch(ui.FILL_PARENT,0,32)
 	
 	baseLayout:addChild(scrollLayout)
-	--baseLayout:addChild(titleLayout)
 	
 	addSpeareItem(scrollLayout,"开关")
 	local fly_layout = addSettingItem(scrollLayout,"WLAN")
 	local switch = ui.createWidget(themes,"switch")
 	switch:setAlign(ui.ALIGN_RIGHT+ui.ALIGN_MIDDLE,-12,0)
 	fly_layout:addChild(switch)
-	fly_layout:relayout()
+
 	addSettingItem(scrollLayout,"WLAN+","images/image3.jpg")
 	addSpeareItem(scrollLayout,"可用WLAN列表")
 	
@@ -155,7 +150,6 @@ local function createWLANLayout()
 	root:addChild(baseLayout)
 	
 	baseLayout:setSize(sw,sh)
-	baseLayout:relayout()
 	return baseLayout
 end
 
@@ -184,7 +178,6 @@ local function createSettingLayout()
 	titleLayout:setSize(w,32)
 	
 	baseLayout:addChild(titleLayout)
-	titleLayout:relayout()
 	
 	local scrollLayout = ui.createWidget(themes,"scroll")
 	scrollLayout:configScroll(ui.VERTICAL+ui.ALIGN_LEFT,0,0,true)
@@ -198,9 +191,9 @@ local function createSettingLayout()
 	search:setLayoutMatch(ui.WIDTH_MATCH_PARENT,16,16)
 	search:setSize(sw,64-32)
 	search:setAlign(ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
-	searchLayout:setSize(sw,64)
 	searchLayout:addChild(search)
-	searchLayout:relayout()
+	searchLayout:setSize(sw,64)
+
 	scrollLayout:addChild(searchLayout)
 	
 	addSpeareItem(scrollLayout,"网络")
@@ -209,7 +202,6 @@ local function createSettingLayout()
 	local switch = ui.createWidget(themes,"switch")
 	switch:setAlign(ui.ALIGN_RIGHT+ui.ALIGN_MIDDLE,-12,0)
 	fly_layout:addChild(switch)
-	fly_layout:relayout()
 	
 	addSettingItem(scrollLayout,"双卡管理","images/image1.jpg","",
 		function()
@@ -250,7 +242,6 @@ local function createSettingLayout()
 	scrollLayout:relayout()
 	
 	baseLayout:setSize(sw,sh)
-	baseLayout:relayout()
 	return baseLayout
 end
 

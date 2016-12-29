@@ -49,6 +49,8 @@ return {
 		self._type = 'layout'
 		--self._color = themes.color
 		--self._colorBG = themes.colorBG
+		self.c_setSize = self:widgetFunction("setSize")
+		self.c_addChild = self:widgetFunction("addChild")
 	end,
 	onRelease=function(self)
 	end,	
@@ -95,6 +97,22 @@ return {
 				relayoutChild(child,child._align,w,h)
 			end
 		end
+	end,
+	--! \brief 重装为了在尺寸不相同的时候重新布局内容
+	setSize=function(self,cx,cy)
+		local w,h = self:getSize()
+		if w~=cx or h~=cy then
+			self.c_setSize(self,cx,cy)
+			self:relayout()
+		end
+	end,
+	--! \brief 重装为了在加入一个对象的时候对其进行布局操作
+	addChild=function(self,widget)
+		if widget and widget._align then
+			local w,h = self:getSize()
+			relayoutChild(widget,widget._align,w,h)
+		end
+		self.c_addChild(self,widget)
 	end,
 	--! \brief 设置对齐方式
 	--! \param align 对齐方式，可以是下面的值
