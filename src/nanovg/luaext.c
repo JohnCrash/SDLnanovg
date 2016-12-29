@@ -790,6 +790,17 @@ int lua_setWindowSize(lua_State *L)
 }
 
 /**
+ * \brief 在window系统中设置主窗口的尺寸
+ */
+int lua_setWindowTitle(lua_State *L)
+{
+	const char *title = luaL_checkstring(L, 1);
+	SDLState * state = getSDLState();
+	SDL_SetWindowTitle(state->window, title);
+	return 0;
+}
+
+/**
  * \brief 用于调试，当调用时可以让调试器停在lua调用点的c调用栈处。
  *	仅仅在windows平台可用。
  */
@@ -815,6 +826,7 @@ int initLua()
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },
 		{ "setWindowSize",lua_setWindowSize},
+		{ "setWindowTitle", lua_setWindowTitle },
 		{ "schedule", lua_schedule },
 		{ "removeSchedule", lua_removeSchedule },
 		{ "softKeyboard",lua_enableSoftkeyboard },

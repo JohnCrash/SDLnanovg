@@ -14,15 +14,20 @@ LOCAL_C_INCLUDES := $(SRC_PATH) \
 		$(LOCAL_PATH)/../../../src/nanovg \
 		$(LOCAL_PATH)/../../../src/nanovg/example
 
-LOCAL_SRC_FILES := SDL/src/main/android/SDL_android_main.c \
-	$(SRC_PATH)/sdlmain.c \
-	$(SRC_PATH)/main.c \
-	$(SRC_PATH)/fs.c \
-	$(SRC_PATH)/test_nanovg_sdl.c \
-	$(NANOVG_SRC_PATH)/nanovg.c \
-	$(NANOVG_SRC_PATH)/sdlport.c \
-	$(NANOVG_SRC_PATH)/example/demo.c \
-	$(NANOVG_SRC_PATH)/example/perf.c
+LOCAL_SRC_FILES := ../../../src/main/android/SDL_android_main.c \
+	$(SRC_PATH)/main.c 					\
+	$(SRC_PATH)/fs.c 					\
+	$(SRC_PATH)/basetype				\
+	$(NANOVG_SRC_PATH)/sdlmain.c 		\
+	$(NANOVG_SRC_PATH)/nanovg.c 		\
+	$(NANOVG_SRC_PATH)/eventhandler.c	\
+	$(NANOVG_SRC_PATH)/sdlport.c 		\
+	$(NANOVG_SRC_PATH)/luaext.c		 	\
+	$(NANOVG_SRC_PATH)/luananovg.c		\
+	$(NANOVG_SRC_PATH)/luaui.c			\
+	$(NANOVG_SRC_PATH)/nanovg_sdl.c		\
+	$(NANOVG_SRC_PATH)/ui.c				\
+	$(NANOVG_SRC_PATH)/utf8.c			\
 	
 LOCAL_SHARED_LIBRARIES := SDL2
 
@@ -30,4 +35,4 @@ LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
 
 include $(BUILD_SHARED_LIBRARY)
 
-$(call import-module,SDL)
+$(call import-module,SDLnanovg)

@@ -248,7 +248,7 @@ end
 eventFunction("init",function()
 	local sw,sh = 540,960
 	setWindowSize(sw,sh)
-	
+	setWindowTitle("Themes library test")
 	ui.loadThemes(themes,"themes/default")
 	
 	activeLayout = createSettingLayout()
