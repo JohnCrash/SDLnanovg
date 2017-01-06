@@ -8,9 +8,10 @@ local activeLayout
 
 local function relayout()
 	if activeLayout then
-		--local w,h = screenSize()
-		--activeLayout:setSize(w,h)
-		--activeLayout:relayout()
+		local w,h = screenSize()
+		print( string.format("screenSize %d , %d",sw,sh) )
+		activeLayout:setSize(w,h)
+		activeLayout:relayout()
 	end
 end
 
