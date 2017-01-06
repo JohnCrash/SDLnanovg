@@ -39,7 +39,7 @@ int initNanovg()
 #endif
 #endif
 	if (_vg == NULL) {
-		printf("Could not init nanovg.\n");
+		SDL_Log("Could not init nanovg.\n");
 		return -1;
 	}
 

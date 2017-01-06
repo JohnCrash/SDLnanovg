@@ -596,12 +596,13 @@ static int lua_widgetToRoot(lua_State *L)
  */
 static int lua_widgetFormPt(lua_State *L)
 {
+	int i;
 	float x = (float)luaL_checknumber(L, 1);
 	float y = (float)luaL_checknumber(L, 2);
 	uiWidget * wp[32];
 	int n = uiWidgetFormPt(x, y, wp, 32);
 	lua_newtable(L);
-	for (int i = 0; i < n; i++){
+	for (i = 0; i < n; i++){
 		lua_pushWidget(L, wp[i]);
 		lua_rawseti(L, -2, i + 1);
 	}
@@ -656,8 +657,9 @@ static int lua_isVisible(lua_State *L)
 
 static void relayout_raw(uiWidget *col[], float w[], float maxh, float sx,float y,int n, int mode)
 {
+	int i;
 	float x = 0;
-	for (int i = 0; i < n; i++){
+	for (i = 0; i < n; i++){
 		if (mode&ALIGN_LEFT)
 			col[i]->x = x+sx;
 		else if (mode&ALIGN_RIGHT)
@@ -857,9 +859,9 @@ static const struct luaL_Reg uimeta_methods_c[] =
  */
 static lua_CFunction getWidgetCFunction(const char * name)
 {
-	int j;
+	int i,j;
 	int len = strlen(name);
-	for (int i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg)-1; i++){
+	for (i = 0; i < sizeof(uimeta_methods_c) / sizeof(luaL_Reg)-1; i++){
 		const char * s = uimeta_methods_c[i].name;
 		/*
 		 * 这里优化strcmp(s,name)==0

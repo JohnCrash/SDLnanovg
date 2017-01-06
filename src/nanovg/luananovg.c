@@ -447,9 +447,10 @@ static int lua_transform(lua_State *L)
  */
 static int lua_currentTransform(lua_State *L)
 {
+	int i;
 	float form[6];
 	nvgCurrentTransform(_vg, form);
-	for (int i = 0; i < 6;i++)
+	for (i = 0; i < 6;i++)
 		lua_pushnumber(L, form[i]);
 	return 6;
 }
@@ -1025,13 +1026,14 @@ static int lua_textBounds(lua_State *L)
 	float x, y;
 	const char * string;
 	float bounds[4];
+	int i;
 
 	x = (float)luaL_checknumber(L, 1);
 	y = (float)luaL_checknumber(L, 2);
 	string = luaL_checkstring(L, 3);
 	float width = nvgTextBounds(_vg,x, y, string, NULL, bounds);
 	lua_pushnumber(L, width);
-	for (int i = 0; i < 4;i++)
+	for (i = 0; i < 4;i++)
 		lua_pushnumber(L, bounds[i]);
 	return 5;
 }
@@ -1053,13 +1055,14 @@ static int lua_textBoxBounds(lua_State *L)
 	float x, y,breakRowWidth;
 	float bounds[4];
 	const char * string;
+	int i;
 
 	x = (float)luaL_checknumber(L, 1);
 	y = (float)luaL_checknumber(L, 2);
 	breakRowWidth = (float)luaL_checknumber(L, 3);
 	string = luaL_checkstring(L, 4);
 	nvgTextBoxBounds(_vg, x, y, breakRowWidth, string, NULL, bounds);
-	for (int i = 0; i < 4; i++)
+	for (i = 0; i < 4; i++)
 		lua_pushnumber(L, bounds[i]);
 	return 4;
 }
@@ -1080,6 +1083,8 @@ static int lua_textGlyphPositions(lua_State *L)
 	float x, y;
 	const char * string;
 	int maxPositions;
+	int i;
+
 	NVGglyphPosition *positions;
 	x = (float)luaL_checknumber(L, 1);
 	y = (float)luaL_checknumber(L, 2);
@@ -1089,7 +1094,7 @@ static int lua_textGlyphPositions(lua_State *L)
 		positions = (NVGglyphPosition *)malloc((maxPositions+1)*sizeof(NVGglyphPosition));
 		int npos = nvgTextGlyphPositions(_vg, x, y, string, NULL, positions, maxPositions);
 		lua_newtable(L);
-		for (int i = 0; i < maxPositions; i++){
+		for (i = 0; i < maxPositions; i++){
 			lua_newtable(L);
 			lua_pushinteger(L, (lua_Integer)(positions[i].str - string)+1);
 			lua_setfield(L, -2, "pos");
@@ -1135,6 +1140,7 @@ static int lua_textMetrics(lua_State *L)
  */
 static int lua_textBreakLines(lua_State *L)
 {
+	int i;
 	const char *string = luaL_checkstring(L, 1);
 	float breakRowWidth = (float)luaL_checknumber(L, 2);
 	int maxRows = (int)luaL_checkinteger(L, 3);
@@ -1143,7 +1149,7 @@ static int lua_textBreakLines(lua_State *L)
 		if (!rows)return 0;
 		int nrows = nvgTextBreakLines(_vg, string, NULL, breakRowWidth, rows, maxRows);
 		lua_newtable(L);
-		for (int i = 0; i < nrows; i++){
+		for (i = 0; i < nrows; i++){
 			lua_newtable(L);
 			lua_pushinteger(L,(lua_Integer)(rows[i].start-string)+1 );
 			lua_setfield(L, -2, "head");

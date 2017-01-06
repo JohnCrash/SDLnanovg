@@ -590,12 +590,13 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
  */
 static void prepareUIEvent()
 {
+	int i;
 	SDL_Event *pevent;
 	uiEvent *pev;
 	int count = getSDLEventCount();
 	_eventState.nEvent = 0;
 	_eventState.haveEventType = 0;
-	for (int i = 0; i < count; i++){
+	for (i = 0; i < count; i++){
 		if (_eventState.nEvent >= 8){
 			SDL_Log("uiEvent overflow");
 			break;
@@ -725,6 +726,7 @@ void uiEnumWidget(uiWidget *root,
 	uiRenderProc renderFunc, uiEventProc eventFunc,
 	int winWidth, int winHeight, float devicePixelRatio)
 {
+	int i;
 	uiWidget * head,*temp,*tail;
 	head = root;
 	head->enum_next = NULL;
@@ -741,7 +743,7 @@ void uiEnumWidget(uiWidget *root,
 	 */
 	if (_eventState.haveEventType){
 		temp = tail;
-		for (int i = 0; i < _eventState.nEvent; i++){
+		for (i = 0; i < _eventState.nEvent; i++){
 			uiEvent * pev = &(_eventState.events[i]);
 			tail = temp;
 			/*
@@ -989,12 +991,13 @@ static void uiWidgetToRootForm(uiWidget *self,float xform[6])
  */
 void uiRootToWidget(uiWidget *self, float *pt, int n)
 {
+	int i;
 	float xform[6];
 	float invs[6];
 	float x, y;
 	uiWidgetToRootForm(self, xform);
 	nvgTransformInverse(invs, xform);
-	for (int i = 0; i < n; i++){
+	for (i = 0; i < n; i++){
 		x = *(pt + 2 * i);
 		y = *(pt + 2 * i+1);
 		nvgTransformPoint((pt + 2 * i), (pt + 2 * i + 1), invs, x, y);
@@ -1006,10 +1009,11 @@ void uiRootToWidget(uiWidget *self, float *pt, int n)
  */
 void uiWidgetToRoot(uiWidget *self, float *pt, int n)
 {
+	int i;
 	float xform[6];
 	float x, y;
 	uiWidgetToRootForm(self, xform);
-	for (int i = 0; i < n; i++){
+	for (i = 0; i < n; i++){
 		x = *(pt + 2 * i);
 		y = *(pt + 2 * i + 1);
 		nvgTransformPoint((pt + 2 * i), (pt + 2 * i + 1), xform, x, y);

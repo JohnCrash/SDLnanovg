@@ -17,6 +17,7 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "nanovg.h"
 #include "fontstash.h"
@@ -625,8 +626,9 @@ void nvgTransform(NVGcontext* ctx, float a, float b, float c, float d, float e, 
 
 void nvgSetTransform(NVGcontext* ctx, float xform[6])
 {
+	int i;
 	NVGstate* state = nvg__getState(ctx);
-	for (int i = 0; i < 6; i++)
+	for (i = 0; i < 6; i++)
 		state->xform[i] = xform[i];
 }
 

@@ -1,7 +1,7 @@
 #include "SDL.h"
 #include "fs.h"
 
-static char * _pwrite_directory[MAX_PATH] = {0};
+static char _pwrite_directory[MAX_PATH] = {0};
 /*
  * 取得可写目录
  * 根据不同系统改函数将返回一个可写目录

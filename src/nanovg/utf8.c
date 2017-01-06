@@ -24,9 +24,9 @@ static const char utf8_skip_data[256] = {
 };
 
 static const char *const g_utf8_skip = utf8_skip_data;
-#define cc_utf8_next_char(p) (char *)((p) + g_utf8_skip[*(unsigned char *)(p)])
+#define cc_utf8_next_char(p) (const char *)((p) + g_utf8_skip[*(unsigned char *)(p)])
 
-char *cc_utf8_next(char *p)
+const char *cc_utf8_next(const char *p)
 {
 	return cc_utf8_next_char(p);
 }

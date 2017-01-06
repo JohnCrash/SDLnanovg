@@ -2,7 +2,8 @@ local ui = require "ui"
 local vg = require "vg"
 
 local themes = "normal"
-
+local sw,sh = screenSize()--540,960
+print( string.format("screenSize %d , %d",sw,sh) )
 local activeLayout
 
 local function relayout()
@@ -111,7 +112,6 @@ end
 
 --创建WLAN设置
 local function createWLANLayout()
-	local sw,sh = 540,960
 	local root = ui.rootWidget()
 
 	local baseLayout = ui.createWidget(themes,"layout")
@@ -160,7 +160,7 @@ end
 
 --创建设置首页
 local function createSettingLayout()
-	local sw,sh = 540,960
+
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
 	
@@ -246,7 +246,6 @@ local function createSettingLayout()
 end
 
 eventFunction("init",function()
-	local sw,sh = 540,960
 	setWindowSize(sw,sh)
 	setWindowTitle("Themes library test")
 	ui.loadThemes(themes,"themes/default")

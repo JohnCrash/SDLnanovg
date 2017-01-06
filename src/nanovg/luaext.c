@@ -6,6 +6,8 @@
 #include "eventhandler.h"
 #include "luaext.h"
 #include "ui.h"
+#include "utf8.h"
+
 /**
 * \addtogroup LuaEXT lua global
 * \brief lua全局函数
@@ -53,11 +55,11 @@ static int lua_print(lua_State * luastate)
 	int nargs = lua_gettop(luastate);
 	char buf[MAX_PATH]="";
 	char *t;
-	int len,cur;
+	int len,cur,i;
 	len = MAX_PATH;
 	cur = 0;
 	t = buf;
-	for (int i = 1; i <= nargs; i++)
+	for (i = 1; i <= nargs; i++)
 	{
 		if (lua_istable(luastate, i))
 			addstring(&t, "table", &len, &cur);
@@ -99,6 +101,8 @@ static int lua_print(lua_State * luastate)
  */
 static void initLuaLoader(lua_CFunction func)
 {
+	int i;
+
 	if (!func) return;
 
 	// stack content after the invoking of the function
@@ -108,7 +112,7 @@ static void initLuaLoader(lua_CFunction func)
 
 	// insert loader into index 2
 	lua_pushcfunction(_state, func);                                   /* L: package, loaders, func */
-	for (int i = (int)(lua_objlen(_state, -2) + 1); i > 2; --i)
+	for (i = (int)(lua_objlen(_state, -2) + 1); i > 2; --i)
 	{
 		lua_rawgeti(_state, -2, i - 1);                                /* L: package, loaders, func, function */
 		// we call lua_rawgeti, so the loader table now is at -3
@@ -172,9 +176,13 @@ static int lua_loader(lua_State *L)
 	}
 	else
 		len = i;
+#if defined(__ANDROID__)
+	searchpath = "lua/?.lua";
+#else
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
 	searchpath = lua_tostring(L, -1);
+#endif
 	j = i = 0;
 	fp = NULL;
 	for (;;){
@@ -653,7 +661,7 @@ static int lua_enableSoftkeyboard(lua_State *L)
 int lua_keyboardState(lua_State *L)
 {
 	int len,sk,i = 1;
-	Uint8 * kbs = SDL_GetKeyboardState(&len);
+	const Uint8 * kbs = SDL_GetKeyboardState(&len);
 	lua_newtable(L);
 	lua_pushnil(L);
 	while (lua_next(L, 1) != 0){
@@ -750,8 +758,8 @@ int lua_utf8Length(lua_State *L)
  */
 int lua_utf8Index(lua_State *L)
 {
-	char * p = luaL_checkstring(L, 1);
-	char * pp;
+	const char * p = luaL_checkstring(L, 1);
+	const char * pp;
 	int i = 1;
 	int index = 1;
 	lua_newtable(L);
@@ -878,8 +886,9 @@ int initLua()
 
 void releaseLua()
 {
+	int i;
 	if (_state){
-		for (int i = 0; i < EVENT_COUNT; i++){
+		for (i = 0; i < EVENT_COUNT; i++){
 			if (_eventRef[i] != LUA_REFNIL){
 				lua_unref(_state, _eventRef[i]);
 			}
@@ -963,6 +972,7 @@ void lua_EventLoop(double dt)
 void lua_EventInit()
 {
 	/* 执行初始化代码 */
+	SDL_Log("execute script nanovg.lua");
 	lua_executeScriptFile("nanovg.lua");
 	lua_executeScriptFile("init.lua");
 

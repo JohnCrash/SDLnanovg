@@ -17,7 +17,7 @@ extern "C"{
 **/
 long cc_utf8_strlen(const char * p, int max);
 
-char *cc_utf8_next(char *p);
+const char *cc_utf8_next(const char *p);
 #ifdef __cplusplus
 }
 #endif

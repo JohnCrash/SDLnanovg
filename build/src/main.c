@@ -9,7 +9,6 @@ Permission is granted to anyone to use this software for any purpose,
 including commercial applications, and to alter it and redistribute it
 freely.
 */
-#ifdef _DEMO_
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -34,7 +33,11 @@ static void openConsole()
 }
 #endif
 
+#if defined(__ANDROID__)
+int SDL_main(int argc, char *argv[])
+#else
 int main(int argc,char *argv[])
+#endif
 {
 	Uint32 t,t0;
 	SDLState * state;
@@ -107,4 +110,3 @@ rerun:
 #endif
 	return 0;
 }
-#endif //_DEMO_
