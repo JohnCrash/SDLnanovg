@@ -247,6 +247,7 @@ local function createSettingLayout()
 end
 
 eventFunction("init",function()
+	print(string.format("setWindowSize %d , %d",sw,sh))
 	setWindowSize(sw,sh)
 	setWindowTitle("Themes library test")
 	ui.loadThemes(themes,"themes/default")

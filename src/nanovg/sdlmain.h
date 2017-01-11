@@ -14,6 +14,12 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+	enum DesignMode{
+		SHOW_ALL = 1,
+		FIT_WIDTH,
+		FIT_HEIGHT,
+	};
+
 	typedef struct{
 		/* SDL init flags */
 		int argc;
@@ -34,6 +40,9 @@ extern "C"{
 		int window_minH;
 		int window_maxW;
 		int window_maxH;
+		int design_mode;
+		int design_w;
+		int design_h;
 		int logical_w;
 		int logical_h;
 		float scale;

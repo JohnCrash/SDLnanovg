@@ -22,7 +22,7 @@ freely.
 #include "luaext.h"
 #include "ui.h"
 
-#ifdef _DEBUG
+#if defined(_WIN32) && defined(_DEBUG)
 #include <Windows.h>
 static void openConsole()
 {
@@ -42,7 +42,7 @@ int main(int argc,char *argv[])
 	Uint32 t,t0;
 	SDLState * state;
 
-#ifdef _DEBUG
+#ifdef defined(_WIN32) && defined(_DEBUG)
 	openConsole();
 rerun:
 #endif
@@ -105,7 +105,7 @@ rerun:
 	SDL_Log("releaseSDL..");
 	releaseSDL(state);
 	SDL_Log("DONE..");
-#ifdef _DEBUG
+#ifdef defined(_WIN32) && defined(_DEBUG)
 	goto rerun;
 #endif
 	return 0;

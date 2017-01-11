@@ -153,7 +153,7 @@ static int luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, const c
 }
 
 /*
- *在lua的搜索路径中找到指定的文件并加载,这是lua加载机制的一部分
+ * 在lua的搜索路径中找到指定的文件并加载,这是lua加载机制的一部分
  */
 static int lua_loader(lua_State *L)
 {
@@ -164,6 +164,24 @@ static int lua_loader(lua_State *L)
 	char c;
 	SDL_RWops *fp;
 	unsigned char * data;
+
+#if defined(__ANDROID__)
+	/*
+	* android系统下面如果是调试版本，优先从sdcard:/SDLnanovg下装载lua代码
+	*/
+	#ifdef _DEBUG
+		char androidpath[256];
+		const char * sd = "/sdcard";//SDL_AndroidGetExternalStoragePath();
+		sprintf(androidpath,"%s/SDLnanovg/lua/?.lua;lua/?.lua",sd);	
+		searchpath = androidpath;
+	#else
+		searchpath = "lua/?.lua";
+	#endif
+#else
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "path");
+	searchpath = lua_tostring(L, -1);
+#endif
 
 	filename = luaL_checkstring(L, 1);
 	//去掉后缀.lua
@@ -176,13 +194,6 @@ static int lua_loader(lua_State *L)
 	}
 	else
 		len = i;
-#if defined(__ANDROID__)
-	searchpath = "lua/?.lua";
-#else
-	lua_getglobal(L, "package");
-	lua_getfield(L, -1, "path");
-	searchpath = lua_tostring(L, -1);
-#endif
 	j = i = 0;
 	fp = NULL;
 	for (;;){
@@ -190,12 +201,17 @@ static int lua_loader(lua_State *L)
 		if (c == 0 || c == ';'){
 			f[j] = 0;
 			fp = SDL_RWFromFile(f, "rb");
+			SDL_Log("SDL_RWFromFile:%s", f);
 			if (!fp){
 				f[j] = 'c';
 				f[j+1] = 0;
 				fp = SDL_RWFromFile(f, "rb");
+				SDL_Log("SDL_RWFromFile:%s", f);
 			}
-			if (c==0||fp)break;
+			if (c == 0 || fp){
+				SDL_Log("lua_loader:%s", f);
+				break;
+			}
 			j = 0;
 		}else if (c == '?'){
 			strcpy(f + j, fn);
@@ -395,12 +411,18 @@ static int lua_eventFunction(lua_State *L)
 	return 1;
 }
 
+/**
+ * \brief 返回屏幕尺寸。
+ * \return cx,cy 屏幕的尺寸
+ */
 static int lua_screenSize(lua_State *L)
 {
-	SDLState * state = getSDLState();
-	lua_pushnumber(L, state->window_w);
-	lua_pushnumber(L, state->window_h);
-	return 2;
+	SDL_DisplayMode mode;
+	if(SDL_GetDisplayMode(0,0,&mode)==0){
+		lua_pushnumber(L,mode.w);
+		lua_pushnumber(L, mode.h);
+		return 2;
+	}else return 0;
 }
 
 static int lua_isand(lua_State *L)
@@ -821,6 +843,48 @@ int lua_breakpoint(lua_State *L)
 #endif
 	return 0;
 }
+
+/**
+ * \brief 设置设计尺寸
+ * \param cx,cy 宽高尺寸
+ * \param mode 设计尺寸如何与设备尺寸匹配
+ */
+int lua_setDesignSize(lua_State *L)
+{
+	int w = luaL_checkint(L, 1);
+	int h = luaL_checkint(L, 2);
+	int m = luaL_checkint(L, 3);
+	SDLState * state = getSDLState();
+	if (state && w > 0 && h > 0){
+		state->design_w = w;
+		state->design_h = h;
+		state->design_mode = m;
+		lua_pushboolean(L, 1);
+	}
+	else{
+		lua_pushboolean(L, 0);
+	}
+	return 1;
+}
+
+/**
+* \brief 返回设计尺寸
+* \return cx,cy 宽高尺寸
+*/
+int lua_getDesignSize(lua_State *L)
+{
+	SDLState * state = getSDLState();
+	if (state){
+		lua_pushnumber(L, state->design_w);
+		lua_pushnumber(L, state->design_h);
+		lua_pushnumber(L, state->design_mode);
+		return 3;
+	}
+	else{
+		return 0;
+	}
+}
+
 /*
  * 初始Lua环境
  */
@@ -833,6 +897,7 @@ int initLua()
 		{ "eventFunction", lua_eventFunction },
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },
+		{ "setDesignSize",lua_setDesignSize },
 		{ "setWindowSize",lua_setWindowSize},
 		{ "setWindowTitle", lua_setWindowTitle },
 		{ "schedule", lua_schedule },
