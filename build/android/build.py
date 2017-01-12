@@ -30,8 +30,9 @@ if __name__ == '__main__':
 	'-M AndroidManifest.xml -I "'+ANDROID_SDK_HOME+
 	'/platforms/android-16/android.jar" -S res -F bin/SDLnanovg_temp.apk') != 0 :
 		exit(1)
+#android sdk stop support apkbuilder.bat
 	if os.system(ANDROID_SDK_HOME+"/tools/apkbuilder.bat bin/SDLnanovg_unsinger.apk "+
-	'-v -u -z bin/SDLnanovg_temp.apk '+
+	'-v -u -z ./bin/SDLnanovg_temp.apk '+
 	'-f bin/classes.dex '+
 	'-rf ./src '+
 	'-nf ./libs '+
