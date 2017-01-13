@@ -898,6 +898,7 @@ int initLua()
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },
 		{ "setDesignSize",lua_setDesignSize },
+		{ "getDesignSize", lua_getDesignSize },
 		{ "setWindowSize",lua_setWindowSize},
 		{ "setWindowTitle", lua_setWindowTitle },
 		{ "schedule", lua_schedule },

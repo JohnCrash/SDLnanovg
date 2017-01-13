@@ -36,7 +36,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 		label:setFontBold(true)
 		label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,w+12,0)
 		
-		layout:setSize(540,64)
+		layout:setSize(sw,64)
 	else
 		layout:addChild(label)	
 		label:setString(text)
@@ -44,7 +44,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 		label:setFontBold(true)
 		label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,12,0)
 		
-		layout:setSize(540,32)
+		layout:setSize(sw,32)
 	end
 	--插入一条横线
 	local line = ui.createWidget(themes,"vgw")
@@ -58,7 +58,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 		vg.strokeWidth( 1.0)
 		vg.stroke()
 	end)
-	line:setSize(540,1)
+	line:setSize(sw,1)
 	layout:addChild(line)
 	
 	local hasFunc = arrowFunc and type(arrowFunc) == "function"
@@ -107,7 +107,7 @@ local function addSpeareItem(scroll,text)
 	label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,20,0)
 	layout:setBGColor(vg.rgba(0,0,0,128))
 	
-	layout:setSize(540,28)
+	layout:setSize(sw,28)
 	return layout	
 end
 
@@ -164,7 +164,9 @@ local function createSettingLayout()
 
 	local root = ui.rootWidget()
 	local w,h = root:getSize()
-	
+	print("==================")
+	print(string.format("root getSize %d,%d",w,h))
+	print("==================")
 	local baseLayout = ui.createWidget(themes,"layout")
 	
 	local titleLayout = ui.createWidget(themes,"layout")

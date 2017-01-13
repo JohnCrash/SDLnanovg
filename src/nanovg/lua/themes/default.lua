@@ -28,7 +28,8 @@ return {
 	
 	--! \brief 在样式表被加载时调用一次，具体来说就是ui.loadThemes被调用时
 	--!		onInit函数用来初始化和themes相关的资源，例如公共图片，字体等
-	onInit=function()
+	onInit=function(self)
+		print("font:"..tostring(self.font))
 		if getPlatform() ~= 'windows' then
 			vg.createFont("default","fonts/Roboto-Regular.ttf")
 			vg.createFont("default-bold","fonts/Roboto-Bold.ttf")
