@@ -815,7 +815,12 @@ int lua_setWindowSize(lua_State *L)
 	int w = luaL_checkint(L, 1);
 	int h = luaL_checkint(L, 2);
 	SDLState * state = getSDLState();
-	SDL_SetWindowSize(state->window, w, h);
+	uiWidget * root = uiRootWidget();
+	if (root){
+		root->width = w;
+		root->height = h;
+		SDL_SetWindowSize(state->window, w, h);
+	}
 	return 0;
 }
 
@@ -844,47 +849,6 @@ int lua_breakpoint(lua_State *L)
 	return 0;
 }
 
-/**
- * \brief 设置设计尺寸
- * \param cx,cy 宽高尺寸
- * \param mode 设计尺寸如何与设备尺寸匹配
- */
-int lua_setDesignSize(lua_State *L)
-{
-	int w = luaL_checkint(L, 1);
-	int h = luaL_checkint(L, 2);
-	int m = luaL_checkint(L, 3);
-	SDLState * state = getSDLState();
-	if (state && w > 0 && h > 0){
-		state->design_w = w;
-		state->design_h = h;
-		state->design_mode = m;
-		lua_pushboolean(L, 1);
-	}
-	else{
-		lua_pushboolean(L, 0);
-	}
-	return 1;
-}
-
-/**
-* \brief 返回设计尺寸
-* \return cx,cy 宽高尺寸
-*/
-int lua_getDesignSize(lua_State *L)
-{
-	SDLState * state = getSDLState();
-	if (state){
-		lua_pushnumber(L, state->design_w);
-		lua_pushnumber(L, state->design_h);
-		lua_pushnumber(L, state->design_mode);
-		return 3;
-	}
-	else{
-		return 0;
-	}
-}
-
 /*
  * 初始Lua环境
  */
@@ -897,8 +861,6 @@ int initLua()
 		{ "eventFunction", lua_eventFunction },
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },
-		{ "setDesignSize",lua_setDesignSize },
-		{ "getDesignSize", lua_getDesignSize },
 		{ "setWindowSize",lua_setWindowSize},
 		{ "setWindowTitle", lua_setWindowTitle },
 		{ "schedule", lua_schedule },
@@ -1080,13 +1042,6 @@ void lua_EventRelease()
  */
 void lua_EventChangeSize(int w,int h)
 {
-	uiWidget * root;
-
-	root = uiRootWidget();
-	if (root){
-		root->width = (float)w;
-		root->height = (float)h;
-	}
 	if (lua_pushEventFunction(EVENT_WINDOW)){
 		lua_pushstring(_state, "sizeChanged");
 		lua_pushinteger(_state, w);

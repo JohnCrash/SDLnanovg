@@ -945,12 +945,11 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
  */
 void uiLoop()
 {
-	uiWidget * self = uiRootWidget();
-	if (self && self->isVisible&VISIBLE){
-		SDLState * state = getSDLState();
-		nvgBeginFrame(_vg, (int)state->design_w, (int)state->design_h, 1);
+	uiWidget * root = uiRootWidget();
+	if (root && root->isVisible&VISIBLE){
+		nvgBeginFrame(_vg, (int)root->width, (int)root->height, 1);
 		nvgResetTransform(_vg);
-		uiEnumWidget(_root, renderWidget, eventWidget,(int)self->width, (int)self->height, 1);
+		uiEnumWidget(root, renderWidget, eventWidget, (int)root->width, (int)root->height, 1);
 		nvgEndFrame(_vg);
 	}
 }

@@ -47,9 +47,6 @@ SDLState *createSDLState(int argc,char **argv)
 	state->window_w = DEFAULT_WINDOW_WIDTH;
 	state->window_h = DEFAULT_WINDOW_HEIGHT;
 #endif
-	state->design_mode = SHOW_ALL;
-	state->design_w = DEFAULT_WINDOW_WIDTH;
-	state->design_h = DEFAULT_WINDOW_HEIGHT;
 	/* Ä¬ÈÏÉùÒôÉèÖÃ */
 	state->audiospec.freq = 22050;
 	state->audiospec.format = AUDIO_S16;
