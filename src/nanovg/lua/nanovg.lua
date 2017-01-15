@@ -104,6 +104,10 @@ ui.EVENT_BREAK = 16
 ui.EVENT_EXCLUSIVE = 32
 ui.EVENT_UNBOUNDED = 64
 
+ui.SHOW_ALL = 1
+ui.FIT_WIDTH = 2
+ui.FIT_HEIGHT = 3
+
 ui.rect=function(x,y,width,height)
 	return {x=x,y=y,width=width,height=height}
 end

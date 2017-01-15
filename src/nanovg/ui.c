@@ -947,7 +947,8 @@ void uiLoop()
 {
 	uiWidget * self = uiRootWidget();
 	if (self && self->isVisible&VISIBLE){
-		nvgBeginFrame(_vg, (int)self->width, (int)self->height, 1);
+		SDLState * state = getSDLState();
+		nvgBeginFrame(_vg, (int)state->design_w, (int)state->design_h, 1);
 		nvgResetTransform(_vg);
 		uiEnumWidget(_root, renderWidget, eventWidget,(int)self->width, (int)self->height, 1);
 		nvgEndFrame(_vg);

@@ -42,7 +42,7 @@ int main(int argc,char *argv[])
 	Uint32 t,t0;
 	SDLState * state;
 
-#ifdef defined(_WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	openConsole();
 rerun:
 #endif
@@ -89,7 +89,7 @@ rerun:
 		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glViewport(0, 0, state->window_w,state->window_h);
+		glViewport(0, 0, state->window_w, state->window_h);
 		t = SDL_GetTicks();
 		lua_EventLoop((double)(t - t0) / 1000.0);
 		uiLoop();
@@ -105,7 +105,7 @@ rerun:
 	SDL_Log("releaseSDL..");
 	releaseSDL(state);
 	SDL_Log("DONE..");
-#ifdef defined(_WIN32) && defined(_DEBUG)
+#if defined(_WIN32) && defined(_DEBUG)
 	goto rerun;
 #endif
 	return 0;
