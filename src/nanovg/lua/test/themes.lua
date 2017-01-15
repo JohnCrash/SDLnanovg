@@ -2,7 +2,7 @@ local ui = require "ui"
 local vg = require "vg"
 
 local themes = "normal"
-local sw,sh = screenSize() --540,960
+local sw,sh = 540,960
 print( string.format("screenSize %d , %d",sw,sh) )
 local activeLayout
 
@@ -250,6 +250,7 @@ end
 
 eventFunction("init",function()
 	setWindowSize(540,960)
+	ui.rootWidget():setSize(540,960)
 	setWindowTitle("Themes library test")
 	ui.loadThemes(themes,"themes/default")
 	

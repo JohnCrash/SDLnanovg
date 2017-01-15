@@ -812,15 +812,16 @@ int lua_tick(lua_State *L)
 */
 int lua_setWindowSize(lua_State *L)
 {
+#ifndef __MOBILE__	
 	int w = luaL_checkint(L, 1);
 	int h = luaL_checkint(L, 2);
 	SDLState * state = getSDLState();
-	uiWidget * root = uiRootWidget();
-	if (root){
-		root->width = w;
-		root->height = h;
+	if (state){
+		state->window_w = w;
+		state->window_h = h;
 		SDL_SetWindowSize(state->window, w, h);
 	}
+#endif	
 	return 0;
 }
 

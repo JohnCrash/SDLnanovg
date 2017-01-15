@@ -49,6 +49,8 @@ _continue:
 			else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
 				state->window_w = event.window.data1;
 				state->window_h = event.window.data2;
+				state->screen_w = state->window_w;
+				state->screen_h = state->window_h;
 				lua_EventChangeSize(state->window_w, state->window_h);
 			}
 			else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST){

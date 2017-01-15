@@ -28,22 +28,18 @@ SDLState *createSDLState(int argc,char **argv)
 	state->window_title = "OpenGL Test Window";
 	state->window_icon = "icon.bmp";
 	state->window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-#ifdef __MOBILE__
-	state->window_x = 0;
-	state->window_y = 0;
 	SDL_DisplayMode mode;
 	if (SDL_GetDisplayMode(0, 0, &mode) == 0){
-		state->window_w = mode.w;
-		state->window_h = mode.h;
+		state->screen_w = mode.w;
+		state->screen_h = mode.h;
 	}
 	else{
-		state->window_w = DEFAULT_WINDOW_WIDTH;
-		state->window_h = DEFAULT_WINDOW_HEIGHT;
 		SDL_Log("SDL_GetDisplayMode failed");
 	}
+#ifdef __MOBILE__
+	state->window_w = state->screen_w
+	state->window_h = state->screen_h
 #else
-	state->window_x = 100;
-	state->window_y = 100;
 	state->window_w = DEFAULT_WINDOW_WIDTH;
 	state->window_h = DEFAULT_WINDOW_HEIGHT;
 #endif

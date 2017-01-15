@@ -30,6 +30,8 @@ extern "C"{
 		int window_y;
 		int window_w;
 		int window_h;
+		int screen_w;
+		int screen_h;
 		int window_minW;
 		int window_minH;
 		int window_maxW;
