@@ -175,12 +175,17 @@ local function createSettingLayout()
 	title:setFontSize(26)
 	title:setAlign(ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
 	titleLayout:addChild(title)
+	local sx,sy = title:getPosition()
+	print(string.format("title getPosition %d,%d",w,h))
 	titleLayout:setAlign(ui.ALIGN_LEFT+ui.ALIGN_TOP)
 	titleLayout:setLayoutMatch(ui.WIDTH_MATCH_PARENT)
 	titleLayout:setBGColor(vg.rgba(0,0,0,128))
 	titleLayout:setSize(w,32)
-	
+	sx,sy = title:getPosition()
+	print(string.format("title getPosition %d,%d",w,h))
 	baseLayout:addChild(titleLayout)
+	sx,sy = title:getPosition()
+	print(string.format("title getPosition %d,%d",w,h))
 	
 	local scrollLayout = ui.createWidget(themes,"scroll")
 	scrollLayout:configScroll(ui.VERTICAL+ui.ALIGN_LEFT,0,0,true)
@@ -192,10 +197,10 @@ local function createSettingLayout()
 	local searchLayout = ui.createWidget(themes,"layout")
 	local search = ui.createWidget(themes,"edit")
 	search:setLayoutMatch(ui.WIDTH_MATCH_PARENT,16,16)
-	search:setSize(sw,64-32)
+	search:setSize(w,64-32)
 	search:setAlign(ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
 	searchLayout:addChild(search)
-	searchLayout:setSize(sw,64)
+	searchLayout:setSize(w,64)
 
 	scrollLayout:addChild(searchLayout)
 	
@@ -245,6 +250,7 @@ local function createSettingLayout()
 	scrollLayout:relayout()
 	
 	baseLayout:setSize(w,h)
+
 	return baseLayout
 end
 

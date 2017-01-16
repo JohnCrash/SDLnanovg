@@ -23,3 +23,9 @@ build/android/bin/
 build/android/assets/
 build/doc/
 src/nanovg/doxygen/html/
+*.a
+*.so
+*.dll
+*.lib
+*.bak
+build/deps/glew/lib/

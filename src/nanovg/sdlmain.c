@@ -40,6 +40,8 @@ SDLState *createSDLState(int argc,char **argv)
 	state->window_w = state->screen_w
 	state->window_h = state->screen_h
 #else
+	state->window_x = 12;
+	state->window_y = 32;
 	state->window_w = DEFAULT_WINDOW_WIDTH;
 	state->window_h = DEFAULT_WINDOW_HEIGHT;
 #endif
