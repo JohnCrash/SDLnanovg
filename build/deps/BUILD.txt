@@ -1,0 +1,12 @@
+luajit
+	windows 下使用src/msvcbuild.bat
+	android 下使用src/build_android.sh Cygwin64 with ndk
+	
+glew
+	windows 下build有msvc工程文件
+	android 不使用glew
+	ios		不使用glew
+	
+luasocket
+	windows 执行win32.cmd
+	android 执行android.cmd

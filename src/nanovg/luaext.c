@@ -201,15 +201,12 @@ static int lua_loader(lua_State *L)
 		if (c == 0 || c == ';'){
 			f[j] = 0;
 			fp = SDL_RWFromFile(f, "rb");
-			SDL_Log("SDL_RWFromFile:%s", f);
 			if (!fp){
 				f[j] = 'c';
 				f[j+1] = 0;
 				fp = SDL_RWFromFile(f, "rb");
-				SDL_Log("SDL_RWFromFile:%s", f);
 			}
 			if (c == 0 || fp){
-				SDL_Log("lua_loader:%s", f);
 				break;
 			}
 			j = 0;
@@ -231,7 +228,9 @@ static int lua_loader(lua_State *L)
 		SDL_RWread(fp, data,1, len);
 		SDL_RWclose(fp);
 		//装入lua脚本
-		luaLoadBuffer(_state,data,len,f);
+		sprintf(f,"/SDLnanovg/%s", filename);
+		SDL_Log("lua_loader:%s", f);
+		luaLoadBuffer(_state, data, len, f);
 		free(data);
 		return 1;
 	}

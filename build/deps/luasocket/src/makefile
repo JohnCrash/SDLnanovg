@@ -78,7 +78,7 @@ LDIR_mingw?=lua/$(LUAV)/lua
 # LUALIB_win32:
 # where lua headers and libraries are found for win32 builds
 LUAPREFIX_win32?=
-LUAINC_win32?=$(LUAPREFIX_win32)/include/lua/$(LUAV)
+LUAINC_win32?=$(LUAPREFIX_win32)
 PLATFORM_win32?=Release
 CDIR_win32?=bin/lua/$(LUAV)/$(PLATFORM_win32)
 LDIR_win32?=bin/lua/$(LUAV)/$(PLATFORM_win32)/lua
@@ -229,24 +229,24 @@ SOCKET_mingw=wsocket.o
 SO_win32=dll
 O_win32=obj
 CC_win32=cl
-DEF_win32= //D "WIN32" //D "NDEBUG" //D "_WINDOWS" //D "_USRDLL" \
-     //D "LUASOCKET_API=__declspec(dllexport)" //D "_CRT_SECURE_NO_WARNINGS" \
-     //D "_WINDLL" //D "MIME_API=__declspec(dllexport)" \
-     //D "LUASOCKET_$(DEBUG)" 
-CFLAGS_win32=//I "$(LUAINC)" $(DEF) //O2 //Ot //MD //W3 //nologo
-LDFLAGS_win32= //nologo //link //NOLOGO //DLL //INCREMENTAL:NO \
-    //MANIFEST //MANIFESTFILE:"intermediate.manifest" \
-    //MANIFESTUAC:"level='asInvoker' uiAccess='false'" \
-	//SUBSYSTEM:WINDOWS //OPT:REF //OPT:ICF //DYNAMICBASE:NO \
-    //MACHINE:X86 /LIBPATH:"$(shell cmd //c echo $(LUALIB))" \
-	$(LUALIBNAME_win32) ws2_32.lib //OUT:
+DEF_win32= -D "WIN32" -D "NDEBUG" -D "_WINDOWS" -D "_USRDLL" \
+     -D "LUASOCKET_API=__declspec(dllexport)" -D "_CRT_SECURE_NO_WARNINGS" \
+     -D "_WINDLL" -D "MIME_API=__declspec(dllexport)" \
+     -D "LUASOCKET_$(DEBUG)" 
+CFLAGS_win32=-I "$(LUAINC)" $(DEF) -O2 -Ot -MD -W3 -nologo
+LDFLAGS_win32= -nologo -link -NOLOGO -DLL -INCREMENTAL:NO \
+    -MANIFEST -MANIFESTFILE:"intermediate.manifest" \
+    -MANIFESTUAC:"level='asInvoker' uiAccess='false'" \
+	-SUBSYSTEM:WINDOWS -OPT:REF -OPT:ICF -DYNAMICBASE:NO \
+    -MACHINE:X86 -LIBPATH:"$(LUALIB)" \
+	$(LUALIBNAME_win32) ws2_32.lib -OUT:
 LD_win32=cl
 SOCKET_win32=wsocket.obj
 
 .SUFFIXES: .obj
 
 .c.obj:
-	$(CC) $(CFLAGS) //Fo"$@" //c $<
+	$(CC) $(CFLAGS) -Fo"$@" -c $<
 
 #------
 # Output file names
