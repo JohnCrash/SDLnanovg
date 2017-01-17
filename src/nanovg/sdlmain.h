@@ -85,6 +85,7 @@ extern "C"{
 	int initSDL(SDLState *state);
 	void releaseSDL(SDLState *state);
 	SDLState *getSDLState();
+	int hasProgramParameter(const char * param);
 #ifdef __cplusplus
 }
 #endif

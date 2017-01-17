@@ -1,6 +1,10 @@
 package org.libsdl.nanovg;
+import java.io.File;
+
 import org.libsdl.app.SDLActivity;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -24,6 +28,13 @@ public class nanovgActivity extends SDLActivity {
     	Log.w(TAG,String.format("getExternalStorageState : %s",Environment.getExternalStorageState()));
     	Log.w(TAG,String.format("isExternalStorageEmulated : %s",Environment.isExternalStorageEmulated()?"true":"false"));
     	Log.w(TAG,String.format("isExternalStorageRemovable : %s",Environment.isExternalStorageRemovable()?"true":"false"));
+    /*
+     * 安装一个apk	
+    	Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(new File
+                (Environment.getExternalStorageDirectory()  + "/ljdata/share/download/http/edengine_16_0110.apk")), "application/vnd.android.package-archive");
+        startActivity(intent);
+    */
     	super.onCreate(savedInstanceState);
     }
 }

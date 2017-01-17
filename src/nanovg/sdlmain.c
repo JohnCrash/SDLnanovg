@@ -1,4 +1,5 @@
 #include "sdlmain.h"
+#include <string.h>
 #include <stdio.h>
 
 static SDLState *_state = NULL;
@@ -7,6 +8,19 @@ SDLState *getSDLState()
 {
 	return _state;
 }
+
+int hasProgramParameter(const char * param)
+{
+	int i;
+	if (_state){
+		for (i = 0; i < _state->argc; i++){
+			if (_state->argv[i] && strstr(_state->argv[i], param))
+				return 1;
+		}
+	}
+	return 0;
+}
+
 /*
  *	代码来自于SDLTest,主要进行梳理和修改。
  */

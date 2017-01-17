@@ -8,6 +8,12 @@
 #include "ui.h"
 #include "utf8.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#define MAX_PATH 256
+#endif
+
 /**
 * \addtogroup LuaEXT lua global
 * \brief lua全局函数
@@ -16,16 +22,47 @@
 
 static lua_State * _state = NULL;
 static int _callFromLua = 0;
-#define MAX_PATH 256
 
 static unsigned int _scheduleID = 0;
 static struct schedule * _schedule = NULL;
 static int _isTextInputOpen = 0;
+static char * _execPath = NULL;
 
 lua_State * lua_GlobalState()
 {
 	return _state;
 }
+
+#ifdef _WIN32
+static char * getLuaRootPath()
+{
+	int i,l;
+	if (!_execPath){
+		_execPath = malloc(MAX_PATH);
+		if (GetModuleFileNameA(NULL, _execPath, MAX_PATH) != 0){
+			l = strlen(_execPath);
+			for (i = l-1; i >=0; i--){
+				if (_execPath[i] == '\\'){
+					_execPath[i] = '\0';
+					break;
+				}
+			}
+			strcat(_execPath, "/lua");
+			return _execPath;
+		}
+		else{
+			free(_execPath);
+			_execPath = NULL;
+			return "/lua";
+		}
+	}return _execPath;
+}
+#else
+static char * getLuaRootPath()
+{
+	return "/lua";
+}
+#endif
 /*
  * 自动增长的指针
  */
@@ -102,8 +139,15 @@ static int lua_print(lua_State * luastate)
 static void initLuaLoader(lua_CFunction func)
 {
 	int i;
-
 	if (!func) return;
+
+	/* 
+	 * 设置LUA_PATH环境变量,使用相对的路径。
+	 */
+	lua_getglobal(_state, "package");
+	lua_pushstring(_state, "/?.lua");
+	lua_setfield(_state, -2, "path");
+	lua_pop(_state, 1);
 
 	// stack content after the invoking of the function
 	// get loader table
@@ -158,13 +202,16 @@ static int luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, const c
 static int lua_loader(lua_State *L)
 {
 	const char *filename, *searchpath;
+	const char * luarootpath;
 	int i,j,len;
 	char fn[MAX_PATH];
 	char f[MAX_PATH];
+	char fullpath[MAX_PATH];
 	char c;
 	SDL_RWops *fp;
 	unsigned char * data;
 
+	luarootpath = getLuaRootPath();
 #if defined(__ANDROID__)
 	/*
 	* android系统下面如果是调试版本，优先从sdcard:/SDLnanovg下装载lua代码
@@ -200,11 +247,13 @@ static int lua_loader(lua_State *L)
 		c = searchpath[i++];
 		if (c == 0 || c == ';'){
 			f[j] = 0;
-			fp = SDL_RWFromFile(f, "rb");
+			sprintf(fullpath, "%s%s", luarootpath,f);
+			fp = SDL_RWFromFile(fullpath, "rb");
 			if (!fp){
 				f[j] = 'c';
 				f[j+1] = 0;
-				fp = SDL_RWFromFile(f, "rb");
+				sprintf(fullpath, "%s%s", luarootpath, f);
+				fp = SDL_RWFromFile(fullpath, "rb");
 			}
 			if (c == 0 || fp){
 				break;
@@ -222,15 +271,15 @@ static int lua_loader(lua_State *L)
 		data = (unsigned char *)malloc(len);
 		if (!data){
 			SDL_RWclose(fp);
-			SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,"lua_loader out of memory,%s",filename);
+			SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "lua_loader out of memory,%s", fullpath);
 			return 0;
 		}
 		SDL_RWread(fp, data,1, len);
 		SDL_RWclose(fp);
 		//装入lua脚本
-		sprintf(f,"/SDLnanovg/%s", filename);
 		SDL_Log("lua_loader:%s", f);
-		luaLoadBuffer(_state, data, len, f);
+		sprintf(fn,"@%s",f);
+		luaLoadBuffer(_state, data, len, fn);
 		free(data);
 		return 1;
 	}
@@ -999,10 +1048,15 @@ void lua_EventLoop(double dt)
 
 void lua_EventInit()
 {
+	/* 执行debugger.lua*/
+	if (hasProgramParameter("-luadbg")){
+		SDL_Log("execute script debug.lua");
+		lua_executeScriptFile("gdbp");
+	}
 	/* 执行初始化代码 */
 	SDL_Log("execute script nanovg.lua");
-	lua_executeScriptFile("nanovg.lua");
-	lua_executeScriptFile("init.lua");
+	lua_executeScriptFile("nanovg");
+	lua_executeScriptFile("init");
 
 	if (lua_pushEventFunction(EVENT_INIT)){
 		lua_executeFunction(0);
@@ -1033,7 +1087,7 @@ void lua_EventRelease()
 		lua_executeFunction(0);
 	}
 	/* 执行退出脚本 */
-	lua_executeScriptFile("release.lua");
+	lua_executeScriptFile("release");
 }
 
 /**
