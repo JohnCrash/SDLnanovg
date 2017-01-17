@@ -66,6 +66,7 @@ int initUI()
 	_root->handleEvent = EVENT_NONE;
 	_root->classRef = LUA_REFNIL;
 	_root->selfRef = LUA_REFNIL;
+	_root->hookRef = LUA_REFNIL;
 
 	/* 初始化事件状态 */
 	_eventState.nEvent = 0;
