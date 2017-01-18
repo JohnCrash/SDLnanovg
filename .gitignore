@@ -29,3 +29,6 @@ src/nanovg/doxygen/html/
 *.lib
 *.bak
 build/deps/glew/lib/
+build/deps/luajit-2.1.0-beta/
+*.o
+*.exe
