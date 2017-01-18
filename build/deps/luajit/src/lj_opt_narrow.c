@@ -1,7 +1,7 @@
 /*
 ** NARROW: Narrowing of numbers to integers (double to int32_t).
 ** STRIPOV: Stripping of overflow checks.
-** Copyright (C) 2005-2016 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_opt_narrow_c
@@ -205,6 +205,7 @@ typedef struct NarrowConv {
   jit_State *J;		/* JIT compiler state. */
   NarrowIns *sp;	/* Current stack pointer. */
   NarrowIns *maxsp;	/* Maximum stack pointer minus redzone. */
+  int lim;		/* Limit on the number of emitted conversions. */
   IRRef mode;		/* Conversion mode (IRCONV_*). */
   IRType t;		/* Destination type: IRT_INT or IRT_I64. */
   NarrowIns stack[NARROW_MAX_STACK];  /* Stack holding stack-machine code. */
@@ -341,7 +342,7 @@ static int narrow_conv_backprop(NarrowConv *nc, IRRef ref, int depth)
       NarrowIns *savesp = nc->sp;
       int count = narrow_conv_backprop(nc, ir->op1, depth);
       count += narrow_conv_backprop(nc, ir->op2, depth);
-      if (count <= 1) {  /* Limit total number of conversions. */
+      if (count <= nc->lim) {  /* Limit total number of conversions. */
 	*nc->sp++ = NARROWINS(IRT(ir->o, nc->t), ref);
 	return count;
       }
@@ -413,10 +414,12 @@ TRef LJ_FASTCALL lj_opt_narrow_convert(jit_State *J)
     nc.t = irt_type(fins->t);
     if (fins->o == IR_TOBIT) {
       nc.mode = IRCONV_TOBIT;  /* Used only in the backpropagation cache. */
+      nc.lim = 2;  /* TOBIT can use a more optimistic rule. */
     } else {
       nc.mode = fins->op2;
+      nc.lim = 1;
     }
-    if (narrow_conv_backprop(&nc, fins->op1, 0) <= 1)
+    if (narrow_conv_backprop(&nc, fins->op1, 0) <= nc.lim)
       return narrow_conv_emit(J, &nc);
   }
   return NEXTFOLD;
@@ -501,7 +504,8 @@ TRef LJ_FASTCALL lj_opt_narrow_cindex(jit_State *J, TRef tr)
 {
   lua_assert(tref_isnumber(tr));
   if (tref_isnum(tr))
-    return emitir(IRT(IR_CONV, IRT_INTP), tr, (IRT_INTP<<5)|IRT_NUM|IRCONV_ANY);
+    return emitir(IRT(IR_CONV, IRT_INTP), tr,
+		  (IRT_INTP<<5)|IRT_NUM|IRCONV_TRUNC|IRCONV_ANY);
   /* Undefined overflow semantics allow stripping of ADDOV, SUBOV and MULOV. */
   return narrow_stripov(J, tr, IR_MULOV,
 			LJ_64 ? ((IRT_INTP<<5)|IRT_INT|IRCONV_SEXT) :

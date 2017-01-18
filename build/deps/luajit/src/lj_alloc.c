@@ -77,7 +77,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#if LJ_64 && !LJ_GC64
+#if LJ_64
 
 /* Undocumented, but hey, that's what we all love so much about Windows. */
 typedef long (*PNTAVM)(HANDLE handle, void **addr, ULONG zbits,
@@ -174,10 +174,8 @@ static LJ_AINLINE int CALL_MUNMAP(void *ptr, size_t size)
 #endif
 #define MMAP_FLAGS		(MAP_PRIVATE|MAP_ANONYMOUS)
 
-#if LJ_64 && !LJ_GC64
-/* 64 bit mode with 32 bit pointers needs special support for allocating
-** memory in the lower 2GB.
-*/
+#if LJ_64
+/* 64 bit mode needs special support for allocating memory in the lower 2GB. */
 
 #if defined(MAP_32BIT)
 
@@ -196,7 +194,7 @@ static LJ_AINLINE void *CALL_MMAP(size_t size)
   return ptr;
 }
 
-#elif LJ_TARGET_OSX || LJ_TARGET_PS4 || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__sun__) || defined(__CYGWIN__)
+#elif LJ_TARGET_OSX || LJ_TARGET_PS4 || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__sun__)
 
 /* OSX and FreeBSD mmap() use a naive first-fit linear search.
 ** That's perfect for us. Except that -pagezero_size must be set for OSX,
@@ -260,7 +258,7 @@ static LJ_AINLINE void *CALL_MMAP(size_t size)
 
 #else
 
-/* 32 bit mode and GC64 mode is easy. */
+/* 32 bit mode is easy. */
 static LJ_AINLINE void *CALL_MMAP(size_t size)
 {
   int olderr = errno;
@@ -296,7 +294,7 @@ static LJ_AINLINE void *CALL_MREMAP_(void *ptr, size_t osz, size_t nsz,
 #define CALL_MREMAP(addr, osz, nsz, mv) CALL_MREMAP_((addr), (osz), (nsz), (mv))
 #define CALL_MREMAP_NOMOVE	0
 #define CALL_MREMAP_MAYMOVE	1
-#if LJ_64 && !LJ_GC64
+#if LJ_64
 #define CALL_MREMAP_MV		CALL_MREMAP_NOMOVE
 #else
 #define CALL_MREMAP_MV		CALL_MREMAP_MAYMOVE
