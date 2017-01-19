@@ -16,8 +16,6 @@ public class nanovgActivity extends SDLActivity {
         return new String[] {
             "SDL2",
             "main",
-            "socket",
-            "mine",
         };
     }	
     @Override
