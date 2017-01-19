@@ -60,7 +60,7 @@ static char * getLuaRootPath()
 #else
 static char * getLuaRootPath()
 {
-	return "/lua";
+	return "";
 }
 #endif
 /*
@@ -214,12 +214,12 @@ static int lua_loader(lua_State *L)
 	luarootpath = getLuaRootPath();
 #if defined(__ANDROID__)
 	/*
-	* android系统下面如果是调试版本，优先从sdcard:/SDLnanovg下装载lua代码
-	*/
+	 * android系统下面如果是调试版本，优先从sdcard:/SDLnanovg下装载lua代码
+	 */
 	#ifdef _DEBUG
 		char androidpath[256];
 		const char * sd = "/sdcard";//SDL_AndroidGetExternalStoragePath();
-		sprintf(androidpath,"%s/SDLnanovg/lua/?.lua;lua/?.lua",sd);	
+		sprintf(androidpath,"%s/SDLnanovg/lua/?.lua;lua/?.lua",sd);
 		searchpath = androidpath;
 	#else
 		searchpath = "lua/?.lua";
@@ -1049,10 +1049,10 @@ void lua_EventLoop(double dt)
 void lua_EventInit()
 {
 	/* 执行debugger.lua*/
-	if (hasProgramParameter("-luadbg")){
+	//if (hasProgramParameter("-luadbg")){
 		SDL_Log("execute script debug.lua");
 		lua_executeScriptFile("gdbp");
-	}
+	//}
 	/* 执行初始化代码 */
 	SDL_Log("execute script nanovg.lua");
 	lua_executeScriptFile("nanovg");

@@ -53,6 +53,13 @@ LUAPREFIX_linux?=/usr/local
 CDIR_linux?=lib/lua/$(LUAV)
 LDIR_linux?=share/lua/$(LUAV)
 
+#ANDROID NDK
+LUAINC_android_base?=
+LUAINC_android?=$(LUAPREFIX_android)
+LUAPREFIX_android?=
+CDIR_android?=bin/lua/$(LUAV)/$(PLATFORM_android)
+LDIR_android?=bin/lua/$(LUAV)/$(PLATFORM_android)/lua
+
 # LUAINC_freebsd:
 # /usr/local/include/lua$(LUAV)
 # where lua headers are found for freebsd builds
@@ -174,6 +181,21 @@ CFLAGS_linux= -I$(LUAINC) $(DEF) -Wall -Wshadow -Wextra \
 LDFLAGS_linux=-O -shared -fpic -o 
 LD_linux=gcc
 SOCKET_linux=usocket.o
+
+#------
+# Compiler and linker settings
+# for android ndk
+SO_android=so
+O_android=o
+CC_android=$(CROSS)gcc
+DEF_android=-DLUASOCKET_$(DEBUG) \
+	-DLUASOCKET_API='__attribute__((visibility("default")))' \
+	-DUNIX_API='__attribute__((visibility("default")))' \
+	-DMIME_API='__attribute__((visibility("default")))'
+CFLAGS_android= -I$(LUAINC) $(DEF) $(TARGET_FLAGS) $(TARGET_CFLAGS)
+LDFLAGS_android=$(TARGET_FLAGS) -O -shared -fpic -o 
+LD_android=$(CROSS)gcc
+SOCKET_android=usocket.o
 
 #------
 # Compiler and linker settings
@@ -358,6 +380,9 @@ win32:
 linux:
 	$(MAKE) all-unix PLAT=linux
 
+android:
+	$(MAKE) all-unix PLAT=android
+	
 mingw:
 	$(MAKE) all PLAT=mingw
 	

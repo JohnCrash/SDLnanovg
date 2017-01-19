@@ -9,4 +9,4 @@ glew
 	
 luasocket
 	windows Ö´ÐÐwin32.cmd
-	android Ö´ÐÐandroid.cmd
+	android Ö´ÐÐbuild_android.sh
