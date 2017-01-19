@@ -11,6 +11,15 @@ import android.util.Log;
 
 public class nanovgActivity extends SDLActivity {
 	String TAG = "nanovg";
+	@Override
+    protected String[] getLibraries() {
+        return new String[] {
+            "SDL2",
+            "main",
+            "socket",
+            "mine",
+        };
+    }	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	Log.w(TAG,String.format("getFilesDir : %s",	getFilesDir().getPath()));
@@ -35,6 +44,30 @@ public class nanovgActivity extends SDLActivity {
                 (Environment.getExternalStorageDirectory()  + "/ljdata/share/download/http/edengine_16_0110.apk")), "application/vnd.android.package-archive");
         startActivity(intent);
     */
+    	File file = new File("/data/data/org.libsdl.nanovg/lib/libmain.so");
+    	if( file.exists() ){
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmain.so is exists");
+    	}else{
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmain.so is not exists");
+    	}
+    	file = new File("/data/data/org.libsdl.nanovg/lib/libmine.so");
+    	if( file.exists() ){
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmine.so is exists");
+    	}else{
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmine.so is not exists");
+    	}  
+    	file = new File("/data/data/org.libsdl.nanovg/lib/libSDL2.so");
+    	if( file.exists() ){
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libSDL2.so is exists");
+    	}else{
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libSDL2.so is not exists");
+    	}   
+    	file = new File("/data/data/org.libsdl.nanovg/lib/libsocket.so");
+    	if( file.exists() ){
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libsocket.so is exists");
+    	}else{
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libsocket.so is not exists");
+    	}      	
     	super.onCreate(savedInstanceState);
     }
 }

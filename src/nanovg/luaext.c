@@ -148,7 +148,12 @@ static void initLuaLoader(lua_CFunction func)
 	lua_pushstring(_state, "/?.lua");
 	lua_setfield(_state, -2, "path");
 	lua_pop(_state, 1);
-
+#ifdef __ANDROID__
+	lua_getglobal(_state, "package");
+	lua_pushstring(_state, "/data/data/org.libsdl.nanovg/lib/lib?.so");
+	lua_setfield(_state, -2, "cpath");
+	lua_pop(_state, 1);
+#endif
 	// stack content after the invoking of the function
 	// get loader table
 	lua_getglobal(_state, "package");                                  /* L: package */

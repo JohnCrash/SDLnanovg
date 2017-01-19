@@ -2195,7 +2195,8 @@ function M.init(executionplatform,workingdirectory)
     -- currently, the directory is registered on start, this allows program to load any source file and then change working dir,
     -- which is the most common use case.
     M.base_dir = workingdirectory or os.getenv("PWD")
-
+	M.base_dir = M.base_dir or ''
+	
     -- convert parsed URL table to file path  for the current OS (see url.parse from luasocket)
     M.to_file_uri = function (path) return url.build{scheme="file",authority="", path=path} end
 
