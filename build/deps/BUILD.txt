@@ -1,6 +1,6 @@
 luajit
 	windows 下使用src/msvcbuild.bat 可以加参数debug用来打开调试
-	android 下使用src/build_android.sh Cygwin64 with ndk
+	android 下使用src/build_android.sh Cygwin32 with ndk (要求使用32位版本的Cygwin)
 	
 glew
 	windows 下build有msvc工程文件

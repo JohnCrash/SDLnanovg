@@ -1,5 +1,5 @@
 #!/bin/sh
 # AUTO-GENERATED FILE, DO NOT EDIT!
 if [ -f $1.org ]; then
-  sed -e 's!^C:/Users/wesnoth/AppData/Local/Temp!/tmp!ig;s! C:/Users/wesnoth/AppData/Local/Temp! /tmp!ig;s!^C:/MinGW/msys/1\.0/!/!ig;s! C:/MinGW/msys/1\.0/! /!ig;s!^C:/MinGW/msys/1\.0!/usr!ig;s! C:/MinGW/msys/1\.0! /usr!ig;s!^z:!/z!ig;s! z:! /z!ig;s!^y:!/y!ig;s! y:! /y!ig;s!^x:!/x!ig;s! x:! /x!ig;s!^v:!/v!ig;s! v:! /v!ig;s!^i:!/i!ig;s! i:! /i!ig;s!^g:!/g!ig;s! g:! /g!ig;s!^f:!/f!ig;s! f:! /f!ig;s!^e:!/e!ig;s! e:! /e!ig;s!^d:!/d!ig;s! d:! /d!ig;s!^c:!/c!ig;s! c:! /c!ig;' $1.org > $1 && rm -f $1.org
+  sed -e 's!^C:/cygwin64/lib!/usr/lib!ig;s! C:/cygwin64/lib! /usr/lib!ig;s!^C:/cygwin64/bin!/usr/bin!ig;s! C:/cygwin64/bin! /usr/bin!ig;s!^C:/cygwin64/!/!ig;s! C:/cygwin64/! /!ig;s!^Z:!/cygdrive/z!ig;s! Z:! /cygdrive/z!ig;s!^Y:!/cygdrive/y!ig;s! Y:! /cygdrive/y!ig;s!^X:!/cygdrive/x!ig;s! X:! /cygdrive/x!ig;s!^V:!/cygdrive/v!ig;s! V:! /cygdrive/v!ig;s!^I:!/cygdrive/i!ig;s! I:! /cygdrive/i!ig;s!^G:!/cygdrive/g!ig;s! G:! /cygdrive/g!ig;s!^E:!/cygdrive/e!ig;s! E:! /cygdrive/e!ig;s!^D:!/cygdrive/d!ig;s! D:! /cygdrive/d!ig;s!^C:!/cygdrive/c!ig;s! C:! /cygdrive/c!ig;' $1.org > $1 && rm -f $1.org
 fi

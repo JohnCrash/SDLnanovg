@@ -29,10 +29,10 @@ LOCAL_SRC_FILES := ../../../src/main/android/SDL_android_main.c \
 	$(NANOVG_SRC_PATH)/ui.c				\
 	$(NANOVG_SRC_PATH)/utf8.c			\
 	
-LOCAL_WHOLE_STATIC_LIBRARIES := luajit_static
+#LOCAL_WHOLE_STATIC_LIBRARIES := luajit_static
 	
 #LOCAL_SHARED_LIBRARIES := SDL2 socket-prebuilt mime-prebuilt
-LOCAL_SHARED_LIBRARIES := SDL2
+LOCAL_SHARED_LIBRARIES := SDL2 luajit
 
 LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
 
