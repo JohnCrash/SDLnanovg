@@ -16,6 +16,8 @@ public class nanovgActivity extends SDLActivity {
         return new String[] {
             "SDL2",
             "main",
+            "socket",
+            "mime",
         };
     }	
     @Override
@@ -48,11 +50,11 @@ public class nanovgActivity extends SDLActivity {
     	}else{
     		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmain.so is not exists");
     	}
-    	file = new File("/data/data/org.libsdl.nanovg/lib/libmine.so");
+    	file = new File("/data/data/org.libsdl.nanovg/lib/libmime.so");
     	if( file.exists() ){
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmine.so is exists");
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmime.so is exists");
     	}else{
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmine.so is not exists");
+    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmime.so is not exists");
     	}  
     	file = new File("/data/data/org.libsdl.nanovg/lib/libSDL2.so");
     	if( file.exists() ){

@@ -31,8 +31,8 @@ LOCAL_SRC_FILES := ../../../src/main/android/SDL_android_main.c \
 	
 LOCAL_WHOLE_STATIC_LIBRARIES := luajit_static
 	
-LOCAL_SHARED_LIBRARIES := SDL2 
-LOCAL_WHOLE_SHARED_LIBRARIES := socket-prebuilt mime-prebuilt
+#LOCAL_SHARED_LIBRARIES := SDL2 socket-prebuilt mime-prebuilt
+LOCAL_SHARED_LIBRARIES := SDL2
 
 LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
 
@@ -40,4 +40,4 @@ include $(BUILD_SHARED_LIBRARY)
 
 $(call import-module,SDLnanovg)
 $(call import-module,luajit/prebuilt/android)
-$(call import-module,luasocket/prebuilt/android)
+#$(call import-module,luasocket/prebuilt/android)
