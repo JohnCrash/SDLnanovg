@@ -15,9 +15,10 @@ public class nanovgActivity extends SDLActivity {
     protected String[] getLibraries() {
         return new String[] {
             "SDL2",
+            "luajit",
             "main",
-            "socket",
-            "mime",
+//            "socket",
+//            "mime",
         };
     }	
     @Override

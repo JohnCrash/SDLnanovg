@@ -1,3 +1,5 @@
+注意：ndk预编译库(PREBUILT_SHARED_LIBRARY|PREBUILT_SHARED_LIBRARY)。
+		不能将动态库和静态库放在一个Android.mk文件中。
 luajit
 	windows 下使用src/msvcbuild.bat 可以加参数debug用来打开调试
 	android 下使用src/build_android.sh Cygwin32 with ndk (要求使用32位版本的Cygwin)
