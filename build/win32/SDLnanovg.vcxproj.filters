@@ -84,6 +84,9 @@
     <ClInclude Include="..\..\src\nanovg\bitree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\nanovg\platform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\nanovg\nanovg.c">
@@ -144,6 +147,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\nanovg\bitree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\nanovg\platform.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

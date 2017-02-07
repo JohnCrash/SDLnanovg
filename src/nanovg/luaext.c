@@ -7,12 +7,7 @@
 #include "luaext.h"
 #include "ui.h"
 #include "utf8.h"
-
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#define MAX_PATH 256
-#endif
+#include "platform.h"
 
 /**
 * \addtogroup LuaEXT lua global
@@ -33,36 +28,6 @@ lua_State * lua_GlobalState()
 	return _state;
 }
 
-#ifdef _WIN32
-static char * getLuaRootPath()
-{
-	int i,l;
-	if (!_execPath){
-		_execPath = malloc(MAX_PATH);
-		if (GetModuleFileNameA(NULL, _execPath, MAX_PATH) != 0){
-			l = strlen(_execPath);
-			for (i = l-1; i >=0; i--){
-				if (_execPath[i] == '\\'){
-					_execPath[i] = '\0';
-					break;
-				}
-			}
-			strcat(_execPath, "/lua");
-			return _execPath;
-		}
-		else{
-			free(_execPath);
-			_execPath = NULL;
-			return "/lua";
-		}
-	}return _execPath;
-}
-#else
-static char * getLuaRootPath()
-{
-	return "";
-}
-#endif
 /*
  * 自动增长的指针
  */
@@ -145,15 +110,15 @@ static void initLuaLoader(lua_CFunction func)
 	 * 设置LUA_PATH环境变量,使用相对的路径。
 	 */
 	lua_getglobal(_state, "package");
-	lua_pushstring(_state, "/?.lua");
+	lua_pushstring(_state, getLUAPath());
 	lua_setfield(_state, -2, "path");
 	lua_pop(_state, 1);
-#ifdef __ANDROID__
+
 	lua_getglobal(_state, "package");
-	lua_pushstring(_state, "/data/data/org.libsdl.nanovg/lib/lib?.so");
+	lua_pushstring(_state, getLUAClibPath());
 	lua_setfield(_state, -2, "cpath");
 	lua_pop(_state, 1);
-#endif
+
 	// stack content after the invoking of the function
 	// get loader table
 	lua_getglobal(_state, "package");                                  /* L: package */
@@ -216,25 +181,8 @@ static int lua_loader(lua_State *L)
 	SDL_RWops *fp;
 	unsigned char * data;
 
-	luarootpath = getLuaRootPath();
-#if defined(__ANDROID__)
-	/*
-	 * android系统下面如果是调试版本，优先从sdcard:/SDLnanovg下装载lua代码
-	 */
-	#ifdef _DEBUG
-		char androidpath[256];
-		const char * sd = "/sdcard";//SDL_AndroidGetExternalStoragePath();
-		sprintf(androidpath,"%s/SDLnanovg/lua/?.lua;lua/?.lua",sd);
-		searchpath = androidpath;
-	#else
-		searchpath = "lua/?.lua";
-	#endif
-#else
-	lua_getglobal(L, "package");
-	lua_getfield(L, -1, "path");
-	searchpath = lua_tostring(L, -1);
-#endif
-
+	luarootpath = getLuaRootPath();	//源代码根目录
+	searchpath = getLUAPath();		//搜索模板
 	filename = luaL_checkstring(L, 1);
 	//去掉后缀.lua
 	strcpy(fn, filename);
@@ -946,11 +894,11 @@ int initLua()
 	}
 	luaL_openlibs(_state);
 
-	/* 组成全局函数 */
 	for (i = 0; i < EVENT_COUNT; i++)
 		_eventRef[i] = LUA_REFNIL;
+	/* 注册全局函数 */
 	luaL_register(_state, "_G", global_functions);
-	
+
 	/* 扩展库 */
 	lua_getglobal(_state, "package");
 	lua_getfield(_state, -1, "preload");
@@ -1055,7 +1003,7 @@ void lua_EventInit()
 {
 	/* 执行debugger.lua*/
 	//if (hasProgramParameter("-luadbg")){
-		SDL_Log("execute script debug.lua");
+		SDL_Log("execute script gdbp.lua");
 		lua_executeScriptFile("gdbp");
 	//}
 	/* 执行初始化代码 */
