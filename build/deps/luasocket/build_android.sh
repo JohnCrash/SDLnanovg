@@ -8,6 +8,6 @@ NDKF="--sysroot $NDK/platforms/android-$NDKABI/arch-arm"
 CFLAGS=" -O3 -marm -mcpu=cortex-a8 -mfloat-abi=softfp"
 
 make PLAT=android LUAPREFIX_android='../../luajit/src' \
-	LUALIB_directory='-L../../luajit/prebuilt/android/armeabi/' \
+	LUALIB_directory='-L../../luajit/prebuilt/android/dynamic/armeabi/' \
 	CROSS=$NDKP \
 	TARGET_FLAGS="$NDKF" TARGET_CFLAGS="$CFLAGS"
