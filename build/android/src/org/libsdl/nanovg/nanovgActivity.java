@@ -17,8 +17,8 @@ public class nanovgActivity extends SDLActivity {
             "SDL2",
             "luajit",
             "main",
-            "socket",
-            "mime",
+//            "socket",
+//            "mime",
         };
     }	
     @Override

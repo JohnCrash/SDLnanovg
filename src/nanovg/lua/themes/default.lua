@@ -30,12 +30,12 @@ return {
 	--!		onInit函数用来初始化和themes相关的资源，例如公共图片，字体等
 	onInit=function(self)
 		print("font:"..tostring(self.font))
-		if getPlatform() ~= 'windows' then
-			vg.createFont("default","fonts/Roboto-Regular.ttf")
+		if getPlatform() == 'windows' then
+			vg.createFont("default","c:/windows/fonts/simfang.ttf")
 			vg.createFont("default-bold","fonts/Roboto-Bold.ttf")
 		else
-			vg.createFont("default","C:/Windows/Fonts/simfang.ttf")
-			vg.createFont("default-bold","fonts/Roboto-Bold.ttf")	
+			vg.createFont("default","/system/fonts/DroidSansChinese.ttf")
+			vg.createFont("default-bold","/system/fonts/DroidSans-Bold.ttf")	
 		end
 	end,
 	window = require "themes/window",
