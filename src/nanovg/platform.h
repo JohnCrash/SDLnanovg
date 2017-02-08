@@ -6,8 +6,9 @@
 #include <Windows.h>
 const char * getRootPath();		//返回根目录
 const char * getLuaRootPath();	//返回lua源码根目录
-const char * getLUAClibPath();	//返回lua动态库路径
-const char * getLUAPath();		//返回lua包路径
+const char * getLUAClibPath();	//返回lua动态库搜索路径
+const char * getLUAPath();		//返回lua包搜索路径
+const char * getFileSearchPath();	//返回普通文件搜索路径
 #elif defined(__ANDROID__)
 //android
 #define MAX_PATH 256

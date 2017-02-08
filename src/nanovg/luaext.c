@@ -8,6 +8,7 @@
 #include "ui.h"
 #include "utf8.h"
 #include "platform.h"
+#include "sdlport.h"
 
 /**
 * \addtogroup LuaEXT lua global
@@ -171,18 +172,13 @@ static int luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, const c
  */
 static int lua_loader(lua_State *L)
 {
-	const char *filename, *searchpath;
-	const char * luarootpath;
-	int i,j,len;
+	const char *filename;
+	int i,len;
 	char fn[MAX_PATH];
 	char f[MAX_PATH];
-	char fullpath[MAX_PATH];
-	char c;
 	SDL_RWops *fp;
 	unsigned char * data;
 
-	luarootpath = getLuaRootPath();	//源代码根目录
-	searchpath = getLUAPath();		//搜索模板
 	filename = luaL_checkstring(L, 1);
 	//去掉后缀.lua
 	strcpy(fn, filename);
@@ -194,45 +190,25 @@ static int lua_loader(lua_State *L)
 	}
 	else
 		len = i;
-	j = i = 0;
-	fp = NULL;
-	for (;;){
-		c = searchpath[i++];
-		if (c == 0 || c == ';'){
-			f[j] = 0;
-			sprintf(fullpath, "%s%s", luarootpath,f);
-			fp = SDL_RWFromFile(fullpath, "rb");
-			if (!fp){
-				f[j] = 'c';
-				f[j+1] = 0;
-				sprintf(fullpath, "%s%s", luarootpath, f);
-				fp = SDL_RWFromFile(fullpath, "rb");
-			}
-			if (c == 0 || fp){
-				break;
-			}
-			j = 0;
-		}else if (c == '?'){
-			strcpy(f + j, fn);
-			j += len;
-		}else{
-			f[j++] = c;
-		}
+	//将文件名中的.转换为/
+	for (i = 0; i < len;i++){
+		if (fn[i] == '.')fn[i] = '/';
 	}
+	fp = SDL_searchFile(getLUAPath(), fn, "rb");
 	if (fp){
 		len = (int)SDL_RWsize(fp);
 		data = (unsigned char *)malloc(len);
 		if (!data){
 			SDL_RWclose(fp);
-			SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "lua_loader out of memory,%s", fullpath);
+			SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "lua_loader out of memory,%s", fn);
 			return 0;
 		}
 		SDL_RWread(fp, data,1, len);
 		SDL_RWclose(fp);
 		//装入lua脚本
-		SDL_Log("lua_loader:%s", f);
-		sprintf(fn,"@%s",f);
-		luaLoadBuffer(_state, data, len, fn);
+		SDL_Log("lua_loader:%s", fn);
+		sprintf(f,"@%s.lua",fn);
+		luaLoadBuffer(_state, data, len, f);
 		free(data);
 		return 1;
 	}

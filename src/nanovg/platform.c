@@ -5,6 +5,7 @@
 static char _execPath[MAX_PATH] = { 0 };
 static char _luaPath[MAX_PATH] = { 0 };
 static char _clibPath[MAX_PATH] = { 0 };
+static char _filePath[MAX_PATH] = { 0 };
 
 /*
  * 返回执行程序所在目录
@@ -36,18 +37,6 @@ const char * getRootPath()
 }
 
 /*
- * 返回lua源文件根目录
- */
-const char * getLuaRootPath()
-{
-	if (!_luaPath[0]){
-		strcpy(_luaPath, getRootPath());
-		strcat(_luaPath, "/lua");
-	}
-	return _luaPath;
-}
-
-/*
  * 返回lua动态库的搜索路径
  */
 const char * getLUAClibPath()
@@ -64,16 +53,26 @@ const char * getLUAClibPath()
  */
 const char * getLUAPath()
 {
-	return "lua/?.lua";
+	if (!_luaPath[0]){
+		strcpy(_luaPath, getRootPath());
+		strcat(_luaPath, "/lua/?.lua;");
+		strcat(_luaPath, getRootPath());
+		strcat(_luaPath, "/lua/?.luac");
+	}
+	return _luaPath;
+}
+
+const char * getFileSearchPath()
+{
+	if (!_filePath[0]){
+		strcpy(_filePath, getRootPath());
+		strcat(_filePath, "/?;?"); //先到绝对路径下找，然后直接找
+	}
+	return _filePath;
 }
 #elif defined(__ANDROID__)
 //android
 const char * getRootPath()
-{
-	return "";
-}
-
-const char * getLuaRootPath()
 {
 	return "";
 }
@@ -98,11 +97,6 @@ const char * getLUAPath()
 #elif defined(__APPLE__)
 //apple ios
 const char * getRootPath()
-{
-	return "";
-}
-
-const char * getLuaRootPath()
 {
 	return "";
 }
