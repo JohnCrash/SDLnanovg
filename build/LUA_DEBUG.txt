@@ -1,0 +1,8 @@
+ldt 调试配置
+
+1.执行环境的当前目录一定要是lua根目录，例如:D:\source\SDLnanovg\build\win32\Debug\lua
+	这样在Local resolution模式下就可以正常调试。
+	如果不能设置当前路径为lua根目录可以通过debugger.init的workingdirectory参数传入lua根路径。
+	
+2.远程调试这时候使用Module resolution模式，需要右键工程弹出菜单(Build Path)->(Use as Source Folder)。
+	然后ldt使用Attach debug，并且配置Attach debug为Module resolution。

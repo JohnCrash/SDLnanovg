@@ -78,7 +78,7 @@ const char * getRootPath()
 }
 
 /*
- * 
+ * android下.so文件将被展开在/data/data/"PACKAGE_NAME"/lib/下
  */
 const char * getLUAClibPath()
 {
@@ -91,7 +91,12 @@ const char * getLUAClibPath()
  */
 const char * getLUAPath()
 {
-	return "/sdcard/"APP_NAME"/lua/?.lua;lua/?.lua";
+	return "/sdcard/"APP_NAME"/lua/?.lua;lua/?.lua;lua/?.luac";
+}
+
+const char * getFileSearchPath()
+{
+	return "/sdcard/"APP_NAME"/?;?";
 }
 
 #elif defined(__APPLE__)
@@ -103,14 +108,18 @@ const char * getRootPath()
 
 const char * getLUAClibPath()
 {
-	return "";
+	return "?.so";
 }
 
 const char * getLUAPath()
 {
-	return "lua/?.lua";
+	return "lua/?.lua;lua/?.luac";
 }
 
+const char * getFileSearchPath()
+{
+	return "?";
+}
 #else
 //other unix like system
 #endif
