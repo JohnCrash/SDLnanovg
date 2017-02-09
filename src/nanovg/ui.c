@@ -54,9 +54,19 @@ static void calcXForm(uiWidget *self)
 
 int initUI()
 {
+	SDL_DisplayMode mode;
 	SDLState * state = getSDLState();
 	_root = (uiWidget *)malloc(sizeof(uiWidget));
 	if (!_root)return 0;
+	
+	if (SDL_GetDisplayMode(0, 0, &mode) == 0){
+		state->screen_w = mode.w;
+		state->screen_h = mode.h;
+	}
+#if defined(__ANDROID__) || defined(__IOS__)
+	state->window_w = (float)state->screen_w;
+	state->window_h = (float)state->screen_h;
+#endif
 	memset(_root, 0, sizeof(uiWidget));
 	_root->width = (float)state->window_w;
 	_root->height = (float)state->window_h;

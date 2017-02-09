@@ -36,7 +36,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 		image:setSize(52,52)
 		local w,h = image:getSize()
 		label:setString(text)
-		label:setFontSize(20)
+		label:setFontSize(24)
 		label:setFontBold(true)
 		label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,w+12,0)
 		
@@ -44,7 +44,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 	else
 		layout:addChild(label)	
 		label:setString(text)
-		label:setFontSize(20)
+		label:setFontSize(24)
 		label:setFontBold(true)
 		label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,12,0)
 		
@@ -69,6 +69,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 	--右侧文本
 	if rightText and type(rightText) == "string" then
 		local rightLabel = ui.createWidget(themes,"label")
+		rightLabel:setFontSize(24)
 		rightLabel:setString(rightText)
 		local ox = 0
 		if hasFunc then
@@ -106,7 +107,7 @@ local function addSpeareItem(scroll,text)
 	local label = ui.createWidget(themes,"label")
 	layout:addChild(label)
 	label:setString(text)
-	label:setFontSize(20)
+	label:setFontSize(24)
 	label:setFontBold(true)	
 	label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,20,0)
 	layout:setBGColor(vg.rgba(0,0,0,128))
