@@ -587,12 +587,11 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 	return tail;
 }
 
-//将正则坐标转换到屏幕空间
+//将正则坐标转换到root坐标系
 static void transfromToWindow(float x,float y,float *px,float *py)
 {
-	SDLState *state = getSDLState();
-	*px = state->window_w * x;
-	*py = state->window_h * y;
+	*px = _root->width * x;
+	*py = _root->height * y;
 }
 
 /*

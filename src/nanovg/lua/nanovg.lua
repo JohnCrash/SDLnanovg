@@ -223,7 +223,6 @@ ui.switchUI=function(current,widget,orientation)
 	
 	local rate = 0.04/0.2
 	local STEP
-	local sw,sh = screenSize()
 	local x1,y1 = current:getPosition()
 	local w1,h1 = current:getSize()
 	local w2,h2 = widget:getSize()

@@ -1,0 +1,18 @@
+UI采用树结构组织，根节点使用ui.rootWidget()获取。
+
+UI到屏幕显示有一个映射步骤
+	设备显示区:
+		在windows上显示区是窗口，在移动设备上就是整个设备屏幕。
+		设备显示区尺寸可以通过getDeviceSize()来取得。
+		windows系统中可以通过setDeviceSize()来设置窗口的显示尺寸。
+		screenSize()在windows下返回桌面的尺寸，在移动设备上返回设备的尺寸。
+	UI根区域:
+		根区域是虚拟的区域，根区域尺寸可以是任意指定的。例如可以指定
+		为1024x768或者1080x2048
+	
+	UI根显示区被缩放匹配映射到设备显示区,同时鼠标和触摸事件的坐标也通过相同的变换。
+	显示映射通过nvgBeginFrame进行。
+	void nvgBeginFrame(NVGcontext* ctx, int windowWidth, int windowHeight, float devicePixelRatio)
+	windowWidth和windowHeight最终被传入到viewSize中，viewSize是下面的一段shader代码，用来将
+	nanovg绘制转换到-1,1的正则空间中，然后通过glViewport映射到屏幕上。
+		"	gl_Position = vec4(2.0*vertex.x/viewSize.x - 1.0, 1.0 - 2.0*vertex.y/viewSize.y, 0, 1);\n"

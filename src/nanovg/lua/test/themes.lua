@@ -9,7 +9,11 @@ local activeLayout
 local function relayout()
 	if activeLayout then
 		local w,h = screenSize()
-		print( string.format("screenSize %d , %d",sw,sh) )
+		print( string.format("screenSize %d , %d",w,h) )
+		w,h = getDeviceSize()
+		print( string.format("windowSize %d , %d",w,h) )
+		w,h = ui.rootWidget():getSize()
+		print( string.format("rootSize %d , %d",w,h) )		
 		activeLayout:setSize(sw,sh)
 		activeLayout:relayout()
 	end
@@ -255,13 +259,22 @@ local function createSettingLayout()
 end
 
 eventFunction("init",function()
-	setWindowSize(540,960)
-	ui.rootWidget():setSize(540,960)
+	setDeviceSize(540,960)
+	local dw,dh = getDeviceSize()
+	sw = 540
+	sh = dh*540/dw
+	ui.rootWidget():setSize(sw,sh)
 	setWindowTitle("Themes library test")
 	ui.loadThemes(themes,"themes/default")
 	
 	activeLayout = createSettingLayout()
 	--activeLayout = createWLANLayout()
+	local w,h = screenSize()
+	print( string.format("screenSize %d , %d",w,h) )
+	w,h = getDeviceSize()
+	print( string.format("windowSize %d , %d",w,h) )
+	w,h = ui.rootWidget():getSize()
+	print( string.format("rootSize %d , %d",w,h) )		
 end)
 
 eventFunction("window",function(eventName,p1,p2)

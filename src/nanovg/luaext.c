@@ -787,9 +787,9 @@ int lua_tick(lua_State *L)
 * \brief 在window系统中用来调整主窗口的尺寸
 * \param w,h 屏幕宽度与高度
 */
-int lua_setWindowSize(lua_State *L)
+int lua_setDeviceSize(lua_State *L)
 {
-#ifndef __MOBILE__	
+#if defined(_WIN32) || defined(__MAC__)
 	int w = luaL_checkint(L, 1);
 	int h = luaL_checkint(L, 2);
 	SDLState * state = getSDLState();
@@ -802,6 +802,13 @@ int lua_setWindowSize(lua_State *L)
 	return 0;
 }
 
+int lua_getDeviceSize(lua_State *L)
+{
+	SDLState * state = getSDLState();
+	lua_pushinteger(L, state->window_w);
+	lua_pushinteger(L, state->window_h);
+	return 2;
+}
 /**
  * \brief 在window系统中设置主窗口的尺寸
  */
@@ -839,7 +846,8 @@ int initLua()
 		{ "eventFunction", lua_eventFunction },
 		{ "nanovgRender", lua_nanovgRender },
 		{ "screenSize",lua_screenSize },
-		{ "setWindowSize",lua_setWindowSize},
+		{ "setDeviceSize",lua_setDeviceSize},
+		{ "getDeviceSize", lua_getDeviceSize },
 		{ "setWindowTitle", lua_setWindowTitle },
 		{ "schedule", lua_schedule },
 		{ "removeSchedule", lua_removeSchedule },
