@@ -10,5 +10,5 @@ glew
 	ios		不使用glew
 	
 luasocket
-	windows 执行win32.cmd
+	windows 执行win32.cmd (cygwin)
 	android 执行build_android.sh

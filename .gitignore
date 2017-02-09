@@ -33,3 +33,5 @@ build/deps/luajit-2.1.0-beta/
 *.o
 *.exe
 build/android/gen/
+*.exp
+*.prefs
