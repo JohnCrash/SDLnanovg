@@ -172,6 +172,7 @@ local function createSettingLayout()
 	print("==================")
 	print(string.format("root getSize %d,%d",w,h))
 	print("==================")
+	
 	local baseLayout = ui.createWidget(themes,"layout")
 	
 	local titleLayout = ui.createWidget(themes,"layout")
@@ -251,8 +252,13 @@ local function createSettingLayout()
 	addSettingItem(scrollLayout,"系统更新","images/image8.jpg","",function()end)
 	addSettingItem(scrollLayout,"关于手机","images/image9.jpg","",function()end)
 	
-	root:addChild(baseLayout)
+	local bgLayout = ui.createWidget(themes,"layout")
+	bgLayout:setBGColor(vg.rgba(255/2,255/2,255/2,255))
+	bgLayout:setSize(w,h)
+
+	bgLayout:addChild(baseLayout)
 	scrollLayout:relayout()
+	root:addChild(bgLayout)
 	
 	baseLayout:setSize(w,h)
 

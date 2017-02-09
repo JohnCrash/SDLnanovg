@@ -86,9 +86,9 @@ rerun:
 	t0 = SDL_GetTicks();
 	while (!eventLoop(state))
 	{
-		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+		//glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glClear(GL_COLOR_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT);
 		glViewport(0, 0, state->window_w, state->window_h);
 		t = SDL_GetTicks();
 		lua_EventLoop((double)(t - t0) / 1000.0);
