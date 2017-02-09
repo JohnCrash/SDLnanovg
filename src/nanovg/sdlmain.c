@@ -1,6 +1,7 @@
 #include "sdlmain.h"
 #include <string.h>
 #include <stdio.h>
+#include "platform.h"
 
 static SDLState *_state = NULL;
 
@@ -50,9 +51,9 @@ SDLState *createSDLState(int argc,char **argv)
 	else{
 		SDL_Log("SDL_GetDisplayMode failed");
 	}
-#ifdef __MOBILE__
-	state->window_w = state->screen_w
-	state->window_h = state->screen_h
+#if defined(__ANDROID__) || defined(__IOS__)
+	state->window_w = state->screen_w;
+	state->window_h = state->screen_h;
 #else
 	state->window_x = 12;
 	state->window_y = 32;

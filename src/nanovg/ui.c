@@ -1,4 +1,5 @@
-﻿#include <math.h>
+﻿#include "platform.h"
+#include <math.h>
 #include <memory.h>
 #include "SDL.h"
 #include "lua.h"
@@ -10,7 +11,7 @@
 #include "ui.h" 
 #include "nanovg.h"
 #include "nanovg_sdl.h"
-
+#include "debug.h"
 
 typedef struct {
 	int haveEventType; /* 在事件列表中存在指定的事件类型 */
@@ -586,6 +587,14 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 	return tail;
 }
 
+//将正则坐标转换到屏幕空间
+static void transfromToWindow(float x,float y,float *px,float *py)
+{
+	SDLState *state = getSDLState();
+	*px = state->window_w * x;
+	*py = state->window_h * y;
+}
+
 /*
  * 将SDL_Event转变为uiEvent
  */
@@ -603,7 +612,14 @@ static void prepareUIEvent()
 			break;
 		}
 		pevent = getSDLEvent(i);
+		
+		dumpSDLEvent(pevent);
+
 		switch (pevent->type){
+/*
+ * 在android,ios下SDL会模拟产生MouseButton,MouseMotion事件
+ */
+#if defined(_WIN32) || defined(__MAC__)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			SDL_CaptureMouse(pevent->type == SDL_MOUSEBUTTONDOWN);
@@ -634,12 +650,16 @@ static void prepareUIEvent()
 				_eventState.haveEventType |= EVENT_TOUCHDROP;
 			}
 			break;
+#endif
+/*
+ * TouchFinger事件中的坐标都是被正则为0-1范围
+ */
+#if defined(__ANDROID__) || defined(__IOS__)
 		case SDL_FINGERDOWN:
 			{
 				pev = &(_eventState.events[_eventState.nEvent++]);
 				pev->t = pevent->tfinger.timestamp / 1000.0;
-				pev->x = pevent->tfinger.x;
-				pev->y = pevent->tfinger.y;
+				transfromToWindow(pevent->tfinger.x, pevent->tfinger.y,&pev->x,&pev->y);
 				pev->type = EVENT_TOUCHDOWN;
 				_eventState.haveEventType |= EVENT_TOUCHDOWN;
 				_eventState.isTouchDown = 1;
@@ -650,8 +670,7 @@ static void prepareUIEvent()
 			{
 				pev = &(_eventState.events[_eventState.nEvent++]);
 				pev->t = pevent->tfinger.timestamp / 1000.0;
-				pev->x = pevent->tfinger.x;
-				pev->y = pevent->tfinger.y;
+				transfromToWindow(pevent->tfinger.x, pevent->tfinger.y, &pev->x, &pev->y);
 				pev->type = EVENT_TOUCHUP;
 				_eventState.haveEventType |= EVENT_TOUCHUP;
 			}
@@ -660,12 +679,12 @@ static void prepareUIEvent()
 			if (_eventState.isTouchDown){
 				pev = &(_eventState.events[_eventState.nEvent++]);
 				pev->t = pevent->tfinger.timestamp / 1000.0;
-				pev->x = pevent->tfinger.x;
-				pev->y = pevent->tfinger.y;
+				transfromToWindow(pevent->tfinger.x, pevent->tfinger.y, &pev->x, &pev->y);
 				pev->type = EVENT_TOUCHDROP;
 				_eventState.haveEventType |= EVENT_TOUCHDROP;
 			}
 			break;
+#endif
 		}
 	}
 }
@@ -710,6 +729,7 @@ static void lua_EventInput(uiEvent * pev)
 		lua_executeFunction(1);
 	}
 }
+
 /**
 * \brief 枚举的过程中eventFunc可能改变窗口结构甚至删除窗口
 * 这需要特殊处理，首先将满足调用func的窗口放入一个表中

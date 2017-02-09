@@ -17,8 +17,6 @@ public class nanovgActivity extends SDLActivity {
             "SDL2",
             "luajit",
             "main",
-//            "socket",
-//            "mime",
         };
     }	
     @Override
@@ -44,31 +42,7 @@ public class nanovgActivity extends SDLActivity {
         intent.setDataAndType(Uri.fromFile(new File
                 (Environment.getExternalStorageDirectory()  + "/ljdata/share/download/http/edengine_16_0110.apk")), "application/vnd.android.package-archive");
         startActivity(intent);
-    */
-    	File file = new File("/data/data/org.libsdl.nanovg/lib/libmain.so");
-    	if( file.exists() ){
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmain.so is exists");
-    	}else{
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmain.so is not exists");
-    	}
-    	file = new File("/data/data/org.libsdl.nanovg/lib/libmime.so");
-    	if( file.exists() ){
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmime.so is exists");
-    	}else{
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libmime.so is not exists");
-    	}  
-    	file = new File("/data/data/org.libsdl.nanovg/lib/libSDL2.so");
-    	if( file.exists() ){
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libSDL2.so is exists");
-    	}else{
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libSDL2.so is not exists");
-    	}   
-    	file = new File("/data/data/org.libsdl.nanovg/lib/libsocket.so");
-    	if( file.exists() ){
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libsocket.so is exists");
-    	}else{
-    		Log.w(TAG,"/data/data/org.libsdl.nanovg/lib/libsocket.so is not exists");
-    	}      	
+    */     	
     	super.onCreate(savedInstanceState);
     }
 }

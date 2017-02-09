@@ -29,6 +29,7 @@ LOCAL_SRC_FILES := ../../../src/main/android/SDL_android_main.c \
 	$(NANOVG_SRC_PATH)/ui.c				\
 	$(NANOVG_SRC_PATH)/utf8.c			\
 	$(NANOVG_SRC_PATH)/platform.c		\
+	$(NANOVG_SRC_PATH)/debug.c			\
 	
 #LOCAL_WHOLE_STATIC_LIBRARIES := luajit_static
 

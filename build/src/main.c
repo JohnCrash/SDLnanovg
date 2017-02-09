@@ -17,7 +17,7 @@ freely.
 #include "gles.h"
 #include "sdlmain.h"
 #include "nanovg_sdl.h"
-#include "fs.h"
+#include "platform.h"
 #include "eventhandler.h"
 #include "luaext.h"
 #include "ui.h"
