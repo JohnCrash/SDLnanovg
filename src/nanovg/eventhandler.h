@@ -12,7 +12,7 @@ typedef struct {
 
 } simpleEvent;
 
-int eventLoop(SDLState *state);
+int eventLoop(SDLState *state,unsigned int uss,unsigned int dt);
 
 int getSDLEventCount();
 SDL_Event * getSDLEvent(int n);

@@ -39,8 +39,9 @@ int SDL_main(int argc, char *argv[])
 int main(int argc,char *argv[])
 #endif
 {
-	Uint32 t,t0;
+	Uint32 t,t0,dt;
 	SDLState * state;
+	unsigned int uss = VISIBLE|UPDATE_OFF;
 
 #if defined(_WIN32) && defined(_DEBUG)
 	openConsole();
@@ -84,15 +85,17 @@ rerun:
 	lua_EventInit();
 	SDL_Log("Main loop..");
 	t0 = SDL_GetTicks();
-	while (!eventLoop(state))
+	dt = 0;
+	while (!eventLoop(state,uss,dt))
 	{
 		//glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		//glClear(GL_COLOR_BUFFER_BIT);
 		glViewport(0, 0, state->window_w, state->window_h);
 		t = SDL_GetTicks();
-		lua_EventLoop((double)(t - t0) / 1000.0);
-		uiLoop();
+		dt = t - t0;
+		lua_EventLoop((double)dt / 1000.0);
+		uss = uiLoop();
 		t0 = t;
 		SDL_GL_SwapWindow(state->window);
 	}

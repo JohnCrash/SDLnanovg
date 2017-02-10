@@ -13,13 +13,16 @@
 #include "nanovg_sdl.h"
 #include "debug.h"
 
+#define ES_TDWS_MAX 32
+#define ES_EVENT_MAX 16
+
 typedef struct {
-	int haveEventType; /* 在事件列表中存在指定的事件类型 */
-	int isTouchDown;
-	uiEvent lastTouchDown; /* 最近一次按下事件 */
-	uiWidget *lastTouchDownWidget; /* 按下事件的接受对象 */
+	int haveEventType;		/* 在事件列表中存在指定的事件类型 */
+	int isTouchDown;		/* 在按下状态下 */
+	uiEvent lastTouchDown;	/* 最近一次按下事件 */
+	uiWidget *lastTouchDownWidgets[ES_TDWS_MAX];	/* 接收了按下事件的对象 */
 	int nEvent;
-	uiEvent events[8];
+	uiEvent events[ES_EVENT_MAX];
 } uiEventState;
 
 uiEventState _eventState;
@@ -30,6 +33,38 @@ extern NVGcontext* _vg;
 uiWidget * uiRootWidget()
 {
 	return _root;
+}
+
+/*
+ * 向_eventState lastTouchDownWidgets 中加入一个uiWidget *
+ */
+int pushLastTouchDownWidgets(uiWidget * pwidget)
+{
+	int i;
+	for (i = 0; i < ES_TDWS_MAX; i++){
+		if (!_eventState.lastTouchDownWidgets[i]){
+			_eventState.lastTouchDownWidgets[i] = pwidget;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/*
+ * 查找看看pwidget是不是在lastTouchDownWidgets中
+ */
+int inLastTouchDownWidgets(uiWidget * pwidget)
+{
+	int i;
+	uiWidget * pw;
+	for (i = 0; i < ES_TDWS_MAX; i++){
+		pw = _eventState.lastTouchDownWidgets[i];
+		if (!pw)
+			return 0;
+		else if (pw == pwidget)
+			return 1;
+	}
+	return 0;
 }
 
 /*
@@ -82,7 +117,9 @@ int initUI()
 	/* 初始化事件状态 */
 	_eventState.nEvent = 0;
 	_eventState.isTouchDown = 0;
-	_eventState.lastTouchDownWidget = NULL;
+
+	memset(_eventState.lastTouchDownWidgets, 0, sizeof(_eventState.lastTouchDownWidgets));
+
 	return 1;
 }
 
@@ -236,7 +273,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 				self->sx = 1.0f;
 				self->sy = 1.0f;
 				calcXForm(self);
-				self->isVisible = VISIBLE;
+				self->isVisible = VISIBLE | UPDATE_OFF;
 				self->handleEvent = EVENT_NONE;
 				callWidgetEvent(self,themes->themeRef,"onInit");
 				return self;
@@ -475,7 +512,7 @@ void uiSetVisible(uiWidget *self, int b)
 	if (b)
 		self->isVisible |= VISIBLE;
 	else
-		self->isVisible &= !VISIBLE;
+		self->isVisible &= ~VISIBLE;
 }
 
 void uiSetPosition(uiWidget *self, float x, float y)
@@ -509,7 +546,7 @@ void enableClipClient(uiWidget *self, int b)
 	if (b)
 		self->isVisible |= CLIP;
 	else
-		self->isVisible &= !CLIP;
+		self->isVisible &= ~CLIP;
 }
 
 static int InParentWidget(uiWidget *parent, uiWidget *child, float x, float y)
@@ -534,10 +571,11 @@ int InWidget(uiWidget *parent, uiWidget *child)
  * \brief 将所有可见的对象都链接在一起，并且返回其头，通过enum_next进行遍历
  * \param root 遍历的根节点
  * \param tail 将遍历的全部节点顺序连接，通过uiWidget的enum_next,enum_prev
+ * \param 收集所有isVisible的标志位
  * \param renderFunc 对每个遍历到的uiWidget调用renderFunc(uiWidget*)
  * \return 返回tail
  */
-static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderProc renderFunc)
+static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, unsigned int * puss,uiRenderProc renderFunc)
 {
 	uiWidget * child;
 	int isclip = 0;
@@ -565,11 +603,12 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 		while (child){
 			if (child->isVisible&VISIBLE){
 				if (InParentWidget(pParent, child,x,y)){
+					*puss |= child->isVisible;
 					tail->enum_next = child;
 					child->enum_prev = tail;
 					tail = child;
 					tail->enum_next = NULL;
-					tail = uiEnumWidgetVisible(child, tail, renderFunc);
+					tail = uiEnumWidgetVisible(child, tail, puss,renderFunc);
 				}
 			}
 			child = child->next;
@@ -580,11 +619,12 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, uiRenderPr
 		while (child){
 			if (child->isVisible&VISIBLE){
 				if (InWidget(root, child)){
+					*puss |= child->isVisible;
 					tail->enum_next = child;
 					child->enum_prev = tail;
 					tail = child;
 					tail->enum_next = NULL;
-					tail = uiEnumWidgetVisible(child, tail, renderFunc);
+					tail = uiEnumWidgetVisible(child, tail, puss,renderFunc);
 				}
 			}
 			child = child->next;
@@ -616,7 +656,7 @@ static void prepareUIEvent()
 	_eventState.nEvent = 0;
 	_eventState.haveEventType = 0;
 	for (i = 0; i < count; i++){
-		if (_eventState.nEvent >= 8){
+		if (_eventState.nEvent >= ES_EVENT_MAX){
 			SDL_Log("uiEvent overflow");
 			break;
 		}
@@ -706,7 +746,7 @@ static void endUIEvent()
 	 */
 	if (_eventState.isTouchDown && (_eventState.haveEventType&EVENT_TOUCHUP)){
 		_eventState.isTouchDown = 0;
-		_eventState.lastTouchDownWidget = NULL;
+		memset(_eventState.lastTouchDownWidgets, 0, sizeof(_eventState.lastTouchDownWidgets));
 	}
 }
 
@@ -763,7 +803,7 @@ unsigned int uiEnumWidget(uiWidget *root,
 	head = root;
 	head->enum_next = NULL;
 	head->enum_prev = NULL; 
-	tail = uiEnumWidgetVisible(root, head, renderFunc);
+	tail = uiEnumWidgetVisible(root, head, &uss,renderFunc);
 	/*
 	 * 下面准备分发事件
 	 */
@@ -917,8 +957,8 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 					ev.y2 = _eventState.lastTouchDown.y;
 					ev.t2 = _eventState.lastTouchDown.t;
 				}
-				else if (!_eventState.lastTouchDownWidget && pev->type == EVENT_TOUCHDOWN){
-					_eventState.lastTouchDownWidget = widget;
+				else if (pev->type == EVENT_TOUCHDOWN){
+					pushLastTouchDownWidgets(widget);
 				}
 				if (callWidgetOnEvent(widget, "onEvent", &ev))
 					return 1; /* 如果事件被处理停止传递 */
@@ -927,7 +967,7 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 					(widget->handleEvent&EVENT_BREAK))
 					return 1;
 			}
-			else if (widget == _eventState.lastTouchDownWidget){
+			else if (inLastTouchDownWidgets(widget)){
 				/* 第一个接收掉EVENT_TOUCHDOWN的对象将接收直到EVENT_TOUCHEND的所有数据 */
 				uiEvent ev = *pev;
 				ev.x = x;
@@ -937,6 +977,7 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 					ev.x2 = _eventState.lastTouchDown.x;
 					ev.y2 = _eventState.lastTouchDown.y;
 					ev.t2 = _eventState.lastTouchDown.t;
+					ev.type = EVENT_TOUCHUP;
 				}
 				if (callWidgetOnEvent(widget, "onEvent", &ev))
 					return 1; /* 如果事件被处理停止传递 */
@@ -1078,10 +1119,11 @@ int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
 {
 	uiWidget * head, *tail;
 	int idx = 0;
+	unsigned int uss = 0;
 	head = _root;
 	head->enum_next = NULL;
 	head->enum_prev = NULL;
-	tail = uiEnumWidgetVisible(_root, head, donothingFunc);
+	tail = uiEnumWidgetVisible(_root, head,&uss, donothingFunc);
 	while (tail){
 		if (uiPtInWidget(tail, x, y)){
 			if (idx < n)

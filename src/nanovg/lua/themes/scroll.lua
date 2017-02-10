@@ -89,6 +89,7 @@ return {
 	--! \return 函数不需要返回值
 	onDraw=function(self,dt)	
 		if self._status == MOTIONLESS then
+			self:disableFlags(ui.UPDATE_HIGH)
 			return
 		end
 		local sw,sh = self:getSize()
@@ -171,6 +172,7 @@ return {
 			self._tick = SLIDETIME
 			self._status = SLIDE
 			self._velocity = self._st:velocity()
+			self:enableFlags(ui.UPDATE_HIGH)
 		elseif event.type == ui.EVENT_TOUCHDROP then
 			if self._down then
 				local sw,sh = self:getSize()
