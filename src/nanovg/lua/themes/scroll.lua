@@ -87,7 +87,7 @@ return {
 	--! \breif widget绘制函数
 	--! \param dt 从上一次调用绘制到这次的时间差，单位时秒
 	--! \return 函数不需要返回值
-	onDraw=function(self,dt)
+	onDraw=function(self,dt)	
 		if self._status == MOTIONLESS then
 			return
 		end
