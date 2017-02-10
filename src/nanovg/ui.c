@@ -751,11 +751,13 @@ static void lua_EventInput(uiEvent * pev)
 * \param winWidth
 * \param winHeight
 * \param devicePixelRatio
+* \return 返回无符号整数，该值等于全部控件的标志位做OR操作。
 */
-void uiEnumWidget(uiWidget *root, 
+unsigned int uiEnumWidget(uiWidget *root, 
 	uiRenderProc renderFunc, uiEventProc eventFunc,
 	int winWidth, int winHeight, float devicePixelRatio)
 {
+	unsigned int uss = 0;
 	int i;
 	uiWidget * head,*temp,*tail;
 	head = root;
@@ -800,6 +802,7 @@ void uiEnumWidget(uiWidget *root,
 		uiDeleteWidgetSelf(head);
 		head = temp;
 	}
+	return uss;
 }
 
 /*
@@ -973,15 +976,17 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
 /*
  * 渲染对象树结构
  */
-void uiLoop()
+unsigned int uiLoop()
 {
+	unsigned int uss = 0;
 	uiWidget * root = uiRootWidget();
 	if (root && root->isVisible&VISIBLE){
 		nvgBeginFrame(_vg, (int)root->width, (int)root->height, 1);
 		nvgResetTransform(_vg);
-		uiEnumWidget(root, renderWidget, eventWidget, (int)root->width, (int)root->height, 1);
+		uss = uiEnumWidget(root, renderWidget, eventWidget, (int)root->width, (int)root->height, 1);
 		nvgEndFrame(_vg);
 	}
+	return uss;
 }
 
 void uiSendEvent(uiWidget *self)

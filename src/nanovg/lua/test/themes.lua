@@ -5,6 +5,7 @@ local themes = "normal"
 local sw,sh = 540,960
 print( string.format("screenSize %d , %d",sw,sh) )
 local activeLayout
+local fontSize = 28
 
 local function relayout()
 	if activeLayout then
@@ -36,7 +37,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 		image:setSize(52,52)
 		local w,h = image:getSize()
 		label:setString(text)
-		label:setFontSize(24)
+		label:setFontSize(fontSize)
 		label:setFontBold(true)
 		label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,w+12,0)
 		
@@ -44,7 +45,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 	else
 		layout:addChild(label)	
 		label:setString(text)
-		label:setFontSize(24)
+		label:setFontSize(fontSize)
 		label:setFontBold(true)
 		label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,12,0)
 		
@@ -69,7 +70,7 @@ local function addSettingItem(scroll,text,imagefile,rightText,arrowFunc)
 	--右侧文本
 	if rightText and type(rightText) == "string" then
 		local rightLabel = ui.createWidget(themes,"label")
-		rightLabel:setFontSize(24)
+		rightLabel:setFontSize(fontSize)
 		rightLabel:setString(rightText)
 		local ox = 0
 		if hasFunc then
@@ -107,7 +108,7 @@ local function addSpeareItem(scroll,text)
 	local label = ui.createWidget(themes,"label")
 	layout:addChild(label)
 	label:setString(text)
-	label:setFontSize(24)
+	label:setFontSize(fontSize)
 	label:setFontBold(true)	
 	label:setAlign(ui.ALIGN_LEFT+ui.ALIGN_MIDDLE,20,0)
 	layout:setBGColor(vg.rgba(0,0,0,128))
@@ -125,7 +126,7 @@ local function createWLANLayout()
 	local titleLayout = ui.createWidget(themes,"layout")
 	local title = ui.createWidget(themes,"label")
 	title:setString("WLAN")
-	title:setFontSize(26)
+	title:setFontSize(fontSize)
 	title:setAlign(ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
 	titleLayout:addChild(title)
 	titleLayout:setAlign(ui.ALIGN_LEFT+ui.ALIGN_TOP)
@@ -177,7 +178,7 @@ local function createSettingLayout()
 	local titleLayout = ui.createWidget(themes,"layout")
 	local title = ui.createWidget(themes,"label")
 	title:setString("设置")
-	title:setFontSize(26)
+	title:setFontSize(fontSize+2)
 	title:setAlign(ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
 	titleLayout:addChild(title)
 	local sx,sy = title:getPosition()

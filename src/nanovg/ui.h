@@ -42,11 +42,15 @@ extern "C"{
 	 * #uiWidget isVisible 的可能组合 
 	 */
 	enum{
-		INVISIBLE = 0, ///<不可见
-		VISIBLE = 1, ///<可见
-		LINEAR = 2, ///<线性排列，在一些情况下设置这个可以提高效率
-		CLIP = 4, ///< #uiWidget 的子对象不能绘制到uiWidget外面
-		SCROLL_CLIP = 8, ///<滚动去中的子剪切区
+		INVISIBLE = 0,		///<不可见
+		VISIBLE = 1,		///<可见
+		LINEAR = 2,			///<线性排列，在一些情况下设置这个可以提高效率
+		CLIP = 4,			///< #uiWidget 的子对象不能绘制到uiWidget外面
+		SCROLL_CLIP = 8,	///<滚动去中的子剪切区
+		UPDATE_HIGHT = 16,	///<高速更新界面
+		UPDATE_MID = 32,	///<中速更新
+		UPDATE_LOW = 64,	///<低速更新
+		UPDATE_OFF = 128,	///<低速更新
 	};
 	
 	typedef struct {
@@ -74,7 +78,7 @@ extern "C"{
 		float curxform[6];
 		/** ox,oy旋转和缩放中心，相对于x,y */
 		float x,y,angle, sx, sy,ox,oy;
-		char isVisible;
+		unsigned int isVisible;
 		/**
 		 * 向框架表明如何处理事件
 		 */
@@ -231,7 +235,7 @@ extern "C"{
 	/**
 	 * \brief 遍历绘制根节点和子节点，这个函数由框架调用。
 	 */
-	void uiLoop();
+	unsigned int  uiLoop();
 	
 	/**
 	 * 
