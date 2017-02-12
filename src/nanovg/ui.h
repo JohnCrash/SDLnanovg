@@ -15,14 +15,14 @@ extern "C"{
 	 * ::uiWidget 的处理流程。
 	 */
 	enum{
-		EVENT_NONE = 0, /**<此 ::uiWidget 不处理任何事件*/
-		EVENT_TOUCHDOWN = 1, /**<触摸屏被按下，或者鼠标左键被按下*/
-		EVENT_TOUCHDROP = 2, /**<在触摸屏幕上拖动，或者鼠标左键拖动*/
-		EVENT_TOUCHUP = 4, /**<触摸抬起，或者鼠标左键抬起*/
-		EVENT_ZOOM = 8, /**<触摸屏两手指拖动操作*/
-		EVENT_BREAK = 16, /**<停止将事件传递到此 ::uiWidget_t Z轴下的uiWidget_t对象*/
-		EVENT_EXCLUSIVE = 32, /**<如果事件在对象内部发生就停止传递*/
-		EVENT_UNBOUNDED = 64, /**<不考虑节点的尺寸直接将事件传递给该节点*/
+		EVENT_NONE = 0,			/**<此 ::uiWidget 不处理任何事件*/
+		EVENT_TOUCHDOWN = 1,	/**<触摸屏被按下，或者鼠标左键被按下*/
+		EVENT_TOUCHDROP = 2,	/**<在触摸屏幕上拖动，或者鼠标左键拖动*/
+		EVENT_TOUCHUP = 4,		/**<触摸抬起，或者鼠标左键抬起*/
+		EVENT_ZOOM = 8,			/**<触摸屏两手指拖动操作*/
+		EVENT_BREAK = 16,		/**<停止将事件传递到此 ::uiWidget_t Z轴下的uiWidget_t对象*/
+		EVENT_EXCLUSIVE = 32,	/**<如果事件在对象内部发生就停止传递*/
+		EVENT_UNBOUNDED = 64,	/**<不考虑节点的尺寸直接将事件传递给该节点*/
 	};
 
 	enum{
@@ -42,20 +42,24 @@ extern "C"{
 	 * #uiWidget isVisible 的可能组合 
 	 */
 	enum{
-		INVISIBLE = 0, ///<不可见
-		VISIBLE = 1, ///<可见
-		LINEAR = 2, ///<线性排列，在一些情况下设置这个可以提高效率
-		CLIP = 4, ///< #uiWidget 的子对象不能绘制到uiWidget外面
-		SCROLL_CLIP = 8, ///<滚动去中的子剪切区
+		INVISIBLE = 0,		///<不可见
+		VISIBLE = 1,		///<可见
+		LINEAR = 2,			///<线性排列，在一些情况下设置这个可以提高效率
+		CLIP = 4,			///< #uiWidget 的子对象不能绘制到uiWidget外面
+		SCROLL_CLIP = 8,	///<滚动去中的子剪切区
+		UPDATE_HIGH = 16,	///<高速更新界面
+		UPDATE_MID = 32,	///<中速更新
+		UPDATE_LOW = 64,	///<低速更新
+		UPDATE_OFF = 128,	///<低速更新
 	};
 	
 	typedef struct {
 		int type;
-		int inside; /**< 事件在对象内部发生 */
-		double t; /**< 发生的时间 getLoopInterval() */
-		float x, y; /**< touch */
-		double t2; /**< 发生的时间 SDL_GetTicks */
-		float x2, y2; /**< zoom */
+		int inside;	/**< 事件在对象内部发生 */
+		double t;	/**< 发生的时间 getLoopInterval() */
+		float x, y;	/**< touch */
+		double t2;	/**< 发生的时间 SDL_GetTicks */
+		float x2, y2;	/**< zoom */
 	} uiEvent;
 
 	typedef struct {
@@ -74,7 +78,7 @@ extern "C"{
 		float curxform[6];
 		/** ox,oy旋转和缩放中心，相对于x,y */
 		float x,y,angle, sx, sy,ox,oy;
-		char isVisible;
+		unsigned int isVisible;
 		/**
 		 * 向框架表明如何处理事件
 		 */
@@ -83,12 +87,12 @@ extern "C"{
 		int selfRef;
 		int hookRef;
 		luaWidget * luaobj;
-		struct uiWidget_t *parent; /**<父窗口*/
-		struct uiWidget_t *child; /**<子窗口*/
-		struct uiWidget_t *next; /**<兄弟窗口下一个*/
-		struct uiWidget_t *prev; /**<兄弟窗口上一个*/
-		struct uiWidget_t *remove; /**<将要删除的窗口*/
-		struct uiWidget_t *enum_next; /**<正在枚举的窗口*/
+		struct uiWidget_t *parent;	/**<父窗口*/
+		struct uiWidget_t *child;	/**<子窗口*/
+		struct uiWidget_t *next;	/**<兄弟窗口下一个*/
+		struct uiWidget_t *prev;	/**<兄弟窗口上一个*/
+		struct uiWidget_t *remove;	/**<将要删除的窗口*/
+		struct uiWidget_t *enum_next;	/**<正在枚举的窗口*/
 		struct uiWidget_t *enum_prev;
 	} uiWidget;
 
@@ -231,7 +235,7 @@ extern "C"{
 	/**
 	 * \brief 遍历绘制根节点和子节点，这个函数由框架调用。
 	 */
-	void uiLoop();
+	unsigned int  uiLoop();
 	
 	/**
 	 * 

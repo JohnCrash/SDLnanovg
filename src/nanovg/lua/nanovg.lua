@@ -75,6 +75,10 @@ ui.VISIBLE = 1
 ui.LINEAR = 2
 ui.CLIP = 4
 ui.SCROLL_CLIP = 8
+ui.UPDATE_HIGH = 16
+ui.UPDATE_MID = 32	
+ui.UPDATE_LOW = 64
+ui.UPDATE_OFF = 128
 
 ui.ALIGN_LEFT = 1
 ui.ALIGN_CENTER = 2
@@ -255,7 +259,7 @@ ui.switchUI=function(current,widget,orientation)
 	--设置定时器进行平移
 	schedule(0.04,function(dt)
 		local ret = true
-
+		
 		if orientation == ui.RIGHT then
 			x1 = x1 - STEP
 			x2 = x2 - STEP
@@ -287,12 +291,14 @@ ui.switchUI=function(current,widget,orientation)
 		else
 			return
 		end
+		ui.rootWidget():enableFlags(ui.UPDATE_HIGH)
 		current:setPosition(x1,y1)
 		widget:setPosition(x2,y2)
 		
 		if not ret then
 			current:setVisible(false)
 		end
+		ui.rootWidget():disableFlags(ui.UPDATE_HIGH)
 		return ret
 	end)
 	return true

@@ -32,10 +32,24 @@ SDL_Event * getSDLEvent(int n)
 
 static int _background = 0;
 static int _isediting = 0; //是否处于IME输入状态
-int eventLoop(SDLState *state)
+/*
+ * uss 是一个将所有可见对象都做OR操作得到的值
+ *	控制事件循环的更新频率
+ *		UPDATE_HIGH 60帧
+ *		UPDATE_MID	30帧
+ *		UPDATE_LOW	10帧
+ *		UPDATE_OFF	事件驱动
+ * 上一次循环耗时(ms)
+ */
+#define HIGH_VALUE 1000/60
+#define MID_VALUE 1000/30
+#define LOW_VALUE 1000/10
+
+int eventLoop(SDLState *state,unsigned int uss,unsigned int dt)
 {
 	SDL_Event event;
-
+	Uint32 t1;
+	Uint32 t0 = SDL_GetTicks();
 	clearSDLEvent();
 _continue:
 	while (SDL_PollEvent(&event))
@@ -62,8 +76,6 @@ _continue:
 			}
 			break;
 		case SDL_TEXTEDITING:
-		//	printf("EDITING start: %d,'%s' %d\n",
-		//		event.edit.start,event.edit.text,event.edit.length);
 			if (!event.edit.text[0]){
 				_isediting = 0;
 			}
@@ -74,7 +86,6 @@ _continue:
 			break;
 		case SDL_TEXTINPUT:
 			_isediting = 0;
-		//	printf("TEXTINPUT : %s\n",event.text.text);
 			lua_callKeyboardFunc("insert",event.text.text);
 			break;
 		case SDL_KEYDOWN:
@@ -120,8 +131,29 @@ _continue:
 		if (!addSDLEvent(&event))
 			return 0;
 	}
-	if (_background && getSDLEventCount()==0){
-		//SDL_Delay(100);
+	t1 = SDL_GetTicks();
+	if (getSDLEventCount()>0){
+		return 0;
+	}
+	else if (uss&VISIBLE && uss&UPDATE_HIGH){
+		if (dt + t1 - t0 < HIGH_VALUE){
+			SDL_Delay(1);
+			goto _continue;
+		}
+	}
+	else if (uss&VISIBLE && uss&UPDATE_MID){
+		if (dt + t1 - t0 < MID_VALUE){
+			SDL_Delay(5);
+			goto _continue;
+		}
+	}
+	else if (uss&VISIBLE && uss&UPDATE_LOW){
+		if (dt + t1 - t0 < LOW_VALUE){
+			SDL_Delay(10);
+			goto _continue;
+		}
+	}
+	else if (_background || getSDLEventCount()==0){
 		SDL_WaitEvent(NULL);
 		goto _continue;
 	}
