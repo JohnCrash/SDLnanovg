@@ -50,7 +50,6 @@ extern "C"{
 		UPDATE_HIGH = 16,	///<高速更新界面
 		UPDATE_MID = 32,	///<中速更新
 		UPDATE_LOW = 64,	///<低速更新
-		UPDATE_OFF = 128,	///<低速更新
 	};
 	
 	typedef struct {
@@ -300,6 +299,8 @@ extern "C"{
 	 */	
 	void uiDisableEvent(uiWidget *self, unsigned int e);
 	
+	void uiEnableFlags(uiWidget * widget,int flags);
+	int uiDisableFlags(uiWidget * widget,int flags);
 	 /** @} */
 #ifdef __cplusplus
 }

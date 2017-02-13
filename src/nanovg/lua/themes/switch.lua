@@ -10,7 +10,7 @@ return {
 	_animationSpeed = 0.1,
 	onInit=function(self,themes)
 		self:enableEvent(ui.EVENT_TOUCHDOWN+ui.EVENT_TOUCHUP+ui.EVENT_TOUCHDROP)
-		self:setSize(40,20)
+		self:setSize(60,30)
 		self._color = themes.color
 		self._colorBG = themes.colorBG
 		self._on = false
@@ -36,6 +36,8 @@ return {
 			else
 				self._switchRate = self._animationDelay / self._animationSpeed			
 			end
+		else
+			self:disableFlags(ui.UPDATE_HIGH)
 		end
 		
 		if self._switchRate ~= 0 then
@@ -73,6 +75,7 @@ return {
 	--! \param on 如果on是ture就打开，否则就关闭
 	switch=function(self,on)
 		self._on = on
+		self:enableFlags(ui.UPDATE_HIGH)
 		self._animationDelay = self._animationSpeed
 	end,
 	--! \brief 取得开关控件的状态

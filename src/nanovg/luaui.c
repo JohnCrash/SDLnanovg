@@ -393,7 +393,7 @@ static int lua_enableFlags(lua_State *L)
 	uiWidget *self = lua_checkWidget(L, 1);
 	int flags = luaL_checkint(L, 2);
 	if (self){
-		self->isVisible |= flags;
+		uiEnableFlags(self, flags);
 	}
 	return 0;
 }
@@ -403,7 +403,8 @@ static int lua_disableFlags(lua_State *L)
 	uiWidget *self = lua_checkWidget(L, 1);
 	int flags = luaL_checkint(L, 2);
 	if (self){
-		self->isVisible &= ~flags;
+		lua_pushinteger(L,uiDisableFlags(self, flags));
+		return 1;
 	}
 	return 0;
 }

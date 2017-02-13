@@ -28,6 +28,7 @@ typedef struct {
 uiEventState _eventState;
 static uiWidget * _root = NULL;
 static ThemesList * _themes = NULL;
+static unsigned int _uss = 0;
 extern NVGcontext* _vg;
 
 uiWidget * uiRootWidget()
@@ -273,7 +274,7 @@ uiWidget * uiCreateWidget(const char *themes_name, const char *widget_name)
 				self->sx = 1.0f;
 				self->sy = 1.0f;
 				calcXForm(self);
-				self->isVisible = VISIBLE | UPDATE_OFF;
+				self->isVisible = VISIBLE;
 				self->handleEvent = EVENT_NONE;
 				callWidgetEvent(self,themes->themeRef,"onInit");
 				return self;
@@ -391,6 +392,22 @@ void uiAddChildToTail(uiWidget *parent, uiWidget *child)
 			parent->child = child;
 		}
 	}
+}
+
+void uiEnableFlags(uiWidget * widget,int flags)
+{
+	widget->isVisible |= flags;
+	_uss |= widget->isVisible;
+	SDL_Log("enableFlags : %d", widget->isVisible);
+}
+
+int uiDisableFlags(uiWidget * widget,int flags)
+{
+	int old = widget->isVisible;
+	widget->isVisible &= ~flags;
+	_uss |= widget->isVisible;
+	SDL_Log("disableFlags : %d", widget->isVisible);
+	return old;
 }
 
 void uiRemoveFromParent(uiWidget *self)
@@ -575,7 +592,7 @@ int InWidget(uiWidget *parent, uiWidget *child)
  * \param renderFunc 对每个遍历到的uiWidget调用renderFunc(uiWidget*)
  * \return 返回tail
  */
-static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, unsigned int * puss,uiRenderProc renderFunc)
+static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail,uiRenderProc renderFunc)
 {
 	uiWidget * child;
 	int isclip = 0;
@@ -603,12 +620,12 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, unsigned i
 		while (child){
 			if (child->isVisible&VISIBLE){
 				if (InParentWidget(pParent, child,x,y)){
-					*puss |= child->isVisible;
+					_uss |= child->isVisible;
 					tail->enum_next = child;
 					child->enum_prev = tail;
 					tail = child;
 					tail->enum_next = NULL;
-					tail = uiEnumWidgetVisible(child, tail, puss,renderFunc);
+					tail = uiEnumWidgetVisible(child, tail,renderFunc);
 				}
 			}
 			child = child->next;
@@ -619,12 +636,12 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail, unsigned i
 		while (child){
 			if (child->isVisible&VISIBLE){
 				if (InWidget(root, child)){
-					*puss |= child->isVisible;
+					_uss |= child->isVisible;
 					tail->enum_next = child;
 					child->enum_prev = tail;
 					tail = child;
 					tail->enum_next = NULL;
-					tail = uiEnumWidgetVisible(child, tail, puss,renderFunc);
+					tail = uiEnumWidgetVisible(child, tail,renderFunc);
 				}
 			}
 			child = child->next;
@@ -791,19 +808,17 @@ static void lua_EventInput(uiEvent * pev)
 * \param winWidth
 * \param winHeight
 * \param devicePixelRatio
-* \return 返回无符号整数，该值等于全部控件的标志位做OR操作。
 */
-unsigned int uiEnumWidget(uiWidget *root, 
+void uiEnumWidget(uiWidget *root, 
 	uiRenderProc renderFunc, uiEventProc eventFunc,
 	int winWidth, int winHeight, float devicePixelRatio)
 {
-	unsigned int uss = 0;
 	int i;
 	uiWidget * head,*temp,*tail;
 	head = root;
 	head->enum_next = NULL;
 	head->enum_prev = NULL; 
-	tail = uiEnumWidgetVisible(root, head, &uss,renderFunc);
+	tail = uiEnumWidgetVisible(root, head,renderFunc);
 	/*
 	 * 下面准备分发事件
 	 */
@@ -842,7 +857,6 @@ unsigned int uiEnumWidget(uiWidget *root,
 		uiDeleteWidgetSelf(head);
 		head = temp;
 	}
-	return uss;
 }
 
 /*
@@ -1019,15 +1033,15 @@ static int eventWidget(uiWidget * widget,uiEvent *pev)
  */
 unsigned int uiLoop()
 {
-	unsigned int uss = 0;
+	_uss = 0;
 	uiWidget * root = uiRootWidget();
 	if (root && root->isVisible&VISIBLE){
 		nvgBeginFrame(_vg, (int)root->width, (int)root->height, 1);
 		nvgResetTransform(_vg);
-		uss = uiEnumWidget(root, renderWidget, eventWidget, (int)root->width, (int)root->height, 1);
+		uiEnumWidget(root, renderWidget, eventWidget, (int)root->width, (int)root->height, 1);
 		nvgEndFrame(_vg);
 	}
-	return uss;
+	return _uss;
 }
 
 void uiSendEvent(uiWidget *self)
@@ -1119,11 +1133,10 @@ int uiWidgetFormPt(float x, float y, uiWidget *widget[], int n)
 {
 	uiWidget * head, *tail;
 	int idx = 0;
-	unsigned int uss = 0;
 	head = _root;
 	head->enum_next = NULL;
 	head->enum_prev = NULL;
-	tail = uiEnumWidgetVisible(_root, head,&uss, donothingFunc);
+	tail = uiEnumWidgetVisible(_root, head, donothingFunc);
 	while (tail){
 		if (uiPtInWidget(tail, x, y)){
 			if (idx < n)
