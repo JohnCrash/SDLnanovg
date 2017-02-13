@@ -132,28 +132,34 @@ _continue:
 			return 0;
 	}
 	t1 = SDL_GetTicks();
+	SDL_Log("USS %d dt = %d value = %d HIGHT_VALUE = %d", uss,
+		dt, dt + t1 - t0, HIGH_VALUE);
 	if (getSDLEventCount()>0){
 		return 0;
 	}
 	else if (uss&VISIBLE && uss&UPDATE_HIGH){
 		if (dt + t1 - t0 < HIGH_VALUE){
 			SDL_Delay(1);
+			SDL_Log("HIGH_VALUE %d %d",dt,t1-t0);
 			goto _continue;
 		}
 	}
 	else if (uss&VISIBLE && uss&UPDATE_MID){
 		if (dt + t1 - t0 < MID_VALUE){
 			SDL_Delay(5);
+			SDL_Log("UPDATE_MID %d %d", dt, t1 - t0);
 			goto _continue;
 		}
 	}
 	else if (uss&VISIBLE && uss&UPDATE_LOW){
 		if (dt + t1 - t0 < LOW_VALUE){
 			SDL_Delay(10);
+			SDL_Log("UPDATE_LOW %d %d", dt, t1 - t0);
 			goto _continue;
 		}
 	}
-	else if (_background || getSDLEventCount()==0){
+	else if (getSDLEventCount()==0){
+		SDL_Log("WaitEvent %d %d", dt, t1 - t0);
 		SDL_WaitEvent(NULL);
 		goto _continue;
 	}

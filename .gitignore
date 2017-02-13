@@ -35,3 +35,4 @@ build/deps/luajit-2.1.0-beta/
 build/android/gen/
 *.exp
 *.prefs
+build/android/.adbsyn

@@ -554,8 +554,8 @@ return {
 		vg.roundedRect(0,0,w,h,self._cornerRadius)
 		vg.strokeColor(self._lineColor)
 		vg.stroke()
-		
-		vg.save()
+	
+		--vg.save()
 		vg.scissor(self._cornerRadius,self._cornerRadius,w-2*self._cornerRadius,h-2*self._cornerRadius)
 		if self._text then
 			self._fontSize = h - 2*self._cornerRadius
@@ -572,15 +572,12 @@ return {
 			self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius)
 			vg.fillColor(self._colorSelect)
 			vg.fill()
-			--print(string.format('select %d,%d,%d,%d',self._horzPos+self._select.corsorStart,self._cornerRadius,
-			--self._select.corsorEnd-self._select.corsorStart,h-2*self._cornerRadius))
-			--print('corsorEnd : '..self._select.corsorEnd)
 		end
 		self._flash = self._flash + dt
 		if self._flash > 2*self._cursorFlash then
 			self._flash = 0
 		end
-		vg.restore()
+		--vg.restore()
 		local px = self._horzPos+self._cursorPos
 		if self._forcs and self._flash < self._cursorFlash and px>0 and px<w then
 			vg.beginPath()

@@ -41,7 +41,7 @@ int main(int argc,char *argv[])
 {
 	Uint32 t,t0,dt;
 	SDLState * state;
-	unsigned int uss = VISIBLE|UPDATE_OFF;
+	unsigned int uss = VISIBLE;
 
 #if defined(_WIN32) && defined(_DEBUG)
 	openConsole();
