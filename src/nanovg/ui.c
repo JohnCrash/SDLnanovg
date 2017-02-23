@@ -607,7 +607,7 @@ static uiWidget * uiEnumWidgetVisible(uiWidget *root, uiWidget *tail,uiRenderPro
 	/* 对子窗口设置剪切区域 */
 	if (root->isVisible&CLIP){
 		nvgSave(_vg);
-		nvgScissor(_vg, 0, 0, root->width, root->height);
+		nvgIntersectScissor(_vg, 0, 0, root->width, root->height);
 		isclip = 1;
 	}
 	child = root->child;

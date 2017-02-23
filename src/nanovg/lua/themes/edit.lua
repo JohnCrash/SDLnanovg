@@ -556,7 +556,7 @@ return {
 		vg.stroke()
 	
 		--vg.save()
-		vg.scissor(self._cornerRadius,self._cornerRadius,w-2*self._cornerRadius,h-2*self._cornerRadius)
+		vg.intersectScissor(self._cornerRadius,self._cornerRadius,w-2*self._cornerRadius,h-2*self._cornerRadius)
 		if self._text then
 			self._fontSize = h - 2*self._cornerRadius
 			vg.fontFace(self._font)

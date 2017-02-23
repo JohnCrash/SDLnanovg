@@ -1,2 +1,2 @@
-require "debugger"('192.168.2.61')
+--require "debugger"('192.168.2.61')
 
