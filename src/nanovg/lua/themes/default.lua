@@ -31,8 +31,8 @@ return {
 	onInit=function(self)
 		print("font:"..tostring(self.font))
 		if getPlatform() == 'windows' then
-			vg.createFont("default","c:/windows/fonts/arialuni.ttf")
-			vg.createFont("default-bold","fonts/Roboto-Bold.ttf")
+			vg.createFont("default","c:/windows/fonts/arial.ttf")
+			vg.createFont("default-bold","c:/windows/fonts/arialdb.ttf")
 		else
 			vg.createFont("default","/system/fonts/DroidSansChinese.ttf")
 			vg.createFont("default-bold","/system/fonts/DroidSans-Bold.ttf")	

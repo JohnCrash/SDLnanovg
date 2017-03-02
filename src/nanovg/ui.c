@@ -398,7 +398,6 @@ void uiEnableFlags(uiWidget * widget,int flags)
 {
 	widget->isVisible |= flags;
 	_uss |= widget->isVisible;
-	SDL_Log("enableFlags : %d", widget->isVisible);
 }
 
 int uiDisableFlags(uiWidget * widget,int flags)
@@ -406,7 +405,6 @@ int uiDisableFlags(uiWidget * widget,int flags)
 	int old = widget->isVisible;
 	widget->isVisible &= ~flags;
 	_uss |= widget->isVisible;
-	SDL_Log("disableFlags : %d", widget->isVisible);
 	return old;
 }
 
@@ -679,7 +677,7 @@ static void prepareUIEvent()
 		}
 		pevent = getSDLEvent(i);
 		
-		dumpSDLEvent(pevent);
+		//dumpSDLEvent(pevent);
 
 		switch (pevent->type){
 /*

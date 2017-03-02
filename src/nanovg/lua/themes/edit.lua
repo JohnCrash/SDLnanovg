@@ -555,7 +555,7 @@ return {
 		vg.strokeColor(self._lineColor)
 		vg.stroke()
 	
-		--vg.save()
+		vg.save()
 		vg.intersectScissor(self._cornerRadius,self._cornerRadius,w-2*self._cornerRadius,h-2*self._cornerRadius)
 		if self._text then
 			self._fontSize = h - 2*self._cornerRadius
@@ -577,7 +577,7 @@ return {
 		if self._flash > 2*self._cursorFlash then
 			self._flash = 0
 		end
-		--vg.restore()
+		vg.restore()
 		local px = self._horzPos+self._cursorPos
 		if self._forcs and self._flash < self._cursorFlash and px>0 and px<w then
 			vg.beginPath()
