@@ -244,9 +244,9 @@ static void fons__tmpfree(void* ptr, void* up);
 #define STBTT_malloc(x,u)    fons__tmpalloc(x,u)
 #define STBTT_free(x,u)      fons__tmpfree(x,u)
 #include "stb_truetype.h"
-
+#define FONSIMPL_N 4
 struct FONSttFontImpl {
-	stbtt_fontinfo font;
+	stbtt_fontinfo fonts[FONSIMPL_N];
 };
 typedef struct FONSttFontImpl FONSttFontImpl;
 
@@ -261,44 +261,44 @@ int fons__tt_loadFont(FONScontext *context, FONSttFontImpl *font, unsigned char 
 	int stbError;
 	FONS_NOTUSED(dataSize);
 
-	font->font.userdata = context;
-	stbError = stbtt_InitFont(&font->font, data, 0);
+	font->fonts[0].userdata = context;
+	stbError = stbtt_InitFont(&font->fonts[0], data, 0);
 	return stbError;
 }
 
 void fons__tt_getFontVMetrics(FONSttFontImpl *font, int *ascent, int *descent, int *lineGap)
 {
-	stbtt_GetFontVMetrics(&font->font, ascent, descent, lineGap);
+	stbtt_GetFontVMetrics(&font->fonts[0], ascent, descent, lineGap);
 }
 
 float fons__tt_getPixelHeightScale(FONSttFontImpl *font, float size)
 {
-	return stbtt_ScaleForPixelHeight(&font->font, size);
+	return stbtt_ScaleForPixelHeight(&font->fonts[0], size);
 }
 
 int fons__tt_getGlyphIndex(FONSttFontImpl *font, int codepoint)
 {
-	return stbtt_FindGlyphIndex(&font->font, codepoint);
+	return stbtt_FindGlyphIndex(&font->fonts[0], codepoint);
 }
 
 int fons__tt_buildGlyphBitmap(FONSttFontImpl *font, int glyph, float size, float scale,
 							  int *advance, int *lsb, int *x0, int *y0, int *x1, int *y1)
 {
 	FONS_NOTUSED(size);
-	stbtt_GetGlyphHMetrics(&font->font, glyph, advance, lsb);
-	stbtt_GetGlyphBitmapBox(&font->font, glyph, scale, scale, x0, y0, x1, y1);
+	stbtt_GetGlyphHMetrics(&font->fonts[0], glyph, advance, lsb);
+	stbtt_GetGlyphBitmapBox(&font->fonts[0], glyph, scale, scale, x0, y0, x1, y1);
 	return 1;
 }
 
 void fons__tt_renderGlyphBitmap(FONSttFontImpl *font, unsigned char *output, int outWidth, int outHeight, int outStride,
 								float scaleX, float scaleY, int glyph)
 {
-	stbtt_MakeGlyphBitmap(&font->font, output, outWidth, outHeight, outStride, scaleX, scaleY, glyph);
+	stbtt_MakeGlyphBitmap(&font->fonts[0], output, outWidth, outHeight, outStride, scaleX, scaleY, glyph);
 }
 
 int fons__tt_getGlyphKernAdvance(FONSttFontImpl *font, int glyph1, int glyph2)
 {
-	return stbtt_GetGlyphKernAdvance(&font->font, glyph1, glyph2);
+	return stbtt_GetGlyphKernAdvance(&font->fonts[0], glyph1, glyph2);
 }
 
 #endif
