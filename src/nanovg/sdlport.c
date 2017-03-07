@@ -21,13 +21,14 @@ static unsigned char *stbi_load_from_sdlrw(SDL_RWops *f, int *x, int *y, int *co
 	stbi_uc *buffer;
 	unsigned char *result;
 	int len;
+	stbi__result_info ri;
 	result = NULL;
 	len = (int)SDL_RWsize(f);
 	if( len>0 ){
 	   buffer = malloc(len);
 	   SDL_RWread(f,buffer,1,len);
 	   stbi__start_mem(&s,buffer,len);
-	   result = stbi_load_main(&s,x,y,comp,req_comp);
+	   result = stbi__load_main(&s, x, y, comp, req_comp, &ri,8);
 	   free(buffer);
 	}
 	return result;

@@ -262,7 +262,10 @@ int fons__tt_loadFont(FONScontext *context, FONSttFontImpl *font, unsigned char 
 	FONS_NOTUSED(dataSize);
 
 	font->font.userdata = context;
-	stbError = stbtt_InitFont(&font->font, data, 0);
+	if (data[0] == 't' && data[1] == 't' && data[2] == 'c' && data[3] == 'f'){
+		stbError = stbtt_InitFont(&font->font, data, stbtt_GetFontOffsetForIndex(data,0));
+	}else
+		stbError = stbtt_InitFont(&font->font, data, 0);
 	return stbError;
 }
 
@@ -304,7 +307,7 @@ int fons__tt_getGlyphKernAdvance(FONSttFontImpl *font, int glyph1, int glyph2)
 #endif
 
 #ifndef FONS_SCRATCH_BUF_SIZE
-#	define FONS_SCRATCH_BUF_SIZE 16000
+#	define FONS_SCRATCH_BUF_SIZE 1024*64
 #endif
 #ifndef FONS_HASH_LUT_SIZE
 #	define FONS_HASH_LUT_SIZE 256
