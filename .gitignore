@@ -36,3 +36,6 @@ build/android/gen/
 *.exp
 *.prefs
 build/android/.adbsyn
+*.tlog
+build/deps/glew/build/vc12/tmp/
+*.manifest

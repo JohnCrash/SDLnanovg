@@ -20,28 +20,34 @@
 local vg = require "vg"
 local lfs = require "lfs"
 
-local path = '/system/fonts'
-
-local function sel(op,r1,r2)
-	if op then 
-		return r1
-	else 
-		return r2
-	end
-end
-
-for file in lfs.dir(path) do
-	local ext = string.sub(file,-3)
-	if ext == 'ttf' or ext == 'ttc' then
-		local result = fonsHasCodepoint(path..'/'..file,{'abc','中文'})
-		if result then
-			print( string.format('[%s%s] - %s',
-				sel(result[1]==1,'x',' '),
-				sel(result[2]==1,'x',' '),
-				file) )
+local function searchSystemFont(path)
+	for file in lfs.dir(path) do
+		local ext = string.sub(file,-3)
+		if ext == 'ttf' or ext == 'ttc' then
+			local result = fonsHasCodepoint(path..'/'..file,{'abc','网络设置'})
+			if result and result[1]==1 and result[2]==1 then
+				--return path..'/'..file
+				print( file )
+			end
 		end
 	end
 end
+
+--[[
+ windows 7
+	hyswlongfangsong.ttf	4
+	kaiu.ttf		5
+	mingliu.ttc	32
+	msjh.ttf		21
+	msjhbd.ttf	14
+	msyh.ttf		21
+	msyhbd.ttf	14
+	simfang.ttf	19
+	simhei.ttf	9
+	simkai.ttf	11
+	simsun.ttc	15
+--]]
+--searchSystemFont("c:/windows/fonts")
 
 return {
 	version = 1,
@@ -53,14 +59,14 @@ return {
 	--! \brief 在样式表被加载时调用一次，具体来说就是ui.loadThemes被调用时
 	--!		onInit函数用来初始化和themes相关的资源，例如公共图片，字体等
 	onInit=function(self)
-		print("font:"..tostring(self.font))
+		local font
 		if getPlatform() == 'windows' then
-			vg.createFont("default","E:/test_video/hwp9fonts/DroidSansFallback.ttf")
-			vg.createFont("default-bold","c:/windows/fonts/arialdb.ttf")
+			font = "c:/windows/fonts/hyswlongfangsong.ttf"
 		else
-			vg.createFont("default","/system/fonts/DroidSansChinese.ttf")
-			vg.createFont("default-bold","/system/fonts/DroidSans-Bold.ttf")	
+			font = searchSystemFont("/system/fonts")
 		end
+		print("font:"..tostring(font))
+		vg.createFont("default",font)
 	end,
 	window = require "themes/window",
 	button = require "themes/button",

@@ -258,7 +258,7 @@ DEF_win32= -D "WIN32" -D "NDEBUG" -D "_WINDOWS" -D "_USRDLL" \
 CFLAGS_win32=-I "$(LUAINC)" $(DEF) -O2 -Ot -MD -W3 -nologo
 LDFLAGS_win32= -nologo -link -NOLOGO -DLL -INCREMENTAL:NO \
     -MANIFEST -MANIFESTFILE:"intermediate.manifest" \
-    -MANIFESTUAC:"level='asInvoker' uiAccess='false'" \
+    -MANIFESTUAC:level=asInvoker -MANIFESTUAC:uiAccess=false \
 	-SUBSYSTEM:WINDOWS -OPT:REF -OPT:ICF -DYNAMICBASE:NO \
     -MACHINE:X86 -LIBPATH:"$(LUALIB)" \
 	$(LUALIBNAME_win32) ws2_32.lib -OUT:
