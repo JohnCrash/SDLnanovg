@@ -32,7 +32,6 @@ return {
 		print("font:"..tostring(self.font))
 		if getPlatform() == 'windows' then
 			vg.createFont("default","c:/windows/fonts/arial.ttf")
-			--vg.createFont("default","E:/test_video/6/NotoSansCJK-Regular.ttc")
 			vg.createFont("default-bold","c:/windows/fonts/arialdb.ttf")
 		else
 			vg.createFont("default","/system/fonts/DroidSansChinese.ttf")
