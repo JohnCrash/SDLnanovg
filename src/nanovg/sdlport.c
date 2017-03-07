@@ -107,3 +107,63 @@ error:
 	if (fp) SDL_RWclose(fp);
 	return FONS_INVALID;
 }
+
+static int fons__HasCodepoint(stbtt_fontinfo *font, const char * str)
+{
+	unsigned int codepoint;
+	unsigned int utf8state = 0;
+	const char * end = str + strlen(str);
+	for (; str != end; ++str){
+		if (fons__decutf8(&utf8state, &codepoint, *(const unsigned char*)str))
+			continue;
+
+		if (!stbtt_FindGlyphIndex(font, codepoint))
+			return 0;
+	}
+	return 1;
+}
+/**
+ * \brief 检查看看字体文件中包括指定的字符集吗
+ * \param file		字体文件
+ * \param utf8s		要检查的字符集(UTF8)
+ * \param result	监测结果集，不支持为0，支持为1
+ * \param len		字符集数量
+ * \return 如果字体文件被正常打开就返回1,否则返回0
+ */
+int fonsHasCodepoint(const char * file, const char ** utf8s,int * ret,int len)
+{
+	SDL_RWops *fp;
+	int dataSize = 0;
+	unsigned char* data = NULL;
+	stbtt_fontinfo font;
+	int i,result = 0;
+
+	// Read in the font data.
+	fp = SDL_searchFile(getFileSearchPath(), file, "rb");
+	if (fp == NULL) goto error;
+	dataSize = (int)SDL_RWsize(fp);
+	data = (unsigned char*)malloc(dataSize);
+	if (data == NULL) goto error;
+	SDL_RWread(fp, data, 1, dataSize);
+	SDL_RWclose(fp);
+	fp = 0;
+
+	if (data[0] == 't' && data[1] == 't' && data[2] == 'c' && data[3] == 'f'){
+		result = stbtt_InitFont(&font, data, stbtt_GetFontOffsetForIndex(data, 0));
+	}
+	else{
+		result = stbtt_InitFont(&font, data, 0);
+	}
+	if (!result)goto error;
+
+	for (i = 0; i < len; i++){
+		if (utf8s[i])
+			ret[i] = fons__HasCodepoint(&font, utf8s[i]);
+		else
+			ret[i] = 0;
+	}
+error:
+	if (data) free(data);
+	if (fp) SDL_RWclose(fp);
+	return result;
+}
