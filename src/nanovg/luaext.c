@@ -834,6 +834,33 @@ int lua_breakpoint(lua_State *L)
 	return 0;
 }
 
+/**
+ * \brief 
+ * \param
+ */
+int lua_fonsHasCodepoint(lua_State *L)
+{
+	const char *path = luaL_checkstring(L, 1);
+	size_t l;
+	int i,n = 0;
+	const char * ps[128];
+	int result[128];
+	lua_pushnil(L);
+	while (lua_next(L, 2) != 0){
+		ps[n++] = luaL_checklstring(L, -1, &l);
+		lua_pop(L, 1);
+	}
+	if (n && fonsHasCodepoint(path, ps, result, n)){
+		lua_newtable(L);
+		for (i = 0; i < n; i++){
+			lua_pushinteger(L, result[i]);
+			lua_rawseti(L, -2, i + 1);
+		}
+		return 1;
+	}
+	return 0;
+}
+
 /*
  * 初始Lua环境
  */
@@ -861,6 +888,7 @@ int initLua()
 		{ "utf8Index", lua_utf8Index },
 		{ "isDebug", lua_isDebug },
 		{ "tick",lua_tick },
+		{ "fonsHasCodepoint", lua_fonsHasCodepoint },
 		{ "breakpoint",lua_breakpoint },
 		{ NULL, NULL }
 	};

@@ -18,6 +18,30 @@
 --! @{
 --!
 local vg = require "vg"
+local lfs = require "lfs"
+
+local path = 'E:/test_video/hwp9fonts'
+
+local function sel(op,r1,r2)
+	if op then 
+		return r1
+	else 
+		return r2
+	end
+end
+
+for file in lfs.dir(path) do
+	local ext = string.sub(file,-3)
+	if ext == 'ttf' or ext == 'ttc' then
+		local result = fonsHasCodepoint(path..'/'..file,{'abc','中文'})
+		if result then
+			print( string.format('[%s%s] - %s',
+				sel(result[1]==1,'x',' '),
+				sel(result[2]==1,'x',' '),
+				file) )
+		end
+	end
+end
 
 return {
 	version = 1,
