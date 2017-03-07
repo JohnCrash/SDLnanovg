@@ -6,3 +6,5 @@ echo 'copy libsocket.so => libs/armeabi'
 cp -f ../deps/luasocket/prebuilt/android/armeabi/libsocket.so libs/armeabi
 echo 'copy libmime.so => libs/armeabi'
 cp -f ../deps/luasocket/prebuilt/android/armeabi/libmime.so libs/armeabi
+echo 'copy liblfs.so => libs/armeabi'
+cp -f ../deps/luafilesystem/prebuilt/android/armeabi/liblfs.so libs/armeabi

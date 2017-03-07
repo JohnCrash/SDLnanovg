@@ -300,7 +300,7 @@ linux:
 	$(MAKE) all-unix PLAT=linux
 
 android:
-	$(MAKE) all-unix PLAT=android
+	$(MAKE) all PLAT=android
 	
 mingw:
 	$(MAKE) all PLAT=mingw

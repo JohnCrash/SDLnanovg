@@ -20,7 +20,7 @@
 local vg = require "vg"
 local lfs = require "lfs"
 
-local path = 'E:/test_video/hwp9fonts'
+local path = 'E:/test_video/kubifonts'
 
 local function sel(op,r1,r2)
 	if op then 
@@ -55,7 +55,7 @@ return {
 	onInit=function(self)
 		print("font:"..tostring(self.font))
 		if getPlatform() == 'windows' then
-			vg.createFont("default","E:/test_video/hwp9fonts/NotoSansCJK-Regular.ttc")
+			vg.createFont("default","E:/test_video/hwp9fonts/DroidSansFallback.ttf")
 			vg.createFont("default-bold","c:/windows/fonts/arialdb.ttf")
 		else
 			vg.createFont("default","/system/fonts/DroidSansChinese.ttf")
