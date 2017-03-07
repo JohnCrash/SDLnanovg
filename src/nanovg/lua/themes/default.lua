@@ -20,7 +20,7 @@
 local vg = require "vg"
 local lfs = require "lfs"
 
-local path = 'E:/test_video/kubifonts'
+local path = '/system/fonts'
 
 local function sel(op,r1,r2)
 	if op then 
