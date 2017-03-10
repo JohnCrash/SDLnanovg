@@ -6,7 +6,7 @@
 void dumpEvent(uiEvent * pev);
 void dumpSDLEvent(SDL_Event * pe);
 
-#if DBG
+#ifdef DBG
 	#define DEBUG(format,...) SDL_Log(format,##__VA_ARGS__);
 #else
 	#define DEBUG(format,...)

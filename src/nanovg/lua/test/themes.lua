@@ -6,6 +6,7 @@ local sw,sh = 540,960
 print( string.format("screenSize %d , %d",sw,sh) )
 local activeLayout
 local fontSize = 28
+local mainTitle
 
 local function relayout()
 	if activeLayout then
@@ -178,6 +179,7 @@ local function createSettingLayout()
 	
 	local titleLayout = ui.createWidget(themes,"layout")
 	local title = ui.createWidget(themes,"label")
+	mainTitle = title
 	title:setString("设置")
 	title:setFontSize(fontSize+2)
 	title:setAlign(ui.ALIGN_CENTER+ui.ALIGN_MIDDLE)
@@ -282,7 +284,15 @@ eventFunction("init",function()
 	w,h = getDeviceSize()
 	print( string.format("windowSize %d , %d",w,h) )
 	w,h = ui.rootWidget():getSize()
-	print( string.format("rootSize %d , %d",w,h) )		
+	print( string.format("rootSize %d , %d",w,h) )	
+	local ntime = 0
+	schedule(1,function(dt)
+		print("update")
+		ntime = ntime+1
+		mainTitle:setString(tostring(ntime))
+		ui.requestUpdate()
+		return true
+	end)
 end)
 
 eventFunction("window",function(eventName,p1,p2)

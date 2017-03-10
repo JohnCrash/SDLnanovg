@@ -3,10 +3,14 @@
 #include "eventhandler.h"
 #include "luaext.h"
 #include "ui.h"
-
+#define DBG
 #include "debug.h"
 
 SDLEventBuffer _eventBuffer;
+static Uint32 _prevEventTick = 0;
+static Uint32 _prevRenderTick = 0;
+static int _background = 0;
+static int _isediting = 0; //是否处于IME输入状态
 
 static void clearSDLEvent()
 {
@@ -120,70 +124,62 @@ int handleSDLEvent(SDLState *state)
 	return 0;
 }
 
-static Uint32 _prevEventTick = 0;
-static Uint32 _prevRenderTick = 0;
-static int _background = 0;
-static int _isediting = 0; //是否处于IME输入状态
 /*
  * uss 是一个将所有可见对象都做OR操作得到的值
- *	控制事件循环的更新频率
- *		UPDATE_HIGH 60帧
- *		UPDATE_MID	30帧
- *		UPDATE_LOW	10帧
- *		UPDATE_OFF	事件驱动
- * 上一次循环耗时(ms)
  */
-#define HIGH_VALUE 1000/60
-#define MID_VALUE 1000/30
-#define LOW_VALUE 1000/10
-
 int eventLoop(SDLState *state)
 {
 	Uint32 curTick;
-	Uint32 renderInterval;
-	if (_prevEventTick == 0)_prevEventTick = SDL_GetTicks();
-	if (_prevRenderTick == 0)_prevRenderTick = SDL_GetTicks();
+	double dt;
+	double fps = 1.0 / uiGetFPS();
+	unsigned int uss = uiUSSGet();
+	uiUSSClear();
 
-	curTick = SDL_GetTicks();
 	clearSDLEvent();
 
 	/*
 	 * 如果有SDL事件来就马上返回处理
+	 * 对更新进行优化仅仅在有下面情况下才会做更新渲染
+	 * 1.有事件。(虽然事件不一定会必然导致更新渲染，但是很难进行区别出来)
+	 * 2.在渲染周期中uss被设置为KEEP_UPDATE。
+	 *		使用self:enableFlags(ui.KEEP_UPDATE)来请求标志位。
+	 *		使用self:disableFlags(ui.KEEP_UPDATE)关闭标志位。
+	 * 3.在loop事件或者schedule中uss被设置为KEEP_UPDATE。
+	 *		在loop事件或者schedule中使用requestUpdate()
+	 *		eventFunction("loop",function(dt)
+	 *			requestUpdate()
+	 *		end)
+	 *		或者
+	 *		schedule(0,function(dt)
+	 *			requestUpdate()
+	 *		end)
 	 */
 	while (handleSDLEvent(state) == 0){
-		ussClear();
+		//保持帧率
+		do{
+			curTick = SDL_GetTicks();
+			dt = (curTick - _prevEventTick)/1000.0;
+			SDL_Delay(1);
+		} while (dt<fps);
+
+		//处理loop事件和schedule回调
 		lua_EventLoop(dt);
-		t1 = SDL_GetTicks();
-		DEBUG("USS %d dt = %d value = %d HIGHT_VALUE = %d", uss, dt, dt + t1 - t0, HIGH_VALUE);
-		if (getSDLEventCount() > 0){
+		_prevEventTick = curTick;
+
+		if (getSDLEventCount() > 0 || uss&KEEP_UPDATE || uiUSSGet()&KEEP_UPDATE ){
+			setLoopInterval((curTick-_prevRenderTick)/1000.0);
+			DEBUG("uiLoop %d", curTick - _prevRenderTick);
+			_prevRenderTick = curTick;
 			return 0;
-		}
-		else if (uss&VISIBLE && uss&UPDATE_HIGH){
-			if (dt + t1 - t0 < HIGH_VALUE){
-				SDL_Delay(1);
-				DEBUG("HIGH_VALUE %d %d", dt, t1 - t0);
-				goto _continue;
-			}
-		}
-		else if (uss&VISIBLE && uss&UPDATE_MID){
-			if (dt + t1 - t0 < MID_VALUE){
-				SDL_Delay(5);
-				DEBUG("UPDATE_MID %d %d", dt, t1 - t0);
-				goto _continue;
-			}
-		}
-		else if (uss&VISIBLE && uss&UPDATE_LOW){
-			if (dt + t1 - t0 < LOW_VALUE){
-				SDL_Delay(10);
-				DEBUG("UPDATE_LOW %d %d", dt, t1 - t0);
-				goto _continue;
-			}
-		}
-		else if (getSDLEventCount() == 0){
-			DEBUG("WaitEvent %d %d", dt, t1 - t0);
-			SDL_WaitEvent(NULL);
-			goto _continue;
 		}
 	}
 	return 1; //退出程序
+}
+
+void initEventLoop(SDLState *state)
+{
+	_background = 0;
+	_isediting = 0;
+	_prevEventTick = SDL_GetTicks();
+	_prevRenderTick = SDL_GetTicks();
 }

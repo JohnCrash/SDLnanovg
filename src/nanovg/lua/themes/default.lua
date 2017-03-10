@@ -68,7 +68,7 @@ return {
 	onInit=function(self)
 		local font
 		if getPlatform() == 'windows' then
-			font = "E:/test_video/kubifonts/DroidSansFallback.ttf"
+			font = "c:/windows/fonts/hyswlongfangsong.ttf"
 		else
 			font = searchSystemFont("/system/fonts")
 		end

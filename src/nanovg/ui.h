@@ -47,9 +47,7 @@ extern "C"{
 		LINEAR = 2,			///<线性排列，在一些情况下设置这个可以提高效率
 		CLIP = 4,			///< #uiWidget 的子对象不能绘制到uiWidget外面
 		SCROLL_CLIP = 8,	///<滚动去中的子剪切区
-		UPDATE_HIGH = 16,	///<高速更新界面
-		UPDATE_MID = 32,	///<中速更新
-		UPDATE_LOW = 64,	///<低速更新
+		KEEP_UPDATE = 16, ///<保持界面以固定帧率刷新
 	};
 	
 	typedef struct {
@@ -302,8 +300,12 @@ extern "C"{
 	void uiEnableFlags(uiWidget * widget,int flags);
 	int uiDisableFlags(uiWidget * widget,int flags);
 
-	void ussClear();
-	unsigned int uss();
+	void uiUSSClear();
+	unsigned int uiUSSGet();
+	void uiUSSSet(unsigned int u);
+
+	int uiGetFPS();
+	void uiSetFPS(int fps);
 	 /** @} */
 #ifdef __cplusplus
 }

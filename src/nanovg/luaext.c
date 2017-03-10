@@ -947,12 +947,16 @@ double getLoopInterval()
 	return _loopInterval;
 }
 
+void setLoopInterval(double dt)
+{
+	_loopInterval = dt;
+}
+
 void lua_EventLoop(double dt)
 {
 	struct schedule * next = _schedule;
 	struct schedule * temp;
 
-	_loopInterval = dt;
 	if (lua_pushEventFunction(EVENT_LOOP)){
 		lua_pushnumber(_state, dt);
 		lua_executeFunction(1);

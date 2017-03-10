@@ -15,7 +15,7 @@ void dumpSDLEvent(SDL_Event * pe)
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
 	{
-		SDL_MouseButtonEvent * pb = pe;
+		SDL_MouseButtonEvent * pb = (SDL_MouseButtonEvent *)pe;
 		SDL_Log("MouseButton %s %s clicks:%d %d", 
 			SELECT2(pb->type, SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP),
 			SELECT2(pb->state, SDL_PRESSED, SDL_RELEASED),
@@ -25,13 +25,13 @@ void dumpSDLEvent(SDL_Event * pe)
 	//SDL_MouseMotionEvent
 	case SDL_MOUSEMOTION:
 	{
-		SDL_MouseMotionEvent * pb = pe;
+		SDL_MouseMotionEvent * pb = (SDL_MouseMotionEvent *)pe;
 		SDL_Log("MouseMotion (%d,%d) %d", pb->x, pb->y, pb->timestamp);
 	}break;
 	//SDL_MouseWheelEvent
 	case SDL_MOUSEWHEEL:
 	{
-		SDL_MouseWheelEvent * pb = pe;
+		SDL_MouseWheelEvent * pb = (SDL_MouseWheelEvent *)pe;
 		SDL_Log("MouseWheel (%d,%d) %d", pb->x, pb->y, pb->timestamp);
 	}break;
 	//SDL_TouchFingerEvent
@@ -39,7 +39,7 @@ void dumpSDLEvent(SDL_Event * pe)
 	case SDL_FINGERUP:
 	case SDL_FINGERMOTION:
 	{
-		SDL_TouchFingerEvent * pb = pe;
+		SDL_TouchFingerEvent * pb = (SDL_TouchFingerEvent *)pe;
 		SDL_Log("TouchFinger %s fingerId:%d (%f,%f)-(%f,%f) %d", 
 			SELECT3(pb->type, SDL_FINGERMOTION, SDL_FINGERDOWN, SDL_FINGERUP),
 			pb->fingerId,
@@ -50,7 +50,7 @@ void dumpSDLEvent(SDL_Event * pe)
 	//SDL_MultiGestureEvent
 	case SDL_MULTIGESTURE:
 	{
-		SDL_MultiGestureEvent * pb = pe;
+		SDL_MultiGestureEvent * pb = (SDL_MultiGestureEvent *)pe;
 		SDL_Log("MultiGesture touchId:%d (%f,%f)-(%f,%f) numFingers:%d %d",pb->touchId,
 			pb->x,pb->y,
 			pb->dTheta,pb->dDist,
@@ -61,7 +61,7 @@ void dumpSDLEvent(SDL_Event * pe)
 	case SDL_DOLLARGESTURE:
 	case SDL_DOLLARRECORD:
 	{
-		SDL_DollarGestureEvent * pb = pe;
+		SDL_DollarGestureEvent * pb = (SDL_DollarGestureEvent *)pe;
 		SDL_Log("DollarGesture %s touchId:%d gestureId:%d numFingers:%d (%f,%f) %d", 
 			SELECT2(pb->type, SDL_DOLLARGESTURE, SDL_DOLLARRECORD),
 			pb->touchId,

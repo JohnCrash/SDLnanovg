@@ -37,7 +37,7 @@ return {
 				self._switchRate = self._animationDelay / self._animationSpeed			
 			end
 		else
-			self:disableFlags(ui.UPDATE_HIGH)
+			self:disableFlags(ui.KEEP_UPDATE)
 		end
 		
 		if self._switchRate ~= 0 then
@@ -75,7 +75,7 @@ return {
 	--! \param on 如果on是ture就打开，否则就关闭
 	switch=function(self,on)
 		self._on = on
-		self:enableFlags(ui.UPDATE_HIGH)
+		self:enableFlags(ui.KEEP_UPDATE)
 		self._animationDelay = self._animationSpeed
 	end,
 	--! \brief 取得开关控件的状态

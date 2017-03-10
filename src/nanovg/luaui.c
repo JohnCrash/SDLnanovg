@@ -960,6 +960,15 @@ static int lua_newindexWidget(lua_State *L)
 }
 
 /**
+ * \brief  如果在loop事件或者在schedule回调中想更新ui就需要调用该函数
+ *	\note 函数没有参数不没有返回值
+ */
+static int lua_requestUpdate(lua_State *L)
+{
+	uiUSSSet(KEEP_UPDATE);
+	return 0;
+}
+/**
  * @}
  */
  
@@ -982,6 +991,7 @@ static const struct luaL_Reg nanoui_methods[] =
 	{ "rootToWidget", lua_rootToWidget },
 	{ "widgetToRoot", lua_widgetToRoot },
 	{ "widgetFormPt", lua_widgetFormPt },
+	{ "requestUpdate",lua_requestUpdate },
 	{ NULL, NULL },
 };
 

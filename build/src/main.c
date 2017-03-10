@@ -82,6 +82,7 @@ rerun:
 	}
 	lua_EventInit();
 	SDL_Log("Main loop..");
+	initEventLoop(state);
 	while (!eventLoop(state))
 	{
 		glViewport(0, 0, state->window_w, state->window_h);
@@ -98,7 +99,7 @@ rerun:
 	releaseSDL(state);
 	SDL_Log("DONE..");
 #if defined(_WIN32) && defined(_DEBUG)
-	goto rerun;
+//	goto rerun;
 #endif
 	return 0;
 }

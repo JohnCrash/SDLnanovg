@@ -41,7 +41,6 @@
     <ClCompile Include="..\..\src\nanovg\bitree.c" />
     <ClCompile Include="..\..\src\nanovg\debug.c" />
     <ClCompile Include="..\..\src\nanovg\eventhandler.c" />
-    <ClCompile Include="..\..\src\nanovg\example\demo.c" />
     <ClCompile Include="..\..\src\nanovg\example\perf.c" />
     <ClCompile Include="..\..\src\nanovg\luaext.c" />
     <ClCompile Include="..\..\src\nanovg\luananovg.c" />

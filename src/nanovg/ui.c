@@ -29,16 +29,32 @@ uiEventState _eventState;
 static uiWidget * _root = NULL;
 static ThemesList * _themes = NULL;
 static unsigned int _uss = 0;
+static int _fps = 60;
 extern NVGcontext* _vg;
 
-void ussClear()
+void uiUSSClear()
 {
 	_uss = 0;
 }
 
-unsigned int uss()
+unsigned int uiUSSGet()
 {
 	return _uss;
+}
+
+void uiUSSSet(unsigned int u)
+{
+	_uss = u;
+}
+
+int uiGetFPS()
+{
+	return _fps;
+}
+
+void uiSetFPS(int fps)
+{
+	_fps = fps;
 }
 
 uiWidget * uiRootWidget()

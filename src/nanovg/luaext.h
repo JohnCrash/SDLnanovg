@@ -34,6 +34,8 @@ extern "C"{
 	void releaseLua();
 	void lua_EventLoop(double dt);
 	double getLoopInterval();
+	void setLoopInterval(double dt);
+
 	void lua_EventInit();
 	void lua_EventRelease();
 	void lua_EventChangeSize(int w, int h);
