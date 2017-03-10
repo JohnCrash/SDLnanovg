@@ -301,6 +301,9 @@ extern "C"{
 	
 	void uiEnableFlags(uiWidget * widget,int flags);
 	int uiDisableFlags(uiWidget * widget,int flags);
+
+	void ussClear();
+	unsigned int uss();
 	 /** @} */
 #ifdef __cplusplus
 }

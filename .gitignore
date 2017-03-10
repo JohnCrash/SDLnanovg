@@ -39,3 +39,4 @@ build/android/.adbsyn
 *.tlog
 build/deps/glew/build/vc12/tmp/
 *.manifest
+*.obj

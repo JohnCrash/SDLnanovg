@@ -31,6 +31,16 @@ static ThemesList * _themes = NULL;
 static unsigned int _uss = 0;
 extern NVGcontext* _vg;
 
+void ussClear()
+{
+	_uss = 0;
+}
+
+unsigned int uss()
+{
+	return _uss;
+}
+
 uiWidget * uiRootWidget()
 {
 	return _root;
