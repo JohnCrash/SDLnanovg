@@ -6,9 +6,11 @@
 #define DBG
 #include "debug.h"
 
+#define LAST_EVENT_UPDATE 1000 //1s
 SDLEventBuffer _eventBuffer;
 static Uint32 _prevEventTick = 0;
 static Uint32 _prevRenderTick = 0;
+static Uint32 _lastEventTick = 0;
 static int _background = 0;
 static int _isediting = 0; //是否处于IME输入状态
 
@@ -141,6 +143,7 @@ int eventLoop(SDLState *state)
 	 * 如果有SDL事件来就马上返回处理
 	 * 对更新进行优化仅仅在有下面情况下才会做更新渲染
 	 * 1.有事件。(虽然事件不一定会必然导致更新渲染，但是很难进行区别出来)
+	 *		注意：在事件发生后的1秒内都会持续更新
 	 * 2.在渲染周期中uss被设置为KEEP_UPDATE。
 	 *		使用self:enableFlags(ui.KEEP_UPDATE)来请求标志位。
 	 *		使用self:disableFlags(ui.KEEP_UPDATE)关闭标志位。
@@ -165,8 +168,15 @@ int eventLoop(SDLState *state)
 		//处理loop事件和schedule回调
 		lua_EventLoop(dt);
 		_prevEventTick = curTick;
+		/*
+		 * 基于事件后面会经常有小的动画，可以不用使用self:enableFlags(ui.KEEP_UPDATE)
+		 * 在最近的一个事件后面一段时间界面将被持续更新
+		 */
+		if (getSDLEventCount() > 0)
+			_lastEventTick = curTick;
 
-		if (getSDLEventCount() > 0 || uss&KEEP_UPDATE || uiUSSGet()&KEEP_UPDATE ){
+		if (curTick - _lastEventTick < LAST_EVENT_UPDATE || 
+			uss&KEEP_UPDATE || uiUSSGet()&KEEP_UPDATE){
 			setLoopInterval((curTick-_prevRenderTick)/1000.0);
 			DEBUG("uiLoop %d", curTick - _prevRenderTick);
 			_prevRenderTick = curTick;
@@ -181,5 +191,6 @@ void initEventLoop(SDLState *state)
 	_background = 0;
 	_isediting = 0;
 	_prevEventTick = SDL_GetTicks();
-	_prevRenderTick = SDL_GetTicks();
+	_prevRenderTick = _prevEventTick;
+	_lastEventTick = _prevEventTick;
 }

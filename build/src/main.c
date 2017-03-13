@@ -99,7 +99,7 @@ rerun:
 	releaseSDL(state);
 	SDL_Log("DONE..");
 #if defined(_WIN32) && defined(_DEBUG)
-//	goto rerun;
+	goto rerun;
 #endif
 	return 0;
 }
