@@ -75,6 +75,7 @@ return {
 		print("font:"..tostring(font))
 		vg.createFont("default",font)
 	end,
+	skin = require "themes/default_skin",
 	window = require "themes/window",
 	button = require "themes/button",
 	label = require "themes/label",
