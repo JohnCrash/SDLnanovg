@@ -24,7 +24,7 @@ local function searchSystemFont(path)
 	for file in lfs.dir(path) do
 		local ext = string.sub(file,-3)
 		if ext == 'ttf' or ext == 'ttc' then
-			print(":"..file)
+			--print(":"..file)
 			local result = fonsHasCodepoint(path..'/'..file,{'abc','网络设置'})
 			if result and result[1]==1 and result[2]==1 then
 				--return path..'/'..file
@@ -47,6 +47,21 @@ end
 	simhei.ttf	9
 	simkai.ttf	11
 	simsun.ttc	15
+  windows 10
+	Deng.ttf
+	Dengb.ttf
+	Deng1.ttf
+	DengXian.ttf
+	msjh.ttc
+	msjhbd.ttc
+	msjh1.ttc
+	msyh.ttc
+	msyhbd.ttc
+	msyh1.ttc
+	simfang.ttf
+	simhei.ttf
+	simkai.ttf
+	simsun.ttc
   kubi	
 	
   p9
@@ -54,7 +69,7 @@ end
 	NotoSansCJK-Regular.ttc
 --]]
 print("search system fonts")
-searchSystemFont("E:/test_video/kubifonts")
+searchSystemFont("c:/windows/fonts")
 
 return {
 	version = 1,
@@ -68,7 +83,7 @@ return {
 	onInit=function(self)
 		local font
 		if getPlatform() == 'windows' then
-			font = "c:/windows/fonts/hyswlongfangsong.ttf"
+			font = "c:/windows/fonts/simfang.ttf"
 		else
 			font = searchSystemFont("/system/fonts")
 		end
