@@ -1,1 +1,1 @@
-require "test/button" 
+require "test/xml" 

@@ -16,3 +16,7 @@ luasocket
 luafilesystem
 	windows	执行win32.cmd (cygwin)
 	android	执行build_android.sh
+	
+json-c
+	windows	执行win32.cmd (cygwin)
+	android	执行build_android.sh
